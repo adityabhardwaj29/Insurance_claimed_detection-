@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-09-16T18:16:58.708067",
+  "total_claims_analyzed": 320,
+  "anomalous_claims_count": 32,
+  "anomalous_claims_pct": 10.0,
+  "fraud_distribution": {
+    "fraud_count_in_anomalous": 6,
+    "fraud_rate_in_anomalous_pct": 18.75,
+    "baseline_fraud_rate_pct": 16.25,
+    "lift": 1.15,
+    "correlation_anomaly_score_vs_fraud": -0.1023
+  },
+  "score_statistics": {
+    "mean_anomaly_score": 0.3287,
+    "median_anomaly_score": 0.3098,
+    "max_anomaly_score": 1.0,
+    "min_anomaly_score": 0.0
+  },
+  "model_agreement": {
+    "corr_iso_vs_lof": 0.8467,
+    "corr_iso_vs_ocsvm": 0.8376
+  }
+}

@@ -1,3 +1,5 @@
-from sklearn.ensemble import IsolationForest
+from src.models.anomaly.models import build_isolation_forest
+from src.models.anomaly.anomaly_detector import AnomalyDetector
+
 def build_model():
-    return IsolationForest(n_estimators=200, contamination=0.1, random_state=42)
+    return build_isolation_forest(contamination=0.10, n_estimators=200, random_state=42)
