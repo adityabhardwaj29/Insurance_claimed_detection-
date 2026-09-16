@@ -1,0 +1,107 @@
+{
+  "model_name": "XGBoost",
+  "created_at": "2026-09-16T18:09:51.422449",
+  "evaluation_metrics": {
+    "accuracy": 0.7188,
+    "precision": 0.2,
+    "recall": 0.1667,
+    "f1": 0.1818,
+    "pr_auc": 0.2348,
+    "roc_auc": 0.5819,
+    "brier_score": 0.1906,
+    "confusion_matrix": {
+      "tn": 66,
+      "fp": 12,
+      "fn": 15,
+      "tp": 3
+    },
+    "precision_at_k": {
+      "top_10%": 0.2,
+      "top_20%": 0.1579
+    },
+    "recall_at_k": {
+      "top_10%": 0.1111,
+      "top_20%": 0.1667
+    },
+    "threshold": 0.5,
+    "sample_count": 96,
+    "fraud_count": 18
+  },
+  "all_model_comparison": [
+    {
+      "Model": "XGBoost",
+      "PR-AUC": 0.2348,
+      "ROC-AUC": 0.5819,
+      "F1-Score": 0.1818,
+      "Precision": 0.2,
+      "Recall": 0.1667,
+      "Precision@10%": 0.2,
+      "Recall@10%": 0.1111,
+      "Precision@20%": 0.1579,
+      "Recall@20%": 0.1667,
+      "Brier Score": 0.1906
+    },
+    {
+      "Model": "RandomForest",
+      "PR-AUC": 0.2171,
+      "ROC-AUC": 0.5328,
+      "F1-Score": 0.0,
+      "Precision": 0.0,
+      "Recall": 0.0,
+      "Precision@10%": 0.3,
+      "Recall@10%": 0.1667,
+      "Precision@20%": 0.1579,
+      "Recall@20%": 0.1667,
+      "Brier Score": 0.1735
+    },
+    {
+      "Model": "HistGradientBoosting",
+      "PR-AUC": 0.2091,
+      "ROC-AUC": 0.5442,
+      "F1-Score": 0.2162,
+      "Precision": 0.2105,
+      "Recall": 0.2222,
+      "Precision@10%": 0.2,
+      "Recall@10%": 0.1111,
+      "Precision@20%": 0.2105,
+      "Recall@20%": 0.2222,
+      "Brier Score": 0.2191
+    },
+    {
+      "Model": "LogisticRegression",
+      "PR-AUC": 0.1777,
+      "ROC-AUC": 0.4687,
+      "F1-Score": 0.2333,
+      "Precision": 0.1667,
+      "Recall": 0.3889,
+      "Precision@10%": 0.1,
+      "Recall@10%": 0.0556,
+      "Precision@20%": 0.1579,
+      "Recall@20%": 0.1667,
+      "Brier Score": 0.3134
+    }
+  ],
+  "numeric_features": [
+    "claim_amount",
+    "claim_age_days",
+    "days_since_policy_start",
+    "amount_to_premium_ratio",
+    "invoice_to_claim_ratio",
+    "claimant_claim_frequency",
+    "provider_claim_volume",
+    "vehicle_age",
+    "claimant_age",
+    "provider_rating",
+    "duplicate_similarity_score",
+    "duplicate_flag"
+  ],
+  "categorical_features": [
+    "claim_type",
+    "policy_type",
+    "vehicle_type",
+    "vehicle_make",
+    "provider_type",
+    "claimant_city"
+  ],
+  "target_col": "fraud_label"
+}
