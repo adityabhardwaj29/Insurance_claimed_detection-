@@ -1,0 +1,26 @@
+provider_id,provider_name,city,provider_type,rating
+PRV001,Provider 001,Surat,Surveyor,3.3
+PRV002,Provider 002,Surat,Dealer,3.9
+PRV003,Provider 003,Ahmedabad,Surveyor,3.5
+PRV004,Provider 004,Mumbai,Garage,4.3
+PRV005,Provider 005,Surat,Dealer,4.0
+PRV006,Provider 006,Pune,Garage,3.3
+PRV007,Provider 007,Delhi,Surveyor,3.1
+PRV008,Provider 008,Mumbai,Hospital,4.6
+PRV009,Provider 009,Ahmedabad,Dealer,3.8
+PRV010,Provider 010,Delhi,Garage,4.2
+PRV011,Provider 011,Surat,Dealer,3.7
+PRV012,Provider 012,Mumbai,Hospital,4.1
+PRV013,Provider 013,Surat,Dealer,4.3
+PRV014,Provider 014,Pune,Garage,3.1
+PRV015,Provider 015,Pune,Surveyor,4.0
+PRV016,Provider 016,Delhi,Garage,3.5
+PRV017,Provider 017,Ahmedabad,Surveyor,3.4
+PRV018,Provider 018,Delhi,Dealer,4.4
+PRV019,Provider 019,Surat,Hospital,3.2
+PRV020,Provider 020,Mumbai,Surveyor,3.3
+PRV021,Provider 021,Surat,Garage,4.6
+PRV022,Provider 022,Ahmedabad,Dealer,4.4
+PRV023,Provider 023,Delhi,Dealer,4.8
+PRV024,Provider 024,Pune,Hospital,4.6
+PRV025,Provider 025,Delhi,Hospital,3.2

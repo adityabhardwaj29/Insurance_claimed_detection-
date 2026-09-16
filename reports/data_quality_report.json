@@ -1,0 +1,458 @@
+{
+  "pipeline_run": {
+    "timestamp": "2026-09-16T12:19:14Z",
+    "pipeline_version": "1.0.0",
+    "source": "data/raw/",
+    "output": "data/processed/",
+    "random_seed_used": false,
+    "synthetic_values_introduced": false
+  },
+  "row_summary": {
+    "claims": {
+      "raw_rows": 320,
+      "clean_rows": 320,
+      "rows_removed": 0
+    },
+    "claimants": {
+      "raw_rows": 120,
+      "clean_rows": 120,
+      "rows_removed": 0
+    },
+    "policies": {
+      "raw_rows": 140,
+      "clean_rows": 140,
+      "rows_removed": 0
+    },
+    "vehicles": {
+      "raw_rows": 130,
+      "clean_rows": 130,
+      "rows_removed": 0
+    },
+    "providers": {
+      "raw_rows": 25,
+      "clean_rows": 25,
+      "rows_removed": 0
+    },
+    "invoices": {
+      "raw_rows": 220,
+      "clean_rows": 220,
+      "rows_removed": 0
+    },
+    "locations": {
+      "raw_rows": 60,
+      "clean_rows": 60,
+      "rows_removed": 0
+    }
+  },
+  "cleaning_totals": {
+    "duplicate_pk_rows_removed": 0,
+    "whitespace_values_stripped": 0,
+    "invalid_categorical_values_flagged_as_na": 0,
+    "invalid_date_values_flagged_as_nat": 0,
+    "numeric_range_violations_flagged_as_na": 0
+  },
+  "per_table_cleaning_logs": {
+    "claims": {
+      "table": "claims",
+      "raw_rows": 320,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {
+        "claim_date": {
+          "parsed_ok": 320,
+          "nat_count": 0
+        }
+      },
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [],
+      "fraud_label_unchanged": true,
+      "final_rows": 320
+    },
+    "claimants": {
+      "table": "claimants",
+      "raw_rows": 120,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {},
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [],
+      "fraud_label_unchanged": true,
+      "final_rows": 120
+    },
+    "policies": {
+      "table": "policies",
+      "raw_rows": 140,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {
+        "start_date": {
+          "parsed_ok": 140,
+          "nat_count": 0
+        },
+        "end_date": {
+          "parsed_ok": 140,
+          "nat_count": 0
+        }
+      },
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [
+        "4 rows where end_date <= start_date (policy_ids: ['POL0039', 'POL0063', 'POL0076', 'POL0134'])"
+      ],
+      "fraud_label_unchanged": true,
+      "final_rows": 140
+    },
+    "vehicles": {
+      "table": "vehicles",
+      "raw_rows": 130,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {},
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [],
+      "fraud_label_unchanged": true,
+      "final_rows": 130
+    },
+    "providers": {
+      "table": "providers",
+      "raw_rows": 25,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {},
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [],
+      "fraud_label_unchanged": true,
+      "final_rows": 25
+    },
+    "invoices": {
+      "table": "invoices",
+      "raw_rows": 220,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {
+        "invoice_date": {
+          "parsed_ok": 220,
+          "nat_count": 0
+        }
+      },
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [],
+      "fraud_label_unchanged": true,
+      "final_rows": 220
+    },
+    "locations": {
+      "table": "locations",
+      "raw_rows": 60,
+      "duplicate_pk_removed": 0,
+      "invalid_ids": {},
+      "whitespace_stripped": {},
+      "categorical_normalized": {},
+      "invalid_categoricals_flagged": {},
+      "dates_parsed": {},
+      "invalid_dates_flagged": {},
+      "numeric_range_violations": {},
+      "other_flags": [],
+      "fraud_label_unchanged": true,
+      "final_rows": 60
+    }
+  },
+  "validation": {
+    "summary": {
+      "total_checks": 41,
+      "passed": 40,
+      "failed": 1,
+      "all_passed": false
+    },
+    "class_imbalance": {
+      "total_claims": 320,
+      "fraud_count": 52,
+      "legit_count": 268,
+      "fraud_rate": 0.1625,
+      "imbalance_ratio_legit_to_fraud": 5.15,
+      "note": "Class imbalance detected. Ratio 5.15:1 (legit:fraud). Use class_weight='balanced' or SMOTE during model training."
+    },
+    "checks": [
+      {
+        "check": "claims.no_duplicate_claim_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claimants.no_duplicate_claimant_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "policies.no_duplicate_policy_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "vehicles.no_duplicate_vehicle_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "providers.no_duplicate_provider_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "invoices.no_duplicate_invoice_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "locations.no_duplicate_location_id",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.no_null_claim_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claimants.no_null_claimant_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "policies.no_null_policy_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "vehicles.no_null_vehicle_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "providers.no_null_provider_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "invoices.no_null_invoice_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "locations.no_null_location_id",
+        "passed": "True",
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.claimant_id_fk_to_claimants",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.policy_id_fk_to_policies",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.vehicle_id_fk_to_vehicles",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.provider_id_fk_to_providers",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.invoice_id_fk_to_invoices",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "policies.claimant_id_fk_to_claimants",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "vehicles.claimant_id_fk_to_claimants",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "invoices.provider_id_fk_to_providers",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.claim_type_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.status_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claimants.gender_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claimants.marital_status_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claimants.city_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "providers.city_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "providers.provider_type_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "policies.policy_type_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "vehicles.vehicle_type_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "vehicles.make_valid_categories",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.claim_amount_positive",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "policies.premium_positive",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "invoices.invoice_amount_positive",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claimants.age_range",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "vehicles.model_year_range",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "providers.rating_range",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "policies.start_date_before_end_date",
+        "passed": false,
+        "details": "4 rows where end_date <= start_date: [38, 62, 75, 133]",
+        "failures": [
+          38,
+          62,
+          75,
+          133
+        ]
+      },
+      {
+        "check": "claims.fraud_label_binary",
+        "passed": true,
+        "details": "PASS",
+        "failures": []
+      },
+      {
+        "check": "claims.fraud_label_unchanged",
+        "passed": true,
+        "details": "PASS \u2014 all fraud labels preserved exactly",
+        "failures": []
+      }
+    ]
+  },
+  "fraud_label_integrity": {
+    "source_fraud_label_col": "claims_raw.csv::fraud_label",
+    "altered_during_cleaning": false,
+    "fraud_count": 52,
+    "legit_count": 268,
+    "fraud_rate": 0.1625
+  }
+}

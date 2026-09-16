@@ -1,0 +1,2 @@
+node_types: [claimant, policy, vehicle, claim, provider, invoice]
+edge_strategy: shared_entity

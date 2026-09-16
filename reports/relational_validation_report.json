@@ -1,0 +1,390 @@
+{
+  "generated": "2026-09-16T12:19:24Z",
+  "source": "data/relational/",
+  "summary": {
+    "total_checks": 60,
+    "passed": 59,
+    "failed": 1,
+    "all_passed": false
+  },
+  "failed_checks": [
+    {
+      "check": "policies.start_date_before_end_date",
+      "passed": false,
+      "details": "4 rows with end_date <= start_date: ['POL0039', 'POL0063', 'POL0076', 'POL0134']",
+      "failures": [
+        "POL0039",
+        "POL0063",
+        "POL0076",
+        "POL0134"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "claimants.pk_unique_claimant_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.pk_not_null_claimant_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.pk_unique_policy_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.pk_not_null_policy_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.pk_unique_vehicle_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.pk_not_null_vehicle_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.pk_unique_provider_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.pk_not_null_provider_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.pk_unique_invoice_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.pk_not_null_invoice_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.pk_unique_claim_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.pk_not_null_claim_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "locations.pk_unique_location_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "locations.pk_not_null_location_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "locations.no_full_row_duplicates",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.claimant_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.policy_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.vehicle_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.provider_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.invoice_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.claim_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "locations.location_id_pattern",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.claimant_id \u2192 claimants.claimant_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.policy_id \u2192 policies.policy_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.vehicle_id \u2192 vehicles.vehicle_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.provider_id \u2192 providers.provider_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.invoice_id \u2192 invoices.invoice_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.claimant_id \u2192 claimants.claimant_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.claimant_id \u2192 claimants.claimant_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.provider_id \u2192 providers.provider_id",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.claim_type_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.status_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.gender_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.marital_status_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.city_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.city_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.provider_type_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.policy_type_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.vehicle_type_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.make_valid_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.claim_amount_positive",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.premium_positive",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.invoice_amount_positive",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claimants.age_range_18_100",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "vehicles.model_year_range_1990_2026",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "providers.rating_range_0_5",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "claims.claim_date_date_parseable",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.start_date_date_parseable",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.end_date_date_parseable",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "invoices.invoice_date_date_parseable",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "policies.start_date_before_end_date",
+      "passed": false,
+      "details": "4 rows with end_date <= start_date: ['POL0039', 'POL0063', 'POL0076', 'POL0134']",
+      "failures": [
+        "POL0039",
+        "POL0063",
+        "POL0076",
+        "POL0134"
+      ]
+    },
+    {
+      "check": "claims.fraud_label_binary_values",
+      "passed": true,
+      "details": "PASS",
+      "failures": []
+    },
+    {
+      "check": "locations.orphaned_by_design",
+      "passed": true,
+      "details": "locations has no FK from any other table. City string matching is the only join path. Documented in data dictionary as a source-data limitation.",
+      "failures": []
+    },
+    {
+      "check": "claims.invoice_reuse_documented",
+      "passed": true,
+      "details": "95 invoice_ids are referenced by more than one claim. This is a source-data characteristic, preserved as-is.",
+      "failures": []
+    }
+  ]
+}

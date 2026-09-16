@@ -1,0 +1,1 @@
+-- Load data from data/processed using your selected database import mechanism.

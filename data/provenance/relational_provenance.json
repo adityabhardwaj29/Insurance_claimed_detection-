@@ -1,0 +1,41 @@
+{
+  "generated": "2026-09-16T12:19:19Z",
+  "source": "data/processed/",
+  "output": "data/relational/",
+  "builder": "src/data/relational_builder.py",
+  "note": "All IDs preserved exactly from source. No new relationships invented.",
+  "stats": {
+    "row_counts": {
+      "claimants": 120,
+      "policies": 140,
+      "vehicles": 130,
+      "providers": 25,
+      "invoices": 220,
+      "claims": 320,
+      "locations": 60
+    },
+    "invoice_reuse": {
+      "invoices_referenced_by_multiple_claims": 95,
+      "max_claims_per_invoice": 6,
+      "note": "Some invoices are referenced by multiple claims. This is a source-data characteristic, NOT corrected."
+    },
+    "policies_per_claimant": {
+      "min": 1,
+      "max": 4,
+      "mean": 1.67
+    },
+    "vehicles_per_claimant": {
+      "min": 1,
+      "max": 4,
+      "mean": 1.65
+    },
+    "claims_per_policy": {
+      "min": 1,
+      "max": 7,
+      "mean": 2.67
+    },
+    "policies_with_invalid_date_order": 4,
+    "locations_orphaned": true,
+    "locations_orphan_note": "locations.csv has no FK referencing it from any other table. City string matching is the only possible join. This is a source-data limitation, not modelled as a FK."
+  }
+}

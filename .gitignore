@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+logs/*
+!logs/.gitkeep
+models/**/*.pkl
+.pytest_cache/

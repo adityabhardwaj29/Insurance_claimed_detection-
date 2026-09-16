@@ -1,0 +1,3 @@
+project_name: graph_enhanced
+data_dir: data
+random_seed: 42

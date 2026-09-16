@@ -1,0 +1,3 @@
+baseline: logistic_regression
+advanced: xgboost
+anomaly: isolation_forest
