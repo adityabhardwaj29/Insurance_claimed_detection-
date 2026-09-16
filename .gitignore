@@ -6,3 +6,4 @@ logs/*
 !logs/.gitkeep
 models/**/*.pkl
 .pytest_cache/
+scratch/

@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-09-16T17:58:38.376726",
+  "total_claims_scored": 320,
+  "total_candidate_pairs": 2420,
+  "duplicate_type_distribution": {
+    "SIMILAR": 231,
+    "NO_MATCH": 55,
+    "POSSIBLE_DUPLICATE": 34
+  },
+  "fraud_rates_by_type": {
+    "NO_MATCH": {
+      "count": 55,
+      "fraud_count": 7,
+      "fraud_rate_pct": 12.73
+    },
+    "POSSIBLE_DUPLICATE": {
+      "count": 34,
+      "fraud_count": 8,
+      "fraud_rate_pct": 23.53
+    },
+    "SIMILAR": {
+      "count": 231,
+      "fraud_count": 37,
+      "fraud_rate_pct": 16.02
+    }
+  },
+  "pairwise_metrics": {
+    "total_matches": 2420,
+    "type_counts": {
+      "SIMILAR": 1388,
+      "NO_MATCH": 982,
+      "POSSIBLE_DUPLICATE": 50
+    },
+    "pairs_involving_fraud_claims": 745,
+    "pairs_with_both_fraud_claims": 69
+  },
+  "statistics": {
+    "mean_similarity_score": 0.467,
+    "median_similarity_score": 0.4596,
+    "max_similarity_score": 0.6257,
+    "min_similarity_score": 0.3304
+  }
+}
