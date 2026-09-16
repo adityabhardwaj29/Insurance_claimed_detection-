@@ -1,0 +1,174 @@
+{
+  "graph_overview": {
+    "total_nodes": 1020,
+    "total_edges": 2615,
+    "density": 0.005032,
+    "isolated_nodes_count": 0
+  },
+  "nodes_by_type": {
+    "Claim": 320,
+    "Invoice": 220,
+    "Policy": 140,
+    "Vehicle": 130,
+    "Claimant": 120,
+    "Location": 65,
+    "Provider": 25
+  },
+  "edges_by_relationship": {
+    "FILED": 320,
+    "COVERED_BY": 320,
+    "HAS": 320,
+    "OCCURRED_AT": 320,
+    "INVOLVES": 320,
+    "ASSOCIATED_WITH": 320,
+    "OWNS": 270,
+    "ISSUED_BY": 220,
+    "LOCATED_AT": 145,
+    "WITHIN_TERRITORY": 60
+  },
+  "degree_distribution": {
+    "min": 1,
+    "max": 123,
+    "mean": 5.13,
+    "median": 4.0,
+    "std": 7.93,
+    "p25": 2.0,
+    "p75": 6.0,
+    "top_degree_nodes": [
+      {
+        "node_id": "location:mumbai",
+        "node_type": "Location",
+        "degree": 123
+      },
+      {
+        "node_id": "location:pune",
+        "node_type": "Location",
+        "degree": 111
+      },
+      {
+        "node_id": "location:delhi",
+        "node_type": "Location",
+        "degree": 110
+      },
+      {
+        "node_id": "location:surat",
+        "node_type": "Location",
+        "degree": 91
+      },
+      {
+        "node_id": "location:ahmedabad",
+        "node_type": "Location",
+        "degree": 90
+      },
+      {
+        "node_id": "provider:PRV013",
+        "node_type": "Provider",
+        "degree": 34
+      },
+      {
+        "node_id": "provider:PRV002",
+        "node_type": "Provider",
+        "degree": 27
+      },
+      {
+        "node_id": "provider:PRV016",
+        "node_type": "Provider",
+        "degree": 27
+      },
+      {
+        "node_id": "provider:PRV022",
+        "node_type": "Provider",
+        "degree": 27
+      },
+      {
+        "node_id": "provider:PRV017",
+        "node_type": "Provider",
+        "degree": 26
+      },
+      {
+        "node_id": "provider:PRV019",
+        "node_type": "Provider",
+        "degree": 26
+      },
+      {
+        "node_id": "provider:PRV005",
+        "node_type": "Provider",
+        "degree": 25
+      },
+      {
+        "node_id": "provider:PRV006",
+        "node_type": "Provider",
+        "degree": 25
+      },
+      {
+        "node_id": "provider:PRV018",
+        "node_type": "Provider",
+        "degree": 24
+      },
+      {
+        "node_id": "provider:PRV021",
+        "node_type": "Provider",
+        "degree": 24
+      }
+    ],
+    "degree_by_node_type": {
+      "Claim": {
+        "count": 320,
+        "mean_degree": 6.0,
+        "median_degree": 6.0,
+        "min_degree": 6,
+        "max_degree": 6
+      },
+      "Invoice": {
+        "count": 220,
+        "mean_degree": 2.45,
+        "median_degree": 2.0,
+        "min_degree": 1,
+        "max_degree": 7
+      },
+      "Policy": {
+        "count": 140,
+        "mean_degree": 3.29,
+        "median_degree": 3.0,
+        "min_degree": 1,
+        "max_degree": 8
+      },
+      "Vehicle": {
+        "count": 130,
+        "mean_degree": 3.46,
+        "median_degree": 3.0,
+        "min_degree": 1,
+        "max_degree": 9
+      },
+      "Claimant": {
+        "count": 120,
+        "mean_degree": 5.92,
+        "median_degree": 6.0,
+        "min_degree": 1,
+        "max_degree": 11
+      },
+      "Location": {
+        "count": 65,
+        "mean_degree": 9.0,
+        "median_degree": 1.0,
+        "min_degree": 1,
+        "max_degree": 123
+      },
+      "Provider": {
+        "count": 25,
+        "mean_degree": 22.6,
+        "median_degree": 22.0,
+        "min_degree": 15,
+        "max_degree": 34
+      }
+    }
+  },
+  "connected_components": {
+    "number_of_components": 1,
+    "largest_component_size": 1020,
+    "largest_component_ratio": 1.0,
+    "component_sizes_top10": [
+      1020
+    ]
+  }
+}

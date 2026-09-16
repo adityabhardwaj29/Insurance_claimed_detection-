@@ -1,0 +1,40 @@
+{
+  "is_valid": true,
+  "total_nodes": 1020,
+  "total_edges": 2615,
+  "checks": {
+    "required_columns": {
+      "passed": true,
+      "missing_node_columns": [],
+      "missing_edge_columns": []
+    },
+    "node_id_uniqueness": {
+      "passed": true,
+      "total_nodes": 1020,
+      "unique_node_ids": 1020,
+      "duplicate_count": 0
+    },
+    "referential_integrity": {
+      "passed": true,
+      "invalid_sources_count": 0,
+      "invalid_targets_count": 0,
+      "sample_invalid_sources": [],
+      "sample_invalid_targets": []
+    },
+    "no_self_loops": {
+      "passed": true,
+      "self_loops_count": 0,
+      "self_loops": []
+    },
+    "relationship_consistency": {
+      "passed": true,
+      "inconsistent_edges_count": 0,
+      "sample_inconsistencies": []
+    },
+    "attribute_json_validity": {
+      "passed": true,
+      "invalid_json_count": 0
+    }
+  },
+  "errors": []
+}
