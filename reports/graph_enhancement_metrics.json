@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-09-17T15:50:26.035105",
+  "baseline": {
+    "best_model": "XGBoost",
+    "metrics_by_model": {
+      "LogisticRegression": {
+        "pr_auc": 0.2144,
+        "roc_auc": 0.4943,
+        "f1": 0.2034,
+        "precision": 0.1463,
+        "recall": 0.3333,
+        "brier_score": 0.3122,
+        "precision_at_10pct": 0.2,
+        "recall_at_10pct": 0.1111
+      },
+      "RandomForest": {
+        "pr_auc": 0.2142,
+        "roc_auc": 0.5363,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "brier_score": 0.1716,
+        "precision_at_10pct": 0.2,
+        "recall_at_10pct": 0.1111
+      },
+      "HistGradientBoosting": {
+        "pr_auc": 0.2068,
+        "roc_auc": 0.5321,
+        "f1": 0.1765,
+        "precision": 0.1875,
+        "recall": 0.1667,
+        "brier_score": 0.2111,
+        "precision_at_10pct": 0.1,
+        "recall_at_10pct": 0.0556
+      },
+      "XGBoost": {
+        "pr_auc": 0.2171,
+        "roc_auc": 0.5719,
+        "f1": 0.1818,
+        "precision": 0.2,
+        "recall": 0.1667,
+        "brier_score": 0.1887,
+        "precision_at_10pct": 0.2,
+        "recall_at_10pct": 0.1111
+      }
+    }
+  },
+  "graph_enhanced": {
+    "best_model": "RandomForest",
+    "metrics_by_model": {
+      "LogisticRegression": {
+        "pr_auc": 0.2153,
+        "roc_auc": 0.5499,
+        "f1": 0.2593,
+        "precision": 0.1944,
+        "recall": 0.3889,
+        "brier_score": 0.2727,
+        "precision_at_10pct": 0.2,
+        "recall_at_10pct": 0.1111
+      },
+      "RandomForest": {
+        "pr_auc": 0.222,
+        "roc_auc": 0.547,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "brier_score": 0.16,
+        "precision_at_10pct": 0.1,
+        "recall_at_10pct": 0.0556
+      },
+      "HistGradientBoosting": {
+        "pr_auc": 0.2086,
+        "roc_auc": 0.5242,
+        "f1": 0.1935,
+        "precision": 0.2308,
+        "recall": 0.1667,
+        "brier_score": 0.1986,
+        "precision_at_10pct": 0.2,
+        "recall_at_10pct": 0.1111
+      },
+      "XGBoost": {
+        "pr_auc": 0.2212,
+        "roc_auc": 0.5812,
+        "f1": 0.0741,
+        "precision": 0.1111,
+        "recall": 0.0556,
+        "brier_score": 0.1795,
+        "precision_at_10pct": 0.2,
+        "recall_at_10pct": 0.1111
+      }
+    }
+  },
+  "split_info": {
+    "train_size": 224,
+    "test_size": 96,
+    "train_fraud_count": 34,
+    "test_fraud_count": 18,
+    "train_fraud_rate": 0.1518,
+    "test_fraud_rate": 0.1875
+  }
+}
