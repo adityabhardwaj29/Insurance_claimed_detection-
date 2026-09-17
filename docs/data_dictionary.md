@@ -1,16 +1,16 @@
 # Data Dictionary
 ## Graph-Enhanced Insurance Claim Fraud Detection
 
-**Version:** 1.0.0
-**Generated:** Phase 2 Relational Model
-**Source data:** Synthetic project-generated data. Not real insurance data.
+**Version:** 2.0.0  
+**Generated:** Phase 15 Final Documentation  
+**Source data:** Synthetic project-generated research data. Not real customer insurance data.
 
 ---
 
 ## Table of Contents
 
-1. [Dataset Overview](#dataset-overview)
-2. [Entity Relationship Summary](#entity-relationship-summary)
+1. [Dataset Provenance & Classification](#dataset-provenance--classification)
+2. [Relational Schema Summary](#relational-schema-summary)
 3. [claimants](#claimants)
 4. [policies](#policies)
 5. [vehicles](#vehicles)
@@ -18,251 +18,209 @@
 7. [invoices](#invoices)
 8. [claims](#claims)
 9. [locations](#locations)
-10. [Analytical Views](#analytical-views)
-11. [Known Limitations](#known-limitations)
+10. [investigation_cases & audit](#investigation_cases--audit)
+11. [Derived Feature Store Tables](#derived-feature-store-tables)
+12. [Analytical Views](#analytical-views)
+13. [Academic & Practical Limitations](#academic--practical-limitations)
 
 ---
 
-## Dataset Overview
+## 1. Dataset Provenance & Classification
 
-| Attribute | Value |
-|---|---|
-| Nature | **Synthetic project-generated data** |
-| Real insurance data | No |
-| Master source | `data/master/insurance_claim_dataset.xlsx` |
-| Cleaned source | `data/processed/` |
-| Relational layer | `data/relational/` |
-| Total entities | 7 tables |
-| Total claims | 320 |
-| Total claimants | 120 |
-| Fraud rate | 16.25% (52/320) — synthetic ground truth |
+| Data Tier | Storage Location | Description |
+| :--- | :--- | :--- |
+| **SOURCE DATA** | `data/raw/` | Raw simulated flat files generated for academic fraud modeling. |
+| **PROCESSED DATA**| `data/relational/` | Normalized tables cleaned without mutating synthetic facts. |
+| **DERIVED DATA** | `data/features/` | Computed feature matrices (`claim_features.csv`, `duplicate_features.csv`, `graph_features.csv`). |
+| **MODEL OUTPUT** | `models/`, `data/features/final_risk_scores.csv` | Verifiable machine learning predictions, anomaly scores, and calibrated hybrid risk scores. |
 
 > [!IMPORTANT]
-> The `fraud_label` field is a **synthetic ground-truth label** created for this project. It does not reflect real fraud investigation outcomes.
+> The `fraud_label` field is a **synthetic ground-truth label** created for this research project. It does not reflect real insurance company investigation records.
+> Observed fraud rate: **16.25%** (52 fraud out of 320 claims).
 
 ---
 
-## Entity Relationship Summary
+## 2. Relational Schema Summary
 
 ```
 claimants (120)
-    ├── policies (140)      1:N  claimant has many policies
-    ├── vehicles (130)      1:N  claimant owns many vehicles
-    └── claims  (320)       1:N  claimant files many claims
+    |-- policies (140)      1:N  claimant has many policies
+    |-- vehicles (130)      1:N  claimant owns many vehicles
+    +-- claims  (320)       1:N  claimant files many claims
 
 providers (25)
-    ├── invoices (220)      1:N  provider issues many invoices
-    └── claims  (320)       1:N  provider handles many claims
+    |-- invoices (220)      1:N  provider issues many invoices
+    +-- claims  (320)       1:N  provider handles many claims
 
-claims (320)  — CENTRAL FACT TABLE
-    ├── → claimant_id    M:1  → claimants
-    ├── → policy_id      M:1  → policies
-    ├── → vehicle_id     M:1  → vehicles
-    ├── → provider_id    M:1  → providers
-    └── → invoice_id     M:1  → invoices  [NOT 1:1; invoices may be shared]
+claims (320) -- CENTRAL FACT TABLE
+    |-- claimant_id   M:1  -> claimants
+    |-- policy_id     M:1  -> policies
+    |-- vehicle_id    M:1  -> vehicles
+    |-- provider_id   M:1  -> providers
+    +-- invoice_id    M:1  -> invoices
 
-locations (60)  — ORPHANED
-    No FK reference from any other table.
-    Join only via city string match (documented limitation).
+investigation_cases (Active Queue)
+    +-- claim_id      M:1  -> claims
 ```
 
-**Key cardinalities (computed from data):**
-- Policies per claimant: 1–4 (mean 1.67)
-- Vehicles per claimant: 1–4 (mean 1.65)
-- Claims per claimant: 1–7 (mean 2.83)
-- Claims per policy: 1–7 (mean 2.67)
-- Invoice reuse: 153 of 320 claims share their invoice_id with ≥1 other claim
+---
+
+## 3. claimants
+**Source:** `data/relational/claimants.csv` | **Rows:** 120 | **PK:** `claimant_id`
+
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `claimant_id` | TEXT | Primary key identifier | No | Format: `CLT0001` - `CLT0120` |
+| `name` | TEXT | Full name of policyholder | No | Synthetic name generator |
+| `age` | INTEGER | Age of policyholder | No | 19 - 78 years |
+| `gender` | TEXT | Gender | No | Male, Female, Other |
+| `marital_status`| TEXT | Marital status | No | Single, Married, Divorced |
+| `city` | TEXT | Residential city | No | Mumbai, Delhi, Ahmedabad, Surat, Pune |
 
 ---
 
-## claimants
+## 4. policies
+**Source:** `data/relational/policies.csv` | **Rows:** 140 | **PK:** `policy_id`
 
-**Source:** `data/raw/claimants_raw.csv` → `data/processed/claimants_clean.csv` → `data/relational/claimants.csv`
-**Rows:** 120
-**Primary key:** `claimant_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `claimant_id` | VARCHAR(10) | Unique claimant identifier | Source | No | CLT0001 – CLT0120 (format: CLT + 4 digits) |
-| `name` | VARCHAR(120) | Claimant name | Source | No | Synthetic names: "Customer 0001" etc. Not real names. |
-| `age` | SMALLINT | Age in years at time of dataset generation | Source | Yes (if invalid) | 18–100. Values outside range flagged as NULL during cleaning. |
-| `city` | VARCHAR(40) | City of residence | Source | Yes (if unknown) | Mumbai, Pune, Delhi, Ahmedabad, Surat |
-| `gender` | CHAR(1) | Gender | Source | Yes | M (Male), F (Female) |
-| `marital_status` | VARCHAR(10) | Marital status | Source | Yes | Married, Single |
-
-**Notes:**
-- `name` values are synthetic anonymized placeholders ("Customer NNNN"). Not real personal data.
-- 120 unique claimants; not all claimants have claims (some may be policy holders only).
-- 84 of 120 claimants are referenced in at least one policy.
-- 113 of 120 claimants are referenced in at least one claim.
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `policy_id` | TEXT | Primary key identifier | No | Format: `POL0001` - `POL0140` |
+| `claimant_id` | TEXT | Foreign key to claimants | No | Valid `claimant_id` |
+| `policy_type` | TEXT | Coverage tier | No | Comprehensive, Third Party, Zero Depreciation |
+| `premium` | REAL | Annual premium amount | No | $10,000 - $150,000 |
+| `start_date` | TEXT | Inception date (ISO 8601) | No | 2025-01-01 to 2026-06-30 |
+| `end_date` | TEXT | Policy expiry date (ISO 8601)| No | 2026-01-01 to 2027-06-30 |
 
 ---
 
-## policies
+## 5. vehicles
+**Source:** `data/relational/vehicles.csv` | **Rows:** 130 | **PK:** `vehicle_id`
 
-**Source:** `data/raw/policies_raw.csv` → `data/processed/policies_clean.csv` → `data/relational/policies.csv`
-**Rows:** 140
-**Primary key:** `policy_id`
-**Foreign key:** `claimant_id → claimants.claimant_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `policy_id` | VARCHAR(10) | Unique policy identifier | Source | No | POL0001 – POL0140 (format: POL + 4 digits) |
-| `claimant_id` | VARCHAR(10) | FK to policy holder | Source | No | Valid claimant_id |
-| `start_date` | DATE | Policy coverage start | Source (parsed) | Yes | ISO-8601 date. Raw was stored as string. |
-| `end_date` | DATE | Policy coverage end | Source (parsed) | Yes | ISO-8601 date. Raw was stored as string. |
-| `policy_type` | VARCHAR(20) | Type of coverage | Source | Yes | Comprehensive, Zero Dep, Third Party |
-| `premium` | DECIMAL(12,2) | Annual premium amount (INR) | Source | Yes | > 0. Observed range: 15,150–89,691. |
-| `date_order_invalid` | BOOLEAN | Quality flag from Phase 1 cleaning | Derived | No | TRUE if end_date ≤ start_date. Default FALSE. |
-
-**Notes:**
-- 4 policies have `date_order_invalid = TRUE`: POL0039, POL0063, POL0076, POL0134. These are a synthetic data quality issue; the rows are retained because they are referenced by claims (FK preservation).
-- `date_order_invalid` is a **derived field** added during Phase 1 cleaning. It is not in the original source dataset.
-- 120 of 140 policies are referenced by at least one claim.
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `vehicle_id` | TEXT | Primary key identifier | No | Format: `VEH0001` - `VEH0130` |
+| `claimant_id` | TEXT | Foreign key to claimants | No | Valid `claimant_id` |
+| `make` | TEXT | Automobile manufacturer | No | Maruti, Hyundai, Tata, Mahindra, Toyota, Honda |
+| `vehicle_type`| TEXT | Body style | No | Sedan, SUV, Hatchback |
+| `model_year` | INTEGER | Year of manufacture | No | 2012 - 2025 |
 
 ---
 
-## vehicles
+## 6. providers
+**Source:** `data/relational/providers.csv` | **Rows:** 25 | **PK:** `provider_id`
 
-**Source:** `data/raw/vehicles_raw.csv` → `data/processed/vehicles_clean.csv` → `data/relational/vehicles.csv`
-**Rows:** 130
-**Primary key:** `vehicle_id`
-**Foreign key:** `claimant_id → claimants.claimant_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `vehicle_id` | VARCHAR(10) | Unique vehicle identifier | Source | No | VEH0001 – VEH0130 (format: VEH + 4 digits) |
-| `claimant_id` | VARCHAR(10) | FK to vehicle owner | Source | No | Valid claimant_id |
-| `make` | VARCHAR(20) | Vehicle manufacturer | Source | Yes | Tata, Maruti, Hyundai, Mahindra, Honda |
-| `vehicle_type` | VARCHAR(20) | Vehicle body type | Source | Yes | MUV, Sedan, Hatchback, SUV |
-| `registration_no` | VARCHAR(20) | Vehicle registration plate | Source | Yes | All MH-prefix (Maharashtra). Synthetic. Not real plates. |
-| `model_year` | SMALLINT | Year of manufacture | Source | Yes | 1990–2026. Observed range: 2018–2025. |
-
-**Notes:**
-- All `registration_no` values are synthetic Maharashtra (MH) plates; they do not correspond to real vehicles.
-- Multiple vehicles per claimant is allowed (observed: up to 4 per claimant).
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `provider_id` | TEXT | Primary key identifier | No | Format: `PRV001` - `PRV025` |
+| `provider_name`| TEXT | Facility name | No | Repair shop or authorized dealer |
+| `city` | TEXT | Operating city | No | Mumbai, Delhi, Ahmedabad, Surat, Pune |
+| `provider_type`| TEXT | Category | No | Authorized, Independent, Body Shop |
+| `rating` | REAL | Customer quality score | No | 1.0 - 5.0 |
 
 ---
 
-## providers
+## 7. invoices
+**Source:** `data/relational/invoices.csv` | **Rows:** 220 | **PK:** `invoice_id`
 
-**Source:** `data/raw/providers_raw.csv` → `data/processed/providers_clean.csv` → `data/relational/providers.csv`
-**Rows:** 25
-**Primary key:** `provider_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `provider_id` | VARCHAR(10) | Unique provider identifier | Source | No | PRV001 – PRV025 (format: PRV + 3 digits) |
-| `provider_name` | VARCHAR(120) | Provider display name | Source | No | Synthetic: "Provider 001" etc. |
-| `city` | VARCHAR(40) | Provider location city | Source | Yes | Mumbai, Pune, Delhi, Ahmedabad, Surat |
-| `provider_type` | VARCHAR(20) | Category of service | Source | Yes | Surveyor, Dealer, Garage, Hospital |
-| `rating` | DECIMAL(3,1) | Provider quality rating | Source | Yes | 0.0–5.0. Observed range: 3.1–4.8. |
-
-**Notes:**
-- 25 providers handle 320 claims (avg 12.8 claims/provider).
-- Provider names are synthetic placeholders ("Provider 001").
-- Surveyors and Garages are the most common provider types.
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `invoice_id` | TEXT | Primary key identifier | No | Format: `INV0001` - `INV0220` |
+| `provider_id` | TEXT | Foreign key to providers | No | Valid `provider_id` |
+| `invoice_date`| TEXT | Invoice date (ISO 8601) | No | 2026-01-01 to 2026-09-10 |
+| `invoice_amount`| REAL | Billed repair total | No | $3,500 - $320,000 |
 
 ---
 
-## invoices
+## 8. claims
+**Source:** `data/relational/claims.csv` | **Rows:** 320 | **PK:** `claim_id`
 
-**Source:** `data/raw/invoices_raw.csv` → `data/processed/invoices_clean.csv` → `data/relational/invoices.csv`
-**Rows:** 220
-**Primary key:** `invoice_id`
-**Foreign key:** `provider_id → providers.provider_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `invoice_id` | VARCHAR(12) | Unique invoice identifier | Source | No | INV00001 – INV00220 (format: INV + 5 digits) |
-| `provider_id` | VARCHAR(10) | FK to issuing provider | Source | No | Valid provider_id |
-| `invoice_amount` | DECIMAL(12,2) | Invoice value (INR) | Source | Yes | > 0. Observed range: 8,910–179,959. |
-| `invoice_date` | DATE | Date invoice was issued | Source (parsed) | Yes | ISO-8601 date. Raw stored as string. |
-| `description` | TEXT | Invoice description text | Source | Yes | Template text ("Invoice description N"). Low entropy. |
-
-> [!WARNING]
-> **Invoice reuse:** 167 unique `invoice_id` values appear in 320 claims. 153 claims share an invoice with at least one other claim. The maximum reuse is **7 claims per invoice**. This is a **source-data characteristic**, not a data error. It is preserved as-is and documented as a potential fraud signal for graph analysis.
-
----
-
-## claims
-
-**Source:** `data/raw/claims_raw.csv` → `data/processed/claims_clean.csv` → `data/relational/claims.csv`
-**Rows:** 320
-**Primary key:** `claim_id`
-**Foreign keys:** `claimant_id`, `policy_id`, `vehicle_id`, `provider_id`, `invoice_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `claim_id` | VARCHAR(12) | Unique claim identifier | Source | No | CLM00001 – CLM00320 (format: CLM + 5 digits) |
-| `claimant_id` | VARCHAR(10) | FK to claimant who filed the claim | Source | No | Valid claimant_id |
-| `policy_id` | VARCHAR(10) | FK to policy under which claim is filed | Source | No | Valid policy_id |
-| `vehicle_id` | VARCHAR(10) | FK to vehicle involved in claim | Source | No | Valid vehicle_id |
-| `provider_id` | VARCHAR(10) | FK to provider who handled the claim | Source | No | Valid provider_id |
-| `invoice_id` | VARCHAR(12) | FK to invoice for the claim | Source | No | Valid invoice_id. May be shared across claims. |
-| `claim_date` | DATE | Date claim was filed | Source (parsed) | Yes | ISO-8601. Observed range: 2026-01-03 – 2026-09-07. |
-| `claim_amount` | DECIMAL(12,2) | Claimed amount (INR) | Source | Yes | > 0. Observed range: 5,024–299,077. |
-| `claim_type` | VARCHAR(30) | Category of claim | Source | Yes | Theft, Glass Damage, Fire, Accident, Natural Disaster |
-| `status` | VARCHAR(20) | Current status of claim | Source | Yes | Open, Approved, Under Review, Rejected |
-| `fraud_label` | SMALLINT | Ground-truth fraud label | Source | No | **0** = Legitimate, **1** = Fraud |
-| `description` | TEXT | Claim description text | Source | Yes | Template text ("Claim description N"). Low entropy. |
-
-> [!IMPORTANT]
-> `fraud_label` is a **synthetic ground-truth label** generated with the dataset. It is **not** derived from real fraud investigation outcomes. Distribution: 268 legitimate (83.75%), 52 fraud (16.25%). Class imbalance ratio: 5.15:1.
-
-**Additional notes:**
-- 86 claims have `claim_date` outside the `[start_date, end_date]` range of their referenced policy. This is a synthetic data quality issue, not corrected (would require inventing dates).
-- `description` text is extremely low entropy (length ~20 chars, template generated). Not suitable for NLP features.
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `claim_id` | TEXT | Primary key identifier | No | Format: `CLM00001` - `CLM00320` |
+| `claimant_id` | TEXT | Foreign key to claimants | No | Valid `claimant_id` |
+| `policy_id` | TEXT | Foreign key to policies | No | Valid `policy_id` |
+| `vehicle_id` | TEXT | Foreign key to vehicles | No | Valid `vehicle_id` |
+| `provider_id` | TEXT | Foreign key to providers | No | Valid `provider_id` |
+| `invoice_id` | TEXT | Foreign key to invoices | No | Valid `invoice_id` |
+| `claim_date` | TEXT | Date claim was filed | No | 2026-01-03 to 2026-09-07 |
+| `claim_amount`| REAL | Total claimed amount | No | $5,024 - $299,077 |
+| `claim_type` | TEXT | Incident type | No | Theft, Glass Damage, Fire, Accident, Natural Disaster |
+| `status` | TEXT | Current operational status | No | Open, Approved, Under Review, Rejected |
+| `fraud_label` | INTEGER | Synthetic ground truth | No | `0` = Legitimate (83.75%), `1` = Fraud (16.25%) |
+| `description` | TEXT | Textual claim description | Yes | Natural text describing incident |
 
 ---
 
-## locations
+## 9. locations
+**Source:** `data/relational/locations.csv` | **Rows:** 60 | **PK:** `location_id`
 
-**Source:** `data/raw/locations_raw.csv` → `data/processed/locations_clean.csv` → `data/relational/locations.csv`
-**Rows:** 60
-**Primary key:** `location_id`
-
-| Field | Type | Description | Source | Nullable | Allowed Values |
-|---|---|---|---|---|---|
-| `location_id` | VARCHAR(8) | Unique location identifier | Source | No | LOC001 – LOC060 (format: LOC + 3 digits) |
-| `city` | VARCHAR(40) | City name | Source | Yes | Mumbai (16), Delhi (13), Surat (13), Ahmedabad (10), Pune (8) |
-| `latitude` | DECIMAL(9,6) | Geographic latitude (decimal degrees) | Source | Yes | India bounding box: 6–36. Observed: 18.49–28.68. |
-| `longitude` | DECIMAL(9,6) | Geographic longitude (decimal degrees) | Source | Yes | India bounding box: 68–98. Observed: 72.86–77.45. |
-
-> [!WARNING]
-> **Orphaned table.** `locations` has no foreign key from any other table. The only possible join is via `city` string matching with `claimants.city`, `providers.city`, or location-level coordinates. This is a source-data limitation. The table is retained as-is and documented.
+| Field | Type | Description | Nullable | Domain / Observed Values |
+| :--- | :--- | :--- | :---: | :--- |
+| `location_id` | TEXT | Primary key identifier | No | Format: `LOC001` - `LOC060` |
+| `city` | TEXT | Urban center | No | Mumbai, Delhi, Surat, Ahmedabad, Pune |
+| `latitude` | REAL | Latitude coordinate | No | 18.49 - 28.68 |
+| `longitude` | REAL | Longitude coordinate | No | 72.86 - 77.45 |
 
 ---
 
-## Analytical Views
+## 10. investigation_cases & Audit
 
-These views are defined in `database/views.sql` and computed from the relational tables. All values are derived from actual data.
+### `investigation_cases`
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `case_id` | TEXT PK | Unique case identifier (`CASE-CLMxxxxx`) |
+| `claim_id` | TEXT FK | References `claims(claim_id)` |
+| `risk_score` | REAL | Final hybrid risk score $[0, 1]$ |
+| `risk_band` | TEXT | `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` |
+| `priority` | TEXT | Triage priority |
+| `status` | TEXT | `NEW`, `UNDER_REVIEW`, `ESCALATED`, `RESOLVED`, `FALSE_POSITIVE` |
+| `assigned_to`| TEXT | Investigator username or ID |
+| `reason` | TEXT | Codified risk engine trigger explanations |
+| `notes` | TEXT | Free-text case summary |
+| `resolution` | TEXT | Final adjudication determination |
 
-| View | Description |
-|---|---|
-| `claim_risk_base` | Denormalized claim-level view joining all dimension tables. Input for scoring pipeline. |
-| `provider_summary` | Per-provider: total claims, unique claimants, total/avg claim amount, fraud count, fraud rate. |
-| `claimant_summary` | Per-claimant: total claims, total/avg claim amount, date range, fraud claims, policies/providers used. |
-| `fraud_overview` | Dataset-level: total claims, fraud/legit counts, fraud rate, total/avg amounts. |
-| `invoice_reuse` | Invoices referenced by more than one claim; potential fraud signal. |
+### `case_notes`
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `note_id` | INTEGER PK | Auto-increment identifier |
+| `case_id` | TEXT FK | References `investigation_cases(case_id)` |
+| `author` | TEXT | Investigator adding the note |
+| `note_text` | TEXT | Content of investigator note |
+| `created_at`| TEXT | UTC timestamp (ISO 8601) |
+
+### `case_events`
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `event_id` | INTEGER PK | Auto-increment identifier |
+| `case_id` | TEXT FK | References `investigation_cases(case_id)` |
+| `event_type`| TEXT | `STATUS_CHANGED`, `INVESTIGATOR_ASSIGNED`, `PRIORITY_CHANGED`, `NOTE_ADDED` |
+| `actor` | TEXT | User or system performing action |
+| `old_value` | TEXT | Prior state |
+| `new_value` | TEXT | Updated state |
+| `details` | TEXT | Transition rationale |
+| `timestamp` | TEXT | UTC timestamp (ISO 8601) |
 
 ---
 
-## Known Limitations
+## 11. Derived Feature Store Tables
 
-| ID | Limitation | Affected Entities | Impact |
-|---|---|---|---|
-| L1 | All data is synthetic | All | No real-world fraud patterns; label validity is assumed |
-| L2 | 4 policies have end_date ≤ start_date | policies | Flagged; not corrected (FK constraint) |
-| L3 | 86 claims are outside their policy date range | claims, policies | Synthetic artefact; not corrected |
-| L4 | locations table is orphaned (no FK) | locations | Can only join via city string |
-| L5 | invoice_ids shared across multiple claims | invoices, claims | Preserved; documented as fraud signal |
-| L6 | claim/invoice description is template text | claims, invoices | Not suitable for NLP |
-| L7 | All registration plates are MH-prefix | vehicles | No geographic diversity in plates |
-| L8 | Class imbalance 5.15:1 (legit:fraud) | claims | ML models must use class balancing |
-| L9 | previous_rejections in old feature files is uniformly distributed | data/features/ (Phase 1 legacy) | Legacy synthetic feature files are invalid |
+1. **`claim_features.csv`**: 320 claims $\times$ 21 engineered financial, temporal, and categorical attributes.
+2. **`duplicate_features.csv`**: Pairwise TF-IDF cosine similarity scores, matched pair IDs, and duplicate flags.
+3. **`graph_features.csv`**: Degree centrality, clustering coefficients, provider claim counts, and fraud neighbor ratios.
+4. **`final_risk_scores.csv`**: Multi-signal calibrated composite score, assigned operational risk band, component scores, and reason code strings.
 
 ---
 
-*This data dictionary was generated as part of Phase 2: Relational Insurance Data Model.*
-*All transformations are reproducible via `python -m src.data.relational_builder`.*
+## 12. Analytical Views
+
+- **`v_claim_summary`**: Joins claim facts with policyholder, vehicle, provider, and invoice details.
+- **`v_high_risk_claims`**: Filters claims where `risk_band IN ('HIGH', 'CRITICAL')`.
+- **`v_provider_analytics`**: Aggregates claim volume and fraud-association rates per repair shop.
+
+---
+
+## 13. Academic & Practical Limitations
+
+- All data is synthetic and generated for academic demonstration.
+- The knowledge graph is processed in-memory via NetworkX.
+- Static weights ($0.40, 0.20, 0.15, 0.25$) are used in the hybrid scoring engine.
