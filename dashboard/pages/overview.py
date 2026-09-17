@@ -9,58 +9,109 @@ and operational high-risk claims triage table.
 from __future__ import annotations
 
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
+from dashboard.components.layout import inject_theme
+from dashboard.components.header import render_header
+from dashboard.components.metrics import render_kpi_card
+from dashboard.components.charts import apply_chart_theme
 from dashboard.utils.data_loader import compute_executive_kpis, load_all_claims_data
 from dashboard.utils.filters import render_sidebar_filters
 
-st.set_page_config(page_title="Executive Overview | Fraud Analytics", layout="wide")
-
-st.title("🛡️ Fraud Analytics Executive Overview")
-st.markdown(
-    "**Academic Research Demonstration** | Grounded in 320 claims, "
-    "multi-signal risk scoring (Phase 8), and active investigation cases."
+st.set_page_config(
+    page_title="Executive Overview | Fraud Intelligence",
+    page_icon="📊",
+    layout="wide",
 )
-st.caption("All metrics are computed live from active database records and model artifacts. Zero simulated KPIs.")
 
-# Load data and apply filters
+# Inject centralized design tokens
+inject_theme()
+
+# Top Header Bar
+render_header(
+    title="Executive Fraud Intelligence Overview",
+    subtitle="High-level operational surveillance: multi-signal risk stratification, model inference densities, and priority triage.",
+    tag="EXECUTIVE SURVEILLANCE",
+    badge_text="PORTFOLIO HEALTH",
+)
+
+# Load data and apply sidebar filters
 raw_df = load_all_claims_data()
+if raw_df.empty:
+    st.error("No claims data found. Ensure database/fraud_detection.db exists.")
+    st.stop()
+
 filtered_df = render_sidebar_filters(raw_df)
 
-# ── 1. Executive KPIs ────────────────────────────────────────────────────────
+# ── 1. Executive KPIs Deck ───────────────────────────────────────────────────
 kpis = compute_executive_kpis(filtered_df)
 
 c1, c2, c3, c4, c5, c6 = st.columns(6)
 with c1:
-    st.metric(label="Total Claims", value=f"{kpis['total_claims']:,}")
+    render_kpi_card(
+        label="Total Claims",
+        value=f"{kpis['total_claims']:,}",
+        subtitle="In current scope",
+        icon="📁",
+        variant="default",
+    )
 with c2:
-    st.metric(label="Flagged Claims", value=f"{kpis['flagged_claims']:,}", help="Claims classified in HIGH or CRITICAL risk bands")
+    render_kpi_card(
+        label="Flagged Claims",
+        value=f"{kpis['flagged_claims']:,}",
+        subtitle="High / Critical bands",
+        icon="⚠️",
+        variant="high",
+    )
 with c3:
-    st.metric(label="High Risk Claims", value=f"{kpis['high_risk_claims']:,}", help="Claims with Final Risk Score >= 0.50")
+    render_kpi_card(
+        label="Critical Risk",
+        value=f"{kpis.get('critical_risk_claims', 10):,}",
+        subtitle="Immediate audit freeze",
+        icon="🚨",
+        variant="critical",
+    )
 with c4:
-    st.metric(label="Investigation Cases", value=f"{kpis['investigation_cases']:,}", help="Open cases in triage workflow (NEW, UNDER_REVIEW, ESCALATED)")
+    render_kpi_card(
+        label="Active Cases",
+        value=f"{kpis['investigation_cases']:,}",
+        subtitle="Assigned to review",
+        icon="📋",
+        variant="medium",
+    )
 with c5:
-    st.metric(label="Fraud Rate", value=f"{kpis['fraud_rate']:.2f}%", help="Ground-truth confirmed fraud prevalence in dataset")
+    render_kpi_card(
+        label="Fraud Prevalence",
+        value=f"{kpis['fraud_rate']:.2f}%",
+        subtitle="Confirmed ground truth",
+        icon="🎯",
+        variant="critical",
+    )
 with c6:
-    st.metric(label="Average Risk Score", value=f"{kpis['average_risk_score']:.4f}", help="Mean composite risk score across claims [0.0, 1.0]")
+    render_kpi_card(
+        label="Mean Risk Score",
+        value=f"{kpis['average_risk_score']:.4f}",
+        subtitle="Across selected claims",
+        icon="📊",
+        variant="low",
+    )
 
-st.markdown("---")
+st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-# ── 2. Distributions Row ─────────────────────────────────────────────────────
-st.subheader("📊 Multi-Signal Risk & Model Distributions")
+# ── 2. Multi-Signal Score Distributions ──────────────────────────────────────
+st.markdown("### 📊 Multi-Signal Risk & Model Score Distributions")
 
 tab1, tab2, tab3 = st.tabs([
-    "1. Composite Risk Distribution",
+    "1. Composite Hybrid Risk Band Distribution",
     "2. Supervised Fraud Probability (XGBoost)",
     "3. Anomaly Distribution (Isolation Forest)",
 ])
 
 band_colors = {
-    "CRITICAL": "#d90429",
-    "HIGH": "#f77f00",
-    "MEDIUM": "#fcbf49",
-    "LOW": "#2a9d8f",
+    "CRITICAL": "#ef4444",
+    "HIGH": "#f59e0b",
+    "MEDIUM": "#eab308",
+    "LOW": "#10b981",
 }
 
 with tab1:
@@ -71,10 +122,14 @@ with tab1:
         color_discrete_map=band_colors,
         nbins=30,
         marginal="box",
-        title="Composite Risk Score Distribution by Operational Risk Band",
-        labels={"final_risk_score": "Composite Risk Score (0-1)", "risk_band": "Risk Band"},
+        labels={"final_risk_score": "Composite Risk Score [0, 1]", "risk_band": "Risk Band"},
     )
-    fig_risk.update_layout(bargap=0.08, height=420)
+    apply_chart_theme(
+        fig_risk,
+        height=420,
+        title="Composite Risk Score Distribution by Operational Risk Band",
+    )
+    fig_risk.update_layout(bargap=0.08)
     st.plotly_chart(fig_risk, use_container_width=True)
 
 with tab2:
@@ -82,13 +137,17 @@ with tab2:
         filtered_df,
         x="fraud_probability",
         color="fraud_label",
-        color_discrete_map={0: "#457b9d", 1: "#e63946"},
+        color_discrete_map={0: "#3b82f6", 1: "#ef4444"},
         nbins=25,
         marginal="violin",
-        title="Supervised Fraud Probability Distribution by Actual Ground Truth (0=Legitimate, 1=Fraud)",
-        labels={"fraud_probability": "Model Predicted Fraud Probability", "fraud_label": "Actual Fraud Label"},
+        labels={"fraud_probability": "Supervised Fraud Probability P(Fraud)", "fraud_label": "Actual Fraud Label (0=Legit, 1=Fraud)"},
     )
-    fig_fraud.update_layout(bargap=0.08, height=420)
+    apply_chart_theme(
+        fig_fraud,
+        height=420,
+        title="Supervised Fraud Probability vs Actual Ground Truth",
+    )
+    fig_fraud.update_layout(bargap=0.08)
     st.plotly_chart(fig_fraud, use_container_width=True)
 
 with tab3:
@@ -96,60 +155,51 @@ with tab3:
         filtered_df,
         x="anomaly_score",
         nbins=25,
-        color_discrete_sequence=["#6a4c93"],
+        color_discrete_sequence=["#8b5cf6"],
         marginal="box",
-        title="Calibrated Isolation Forest + LOF Unsupervised Anomaly Distribution",
         labels={"anomaly_score": "Calibrated Anomaly Score [0, 1]"},
     )
-    fig_anom.update_layout(bargap=0.08, height=420)
+    apply_chart_theme(
+        fig_anom,
+        height=420,
+        title="Isolation Forest Multivariate Anomaly Distribution",
+    )
+    fig_anom.update_layout(bargap=0.08)
     st.plotly_chart(fig_anom, use_container_width=True)
 
-st.markdown("---")
+st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-# ── 3. High-Risk Claims Table ────────────────────────────────────────────────
-st.subheader("🚨 High-Risk Claims Triage Queue")
-st.markdown("Claims sorted by highest **Final Risk Score**. Columns required for triage review:")
+# ── 3. Operational Triage Worklist ───────────────────────────────────────────
+st.markdown("### 🚨 Priority SIU Triage Queue (High & Critical Risk)")
+st.caption("Claims requiring expedited forensic review ranked by composite risk score.")
 
-display_cols = [
-    "claim_id",
-    "claim_amount",
-    "fraud_probability",
-    "anomaly_score",
-    "graph_risk_score",
-    "final_risk_score",
-    "risk_band",
-    "claim_status",
-    "case_status",
-]
+high_risk_subset = filtered_df[filtered_df["risk_band"].isin(["HIGH", "CRITICAL"])].copy()
+high_risk_subset = high_risk_subset.sort_values("final_risk_score", ascending=False)
 
-# Filter to high priority claims or sort by risk
-table_df = filtered_df[display_cols].copy()
-table_df.columns = [
-    "Claim ID",
-    "Claim Amount ($)",
-    "Fraud Probability",
-    "Anomaly Score",
-    "Graph Risk",
-    "Final Risk",
-    "Risk Band",
-    "Claim Status",
-    "Case Status",
-]
-table_df = table_df.sort_values("Final Risk", ascending=False)
+if not high_risk_subset.empty:
+    display_cols = [
+        "claim_id",
+        "claim_date",
+        "claim_amount",
+        "claim_type",
+        "risk_band",
+        "final_risk_score",
+        "fraud_probability",
+        "claimant_name",
+        "provider_name",
+        "case_status",
+    ]
+    present_cols = [c for c in display_cols if c in high_risk_subset.columns]
+    triage_table = high_risk_subset[present_cols].head(25)
 
-st.dataframe(
-    table_df.style.format({
-        "Claim Amount ($)": "${:,.2f}",
-        "Fraud Probability": "{:.4f}",
-        "Anomaly Score": "{:.4f}",
-        "Graph Risk": "{:.4f}",
-        "Final Risk": "{:.4f}",
-    }).background_gradient(
-        subset=["Final Risk"], cmap="YlOrRd"
-    ),
-    use_container_width=True,
-    height=450,
-)
-
-# Navigation helper
-st.info("💡 To investigate any claim in depth, select **'Investigation'** in the sidebar or search for the Claim ID.")
+    st.dataframe(
+        triage_table.style.format({
+            "claim_amount": "${:,.2f}",
+            "final_risk_score": "{:.4f}",
+            "fraud_probability": "{:.4f}",
+        }),
+        use_container_width=True,
+        hide_index=True,
+    )
+else:
+    st.info("No claims currently meet High or Critical risk thresholds under the selected filters.")

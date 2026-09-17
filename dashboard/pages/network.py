@@ -10,60 +10,88 @@ with node inspection, edge relationship labels, and provider collusion subgraphs
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List
-
 import networkx as nx
-import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from dashboard.components.layout import inject_theme
+from dashboard.components.header import render_header
+from dashboard.components.metrics import render_kpi_card
 from dashboard.utils.data_loader import (
     build_claim_network_graph,
     load_all_claims_data,
     load_experiment_reports,
 )
 
-st.set_page_config(page_title="Network Analysis | Fraud Graph", layout="wide")
-
-st.title("🕸️ Graph Relationship & Network Analysis")
-st.markdown(
-    "Explores the heterogeneous insurance knowledge graph (Phase 6 & 7) linking "
-    "**Claims**, **Claimants**, **Policies**, **Vehicles**, **Providers**, and **Locations**."
+st.set_page_config(
+    page_title="Network Analysis | Fraud Intelligence",
+    page_icon="🕸️",
+    layout="wide",
 )
-st.caption(
-    "Topological signals (PageRank, Degree Centrality, Community IDs) reveal hidden "
-    "syndicate structures and shared-entity collusion patterns."
+
+# Inject design tokens
+inject_theme()
+
+# Top Header Bar
+render_header(
+    title="Knowledge Graph & Collusion Hubs",
+    subtitle="Explores the heterogeneous insurance network connecting Claims, Claimants, Policies, Vehicles, Providers, and Invoices to expose fraud syndicates.",
+    tag="GRAPH TOPOLOGY & SYNDICATES",
+    badge_text="NETWORKX SUBGRAPH",
 )
 
 claims_df = load_all_claims_data()
 if claims_df.empty:
-    st.warning("Claims database not loaded. Ensure database/fraud_detection.db exists.")
+    st.error("Claims database not loaded. Ensure database/fraud_detection.db exists.")
     st.stop()
 
-# ── 1. Graph Statistics Bar ──────────────────────────────────────────────────
+# ── 1. Graph Statistics Ribbon ───────────────────────────────────────────────
 reports = load_experiment_reports()
 g_stats = reports.get("graph_statistics", {})
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    st.metric("Total Graph Nodes", f"{g_stats.get('total_nodes', 1022):,}")
+    render_kpi_card(
+        label="Total Graph Nodes",
+        value=f"{g_stats.get('total_nodes', 1022):,}",
+        subtitle="7 Heterogeneous entity tiers",
+        icon="⚪",
+        variant="default",
+    )
 with c2:
-    st.metric("Total Graph Edges", f"{g_stats.get('total_edges', 2617):,}")
+    render_kpi_card(
+        label="Total Graph Edges",
+        value=f"{g_stats.get('total_edges', 2617):,}",
+        subtitle="10 Relational relationship types",
+        icon="🔗",
+        variant="default",
+    )
 with c3:
-    st.metric("Entity Types", f"{len(g_stats.get('node_types', {})) or 6}")
+    render_kpi_card(
+        label="Entity Tiers",
+        value=f"{len(g_stats.get('node_types', {})) or 7}",
+        subtitle="Ontological categories",
+        icon="🏷️",
+        variant="low",
+    )
 with c4:
-    st.metric("Detected Communities", f"{g_stats.get('num_communities', 34)}")
+    render_kpi_card(
+        label="Graph Density",
+        value=f"{g_stats.get('graph_overview', {}).get('density', 0.0050):.4f}",
+        subtitle="Network sparsity ratio",
+        icon="🌐",
+        variant="high",
+    )
 
-st.markdown("---")
+st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
 # ── 2. View Mode & Claim Selector ────────────────────────────────────────────
-col_sel, col_mode = st.columns([2, 1])
+col_sel, col_mode = st.columns([3, 2])
 
-# Order claims by risk score descending for easy investigation
 sorted_claims = claims_df.sort_values("final_risk_score", ascending=False)
 claim_options = sorted_claims["claim_id"].tolist()
 claim_labels = {
-    row["claim_id"]: f"{row['claim_id']} | Risk: {row['final_risk_score']:.2f} | ${row['claim_amount']:,.0f} | {'🚨 Fraud' if row['fraud_label'] == 1 else '✅ Legitimate'}"
+    row["claim_id"]: f"{row['claim_id']} | Risk: {row['final_risk_score']:.2f} | ${row['claim_amount']:,.0f} | {'🚨 Fraud' if row['fraud_label'] == 1 else '✅ Legit'}"
     for _, row in sorted_claims.iterrows()
 }
 
@@ -97,19 +125,19 @@ elif "Kamada" in view_mode:
 else:
     pos = nx.spring_layout(G, seed=42, k=1.2 / math.sqrt(max(1, len(G.nodes))))
 
-# Define Entity Color Palette
+# Enterprise Color Palette
 ENTITY_COLORS = {
-    "Claim": "#d90429",          # Red / Crimson
-    "ConnectedClaim": "#f77f00", # Amber
-    "Claimant": "#3a86ff",       # Blue
-    "Policy": "#2a9d8f",         # Teal
-    "Vehicle": "#8338ec",        # Purple
-    "Provider": "#ffb703",       # Gold
-    "Location": "#6c757d",       # Gray
+    "Claim": "#ef4444",          # Red
+    "ConnectedClaim": "#f59e0b", # Amber
+    "Claimant": "#3b82f6",       # Blue
+    "Policy": "#10b981",         # Green
+    "Vehicle": "#8b5cf6",        # Purple
+    "Provider": "#f97316",       # Orange
+    "Location": "#64748b",       # Slate
+    "Invoice": "#06b6d4",        # Cyan
 }
 
 # ── 4. Build Interactive Plotly Graph ────────────────────────────────────────
-# Edge Traces
 edge_x = []
 edge_y = []
 edge_labels_x = []
@@ -128,25 +156,23 @@ for u, v, d in G.edges(data=True):
 edge_trace = go.Scatter(
     x=edge_x,
     y=edge_y,
-    line=dict(width=1.5, color="#ced4da"),
+    line=dict(width=1.5, color="#334155"),
     hoverinfo="none",
     mode="lines",
     showlegend=False,
 )
 
-# Edge text middle trace
 edge_label_trace = go.Scatter(
     x=edge_labels_x,
     y=edge_labels_y,
     mode="text",
     text=edge_texts,
     textposition="middle center",
-    textfont=dict(size=9, color="#6c757d"),
+    textfont=dict(size=9, color="#94a3b8"),
     hoverinfo="none",
     showlegend=False,
 )
 
-# Node Traces by Entity Type for Legend Support
 node_traces = []
 for entity_type, color in ENTITY_COLORS.items():
     nx_nodes = [n for n, d in G.nodes(data=True) if d.get("type") == entity_type]
@@ -164,10 +190,9 @@ for entity_type, color in ENTITY_COLORS.items():
         for k, v in details.items():
             hover_str += f"{k}: {v}<br>"
         nx_hover.append(hover_str)
-        # Short label
         nx_labels.append(n)
 
-    size = 28 if entity_type == "Claim" else 22
+    size = 28 if entity_type == "Claim" else 20
 
     trace = go.Scatter(
         x=nx_x,
@@ -175,13 +200,13 @@ for entity_type, color in ENTITY_COLORS.items():
         mode="markers+text",
         text=nx_labels,
         textposition="top center",
-        textfont=dict(size=10, color="#212529"),
+        textfont=dict(size=10, color="#f8fafc", family="Inter, sans-serif"),
         hoverinfo="text",
         hovertext=nx_hover,
         marker=dict(
             size=size,
             color=color,
-            line=dict(width=2, color="#ffffff"),
+            line=dict(width=2, color="#0f172a"),
             opacity=0.95,
         ),
         name=entity_type,
@@ -192,46 +217,61 @@ fig = go.Figure(
     data=[edge_trace, edge_label_trace, *node_traces],
     layout=go.Layout(
         title=dict(
-            text=f"Knowledge Subgraph for Claim: {selected_claim_id} ({len(G.nodes)} Nodes, {len(G.edges)} Edges)",
-            font=dict(size=16),
+            text=f"Ego Subgraph for Claim {selected_claim_id} ({len(G.nodes)} Nodes, {len(G.edges)} Edges)",
+            font=dict(size=15, color="#f8fafc", family="Inter, sans-serif"),
         ),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#0b1120",
         showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            font=dict(color="#f8fafc", size=11),
+        ),
         hovermode="closest",
         margin=dict(b=20, l=20, r=20, t=50),
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        plot_bgcolor="#f8f9fa",
         height=620,
     ),
 )
 
-# ── 5. Render Layout: Graph (Left) and Node Details (Right) ──────────────────
+# ── 5. Graph Render & Node Inspector ─────────────────────────────────────────
 graph_col, detail_col = st.columns([3, 1])
 
 with graph_col:
     st.plotly_chart(fig, use_container_width=True)
 
 with detail_col:
-    st.subheader("🔍 Node Inspector")
-    st.caption("Inspect attributes of any node in this subgraph:")
+    st.markdown(
+        """
+        <div class="saas-card-header">
+            <h4 class="saas-card-title">🔍 Node Inspector</h4>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     node_options = list(G.nodes)
     inspected_node = st.selectbox(
-        "Select Node:",
+        "Select Node to Inspect:",
         options=node_options,
         index=0 if selected_claim_id in node_options else 0,
     )
 
     info = node_details.get(inspected_node, {})
     if info:
-        st.markdown(f"### **{info.get('Entity', 'Node')}**")
+        st.markdown(f"**Entity Category:** `{info.get('Entity', 'Node')}`")
         for k, v in info.items():
-            st.markdown(f"**{k}:** {v}")
+            if k != "Entity":
+                st.markdown(f"- **{k}:** {v}")
 
     # Connected Neighbors
     st.markdown("---")
-    st.markdown("#### Connected Neighbors")
+    st.markdown("##### **Direct Relationships**")
     neighbors = list(G.neighbors(inspected_node))
     for neighbor in neighbors:
         edge_data = G.get_edge_data(inspected_node, neighbor) or {}
@@ -239,15 +279,12 @@ with detail_col:
         st.markdown(f"- `{neighbor}` *(via {relation})*")
 
     st.markdown("---")
-    st.info(f"💡 Subgraph Density: **{nx.density(G):.3f}**")
+    st.caption(f"Local Subgraph Density: **{nx.density(G):.3f}**")
 
 # ── 6. Provider Collusion & Multi-Claim Hubs ────────────────────────────────
 st.markdown("---")
-st.subheader("🏢 Provider Hubs with Multiple Claims")
-st.markdown(
-    "Providers connected to multiple claims indicate potential repair shop rings "
-    "or billing collusion hot-spots."
-)
+st.markdown("### 🏢 High-Throughput Provider Collusion Hubs")
+st.caption("Repair providers handling multiple claims can indicate systematic billing inflation or collusion rings.")
 
 provider_counts = claims_df.groupby(["provider_id", "provider_name", "provider_city", "provider_type"]).agg(
     total_claims=("claim_id", "count"),
@@ -264,7 +301,8 @@ st.dataframe(
         "avg_risk_score": "{:.4f}",
         "total_billed": "${:,.2f}",
         "fraud_percentage": "{:.1f}%",
-    }).background_gradient(subset=["avg_risk_score"], cmap="YlOrRd"),
+    }),
     use_container_width=True,
-    height=300,
+    height=320,
+    hide_index=True,
 )

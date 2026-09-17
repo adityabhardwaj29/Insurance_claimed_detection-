@@ -12,14 +12,28 @@ import sqlite3
 import pandas as pd
 import streamlit as st
 
+from dashboard.components import (
+    card_container,
+    inject_theme,
+    render_header,
+    render_kpi_card,
+)
 from dashboard.utils.data_loader import DB_PATH
 
-st.set_page_config(page_title="Audit Trail | Case Logs", layout="wide")
+st.set_page_config(
+    page_title="Audit Trail | Case Logs",
+    page_icon="📜",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-st.title("📜 Investigation Audit Trail & Activity Logs")
-st.markdown(
-    "Maintains an immutable, append-only log of every state transition, note, and assignment. "
-    "Ensures full accountability, reproducibility, and audit readiness."
+inject_theme()
+
+render_header(
+    title="Investigation Audit Trail & Activity Logs",
+    subtitle="Immutable, regulatory-grade audit record of every case state transition, investigator assignment, and forensic note.",
+    badge_text="Compliance & Governance",
+    badge_variant="primary",
 )
 
 if not DB_PATH.exists():
@@ -30,32 +44,61 @@ with sqlite3.connect(DB_PATH) as conn:
     events_df = pd.read_sql_query("SELECT * FROM case_events ORDER BY timestamp DESC", conn)
     notes_df = pd.read_sql_query("SELECT * FROM case_notes ORDER BY created_at DESC", conn)
 
-c1, c2 = st.columns(2)
+c1, c2, c3 = st.columns(3)
 with c1:
-    st.metric("Total State Transition Events", f"{len(events_df):,}")
+    render_kpi_card(
+        title="State Transition Events",
+        value=f"{len(events_df):,}",
+        subtitle="Immutable case actions",
+        accent_color="#3b82f6",
+    )
 with c2:
-    st.metric("Total Case Notes Recorded", f"{len(notes_df):,}")
+    render_kpi_card(
+        title="Investigator Notes",
+        value=f"{len(notes_df):,}",
+        subtitle="Forensic observations",
+        accent_color="#10b981",
+    )
+with c3:
+    unique_actors = len(events_df["actor"].dropna().unique()) if not events_df.empty else 0
+    render_kpi_card(
+        title="Active Investigators",
+        value=f"{unique_actors}",
+        subtitle="Distinct actors recorded",
+        accent_color="#6366f1",
+    )
 
-st.markdown("---")
+st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["1. Case Events & State Transitions", "2. Investigator Notes Log"])
+tab1, tab2 = st.tabs(["📋 Case Events & State Transitions", "📝 Forensic Notes Log"])
 
 with tab1:
-    st.subheader("Lifecycle Events Log")
-    if not events_df.empty:
-        # Filter by event type or actor
-        actors = ["All"] + sorted(events_df["actor"].dropna().unique().tolist())
-        selected_actor = st.selectbox("Filter by Actor:", options=actors)
-        if selected_actor != "All":
-            events_df = events_df[events_df["actor"] == selected_actor]
+    with card_container("Chronological Lifecycle Events"):
+        if not events_df.empty:
+            actors = ["All"] + sorted(events_df["actor"].dropna().unique().tolist())
+            c_filter, _ = st.columns([1, 2])
+            with c_filter:
+                selected_actor = st.selectbox("Filter by Actor:", options=actors)
+            if selected_actor != "All":
+                display_events = events_df[events_df["actor"] == selected_actor]
+            else:
+                display_events = events_df
 
-        st.dataframe(events_df, use_container_width=True, height=450)
-    else:
-        st.info("No case events recorded yet.")
+            st.dataframe(
+                display_events,
+                use_container_width=True,
+                height=420,
+            )
+        else:
+            st.info("No case events recorded yet.")
 
 with tab2:
-    st.subheader("Investigator Notes Log")
-    if not notes_df.empty:
-        st.dataframe(notes_df, use_container_width=True, height=450)
-    else:
-        st.info("No investigator notes recorded yet.")
+    with card_container("Investigator Notes & Observations"):
+        if not notes_df.empty:
+            st.dataframe(
+                notes_df,
+                use_container_width=True,
+                height=420,
+            )
+        else:
+            st.info("No investigator notes recorded yet.")

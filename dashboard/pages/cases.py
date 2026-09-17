@@ -11,14 +11,29 @@ from __future__ import annotations
 import plotly.express as px
 import streamlit as st
 
+from dashboard.components import (
+    apply_chart_theme,
+    card_container,
+    inject_theme,
+    render_header,
+    render_kpi_card,
+)
 from dashboard.utils.data_loader import load_all_claims_data, load_investigation_cases
 
-st.set_page_config(page_title="Investigation Cases | Triage Board", layout="wide")
+st.set_page_config(
+    page_title="Investigation Cases | Triage Board",
+    page_icon="📁",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-st.title("📁 SIU Investigation Cases & Triage Queue")
-st.markdown(
-    "Operational triage hub for active fraud investigations. "
-    "All case lifecycle transitions and investigator notes are preserved with an immutable audit trail."
+inject_theme()
+
+render_header(
+    title="SIU Investigation Cases & Triage Queue",
+    subtitle="Operational triage hub for active fraud investigations and investigator lifecycle management.",
+    badge_text="SIU Case Management",
+    badge_variant="info",
 )
 
 cases_df = load_investigation_cases()
@@ -46,57 +61,89 @@ false_positives = int((cases_df["status"] == "FALSE_POSITIVE").sum())
 
 c1, c2, c3, c4, c5, c6 = st.columns(6)
 with c1:
-    st.metric("Total Cases", f"{total_cases:,}")
+    render_kpi_card(
+        title="Total Cases",
+        value=f"{total_cases:,}",
+        subtitle="Active pipeline",
+        accent_color="#6366f1",
+    )
 with c2:
-    st.metric("New / Unassigned", f"{new_cases:,}")
+    render_kpi_card(
+        title="New / Triage",
+        value=f"{new_cases:,}",
+        subtitle="Unassigned queue",
+        accent_color="#06b6d4",
+    )
 with c3:
-    st.metric("Under Review", f"{under_review:,}")
+    render_kpi_card(
+        title="Under Review",
+        value=f"{under_review:,}",
+        subtitle="Active inquiries",
+        accent_color="#f59e0b",
+    )
 with c4:
-    st.metric("Escalated", f"{escalated:,}")
+    render_kpi_card(
+        title="Escalated",
+        value=f"{escalated:,}",
+        subtitle="High priority SIU",
+        accent_color="#ef4444",
+    )
 with c5:
-    st.metric("Resolved (Confirmed)", f"{resolved:,}")
+    render_kpi_card(
+        title="Confirmed Fraud",
+        value=f"{resolved:,}",
+        subtitle="Resolved claims",
+        accent_color="#10b981",
+    )
 with c6:
-    st.metric("False Positives", f"{false_positives:,}")
+    render_kpi_card(
+        title="False Positives",
+        value=f"{false_positives:,}",
+        subtitle="Cleared claims",
+        accent_color="#64748b",
+    )
 
-st.markdown("---")
+st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
 # ── 2. Filters & Breakdown ───────────────────────────────────────────────────
 col_filter, col_chart = st.columns([1, 1])
 
 with col_filter:
-    st.subheader("Filter Queue")
-    status_filter = st.multiselect(
-        "Filter by Status:",
-        options=sorted(cases_df["status"].unique().tolist()),
-        default=sorted(cases_df["status"].unique().tolist()),
-    )
-    priority_filter = st.multiselect(
-        "Filter by Priority:",
-        options=sorted(cases_df["priority"].unique().tolist()),
-        default=sorted(cases_df["priority"].unique().tolist()),
-    )
-    min_risk = st.slider("Minimum Risk Score:", min_value=0.0, max_value=1.0, value=0.0, step=0.05)
+    with card_container("🔍 Queue Filters"):
+        status_opts = sorted(cases_df["status"].unique().tolist())
+        status_filter = st.multiselect(
+            "Filter by Status:",
+            options=status_opts,
+            default=status_opts,
+        )
+        priority_opts = sorted(cases_df["priority"].unique().tolist())
+        priority_filter = st.multiselect(
+            "Filter by Priority:",
+            options=priority_opts,
+            default=priority_opts,
+        )
+        min_risk = st.slider("Minimum Risk Score:", min_value=0.0, max_value=1.0, value=0.0, step=0.05)
 
 with col_chart:
-    st.subheader("Cases by Priority & Status")
-    status_counts = cases_df["status"].value_counts().reset_index()
-    status_counts.columns = ["Status", "Count"]
-    fig = px.bar(
-        status_counts,
-        x="Status",
-        y="Count",
-        color="Status",
-        color_discrete_map={
-            "NEW": "#3a86ff",
-            "UNDER_REVIEW": "#fcbf49",
-            "ESCALATED": "#d90429",
-            "RESOLVED": "#2a9d8f",
-            "FALSE_POSITIVE": "#6c757d",
-        },
-        height=260,
-    )
-    fig.update_layout(showlegend=False, margin=dict(t=10, b=10, l=10, r=10))
-    st.plotly_chart(fig, use_container_width=True)
+    with card_container("📊 Pipeline Distribution"):
+        status_counts = cases_df["status"].value_counts().reset_index()
+        status_counts.columns = ["Status", "Count"]
+        fig = px.bar(
+            status_counts,
+            x="Status",
+            y="Count",
+            color="Status",
+            color_discrete_map={
+                "NEW": "#06b6d4",
+                "UNDER_REVIEW": "#f59e0b",
+                "ESCALATED": "#ef4444",
+                "RESOLVED": "#10b981",
+                "FALSE_POSITIVE": "#64748b",
+            },
+        )
+        apply_chart_theme(fig, height=260)
+        fig.update_layout(showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
 
 # Apply filters
 filtered_cases = cases_df[
@@ -105,47 +152,49 @@ filtered_cases = cases_df[
     & (cases_df["risk_score"] >= min_risk)
 ].copy()
 
-st.markdown("---")
+st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
 # ── 3. Operational Queue Table ───────────────────────────────────────────────
-st.subheader(f"📋 Triage Worklist ({len(filtered_cases)} Matching Cases)")
+with card_container(f"📋 Triage Worklist ({len(filtered_cases)} Matching Cases)"):
+    display_cols = [
+        "case_id",
+        "claim_id",
+        "risk_score",
+        "risk_band",
+        "priority",
+        "status",
+        "assigned_to",
+        "claim_amount",
+        "claim_type",
+        "updated_at",
+    ]
+    available_cols = [c for c in display_cols if c in filtered_cases.columns]
+    tbl = filtered_cases[available_cols].copy()
+    tbl = tbl.sort_values("risk_score", ascending=False)
 
-display_cols = [
-    "case_id",
-    "claim_id",
-    "risk_score",
-    "risk_band",
-    "priority",
-    "status",
-    "assigned_to",
-    "claim_amount",
-    "claim_type",
-    "updated_at",
-]
-available_cols = [c for c in display_cols if c in filtered_cases.columns]
-tbl = filtered_cases[available_cols].copy()
-tbl = tbl.sort_values("risk_score", ascending=False)
+    format_dict = {"risk_score": "{:.4f}"}
+    if "claim_amount" in tbl.columns:
+        format_dict["claim_amount"] = "${:,.2f}"
 
-format_dict = {"risk_score": "{:.4f}"}
-if "claim_amount" in tbl.columns:
-    format_dict["claim_amount"] = "${:,.2f}"
+    st.dataframe(
+        tbl.style.format(format_dict).background_gradient(subset=["risk_score"], cmap="YlOrRd"),
+        use_container_width=True,
+        height=380,
+    )
 
-st.dataframe(
-    tbl.style.format(format_dict).background_gradient(subset=["risk_score"], cmap="YlOrRd"),
-    use_container_width=True,
-    height=400,
-)
+st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
 # ── 4. Quick Action to Investigate ───────────────────────────────────────────
-st.markdown("---")
-st.subheader("🚀 Quick Jump to Investigation Dossier")
-
-selected_jump_claim = st.selectbox(
-    "Choose a Claim ID to inspect full dossier:",
-    options=filtered_cases["claim_id"].tolist() if not filtered_cases.empty else [],
-)
-
-if st.button("🔎 Open 360° Investigation Dossier"):
-    if selected_jump_claim:
-        st.session_state["investigate_claim_id"] = selected_jump_claim
-        st.success(f"Selected Claim `{selected_jump_claim}`. Navigate to the 'Investigation' page to inspect the full dossier.")
+with card_container("⚡ Quick Action — Launch 360° Forensic Dossier"):
+    c_sel, c_btn = st.columns([3, 1])
+    with c_sel:
+        selected_jump_claim = st.selectbox(
+            "Select Claim ID to inspect in deep-dive dossier:",
+            options=filtered_cases["claim_id"].tolist() if not filtered_cases.empty else [],
+            label_visibility="collapsed",
+        )
+    with c_btn:
+        if st.button("🔎 Open Dossier", use_container_width=True):
+            if selected_jump_claim:
+                st.session_state["investigate_claim_id"] = selected_jump_claim
+                st.success(f"Claim `{selected_jump_claim}` loaded into session! Navigate to **Investigation** tab.")

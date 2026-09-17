@@ -1,0 +1,513 @@
+/* ==========================================================================
+   ENTERPRISE SAAS DESIGN SYSTEM - THEME.CSS
+   Graph-Enhanced Insurance Claim Fraud Detection Platform
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Typography */
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Color Palette - Dark Enterprise SaaS */
+  --bg-app: #080c14;
+  --bg-surface: #0f172a;
+  --bg-card: #131d35;
+  --bg-card-hover: #182544;
+  --bg-card-subtle: #0d1527;
+  --border-subtle: #1e293b;
+  --border-medium: #2a3a55;
+  --border-focus: #3b82f6;
+
+  /* Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-white: #ffffff;
+
+  /* Brand / Primary */
+  --brand-primary: #3b82f6;
+  --brand-primary-hover: #2563eb;
+  --brand-glow: rgba(59, 130, 246, 0.2);
+
+  /* Semantic Risk Colors */
+  --risk-critical: #ef4444;
+  --risk-critical-bg: rgba(239, 68, 68, 0.12);
+  --risk-critical-border: #dc2626;
+
+  --risk-high: #f59e0b;
+  --risk-high-bg: rgba(245, 158, 11, 0.12);
+  --risk-high-border: #d97706;
+
+  --risk-medium: #eab308;
+  --risk-medium-bg: rgba(234, 179, 8, 0.12);
+  --risk-medium-border: #ca8a04;
+
+  --risk-low: #10b981;
+  --risk-low-bg: rgba(16, 185, 129, 0.12);
+  --risk-low-border: #059669;
+
+  /* Informational */
+  --info-blue: #0ea5e9;
+  --info-blue-bg: rgba(14, 165, 233, 0.12);
+
+  /* Spacing Tokens */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 40px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.15);
+}
+
+/* ==========================================================================
+   GLOBAL RESET & STREAMLIT CONTAINER STYLING
+   ========================================================================== */
+
+html, body, [class*="css"], .stApp {
+  font-family: var(--font-main) !important;
+  background-color: var(--bg-app) !important;
+  color: var(--text-primary) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide default streamlit decorations cleanly */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header[data-testid="stHeader"] {
+  background: transparent !important;
+}
+
+/* App View Content Container */
+.block-container {
+  padding-top: 1.5rem !important;
+  padding-bottom: 3rem !important;
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
+  max-width: 1400px !important;
+}
+
+/* ==========================================================================
+   ENTERPRISE SIDEBAR STYLING
+   ========================================================================== */
+
+section[data-testid="stSidebar"] {
+  background-color: var(--bg-surface) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+  padding-top: 1rem !important;
+}
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  letter-spacing: -0.01em;
+}
+
+section[data-testid="stSidebar"] .stSelectbox label,
+section[data-testid="stSidebar"] .stMultiSelect label,
+section[data-testid="stSidebar"] .stSlider label {
+  color: var(--text-secondary) !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   CUSTOM REUSABLE UI COMPONENTS
+   ========================================================================== */
+
+/* Top Header Bar */
+.saas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(180deg, #111a2e 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.saas-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.saas-header-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.saas-header-title {
+  font-size: 1.65rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  line-height: 1.25;
+}
+
+.saas-header-subtitle {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  margin-top: 4px !important;
+  font-weight: 400;
+}
+
+.saas-header-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #60a5fa;
+  gap: 6px;
+}
+
+.saas-header-badge.info {
+  background-color: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.3);
+  color: #22d3ee;
+}
+
+.saas-header-badge.success {
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.saas-header-badge.warning {
+  background-color: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.saas-header-badge.critical {
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.saas-header-badge.primary {
+  background-color: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #818cf8;
+}
+
+
+/* Metric / KPI Cards */
+.saas-kpi-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.saas-kpi-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  background-color: var(--bg-card-hover);
+}
+
+.saas-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--brand-primary);
+}
+
+.saas-kpi-card.critical::before { background-color: var(--risk-critical); }
+.saas-kpi-card.high::before { background-color: var(--risk-high); }
+.saas-kpi-card.medium::before { background-color: var(--risk-medium); }
+.saas-kpi-card.low::before { background-color: var(--risk-low); }
+
+.saas-kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.saas-kpi-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.saas-kpi-icon {
+  font-size: 1.15rem;
+  opacity: 0.85;
+}
+
+.saas-kpi-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-white);
+  line-height: 1.1;
+  margin: 0.3rem 0;
+}
+
+.saas-kpi-footer {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Card Box Container */
+.saas-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.saas-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.1rem;
+}
+
+.saas-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saas-card-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Semantic Badges */
+.saas-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.saas-badge.critical {
+  background-color: var(--risk-critical-bg);
+  border: 1px solid var(--risk-critical-border);
+  color: #fca5a5;
+}
+
+.saas-badge.high {
+  background-color: var(--risk-high-bg);
+  border: 1px solid var(--risk-high-border);
+  color: #fcd34d;
+}
+
+.saas-badge.medium {
+  background-color: var(--risk-medium-bg);
+  border: 1px solid var(--risk-medium-border);
+  color: #fef08a;
+}
+
+.saas-badge.low {
+  background-color: var(--risk-low-bg);
+  border: 1px solid var(--risk-low-border);
+  color: #86efac;
+}
+
+.saas-badge.info {
+  background-color: var(--info-blue-bg);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  color: #7dd3fc;
+}
+
+.saas-badge.neutral {
+  background-color: rgba(100, 116, 139, 0.15);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: #cbd5e1;
+}
+
+/* Empty State Component */
+.saas-empty-state {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  background-color: var(--bg-surface);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-lg);
+  margin: var(--space-xl) 0;
+}
+
+.saas-empty-icon {
+  font-size: 2.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+
+.saas-empty-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.saas-empty-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Info Callout */
+.saas-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1rem 1.25rem;
+  background-color: rgba(59, 130, 246, 0.08);
+  border-left: 4px solid var(--brand-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--space-md) 0;
+}
+
+.saas-callout.warning {
+  background-color: rgba(245, 158, 11, 0.08);
+  border-left-color: var(--risk-high);
+}
+
+.saas-callout-text {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Table Styling */
+.stDataFrame {
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-md) !important;
+  overflow: hidden !important;
+  background-color: var(--bg-surface) !important;
+}
+
+/* Buttons */
+.stButton > button {
+  font-family: var(--font-main) !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.45rem 1.1rem !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.stButton > button:hover {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Primary Button */
+.stButton > button[kind="primary"] {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+  background-color: var(--brand-primary-hover) !important;
+}
+
+/* Input Fields */
+.stTextInput > div > div > input,
+.stSelectbox > div > div,
+.stMultiSelect > div > div {
+  background-color: var(--bg-card-subtle) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+  font-size: 0.88rem !important;
+}
+
+.stTextInput > div > div > input:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 2px var(--brand-glow) !important;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 8px;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  margin-bottom: 1.25rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+  padding: 8px 16px !important;
+  background-color: transparent !important;
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+  font-size: 0.88rem !important;
+  border: none !important;
+}
+
+.stTabs [aria-selected="true"] {
+  color: var(--brand-primary) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--brand-primary) !important;
+  background-color: rgba(59, 130, 246, 0.05) !important;
+}
