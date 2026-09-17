@@ -80,3 +80,8 @@ class ClaimExplanationResponse(BaseModel):
     weights: Dict[str, float]
     reasons: List[str]
     summary: str
+    fraud_probability: Optional[float] = None
+    top_factors: Optional[List[Dict[str, Any]]] = None
+    top_positive_factors: Optional[List[Dict[str, Any]]] = None
+    top_negative_factors: Optional[List[Dict[str, Any]]] = None
+    graph_explanation: Optional[Dict[str, Any]] = None

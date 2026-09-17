@@ -21,6 +21,7 @@ from dashboard.utils.data_loader import (
     create_or_update_case,
     load_all_claims_data,
     load_claim_investigation_dossier,
+    load_claim_explanation,
 )
 
 st.set_page_config(page_title="Claim Investigation Dossier", layout="wide")
@@ -168,6 +169,97 @@ with col_reasons:
         st.metric("Fraud Neighbors", f"{graph_info.get('fraud_neighbor_count', 0)}")
     with gc3:
         st.metric("Degree Centrality", f"{graph_info.get('degree_centrality', 0.0):.4f}")
+
+# ── 3.5. Phase 12: Explainable Fraud Detection (SHAP & Graph Evidence) ───────
+st.markdown("---")
+st.subheader("🧠 Phase 12: Explainable Fraud Detection (SHAP & Graph Evidence)")
+exp_data = load_claim_explanation(selected_cid)
+
+if exp_data.get("summary_text"):
+    st.info(f"**Investigator Briefing:** {exp_data['summary_text']}")
+
+tab_shap, tab_graph_ev = st.tabs(["1. Supervised ML SHAP Factor Impact", "2. Knowledge Graph Evidence Decomposition"])
+
+with tab_shap:
+    c_sh1, c_sh2 = st.columns([1, 1])
+    top_factors = exp_data.get("top_factors", [])
+    if top_factors:
+        f_names = [f["feature"] for f in reversed(top_factors)]
+        f_impacts = [f["impact"] for f in reversed(top_factors)]
+        f_colors = ["#d90429" if f["direction"] == "risk_increasing" else "#2a9d8f" for f in reversed(top_factors)]
+
+        fig_shap = go.Figure(
+            go.Bar(
+                x=f_impacts,
+                y=f_names,
+                orientation="h",
+                marker=dict(color=f_colors),
+                text=[f"{val:+.4f}" for val in f_impacts],
+                textposition="auto",
+            )
+        )
+        fig_shap.update_layout(
+            title="Local SHAP Feature Attributions (Red = Risk-Increasing, Teal = Mitigating)",
+            xaxis=dict(title="Marginal Shapley Value Impact"),
+            height=300,
+            margin=dict(l=10, r=10, t=40, b=30),
+        )
+        with c_sh1:
+            st.plotly_chart(fig_shap, use_container_width=True)
+
+    with c_sh2:
+        st.markdown("##### 🚨 **Top Positive Risk Factors (Risk-Increasing)**")
+        pos_f = exp_data.get("top_positive_factors", [])
+        if pos_f:
+            for pf in pos_f:
+                st.markdown(f"- **{pf['feature']}**: `+{pf['impact']:.4f}`")
+        else:
+            st.caption("No significant risk-increasing factors.")
+
+        st.markdown("##### 🛡️ **Top Mitigating Factors (Risk-Decreasing / Normal)**")
+        neg_f = exp_data.get("top_negative_factors", [])
+        if neg_f:
+            for nf in neg_f:
+                st.markdown(f"- **{nf['feature']}**: `{nf['impact']:.4f}`")
+        else:
+            st.caption("No significant mitigating factors.")
+
+with tab_graph_ev:
+    g_exp = exp_data.get("graph_explanation", {})
+    gev1, gev2 = st.columns(2)
+    with gev1:
+        st.markdown("##### 🚨 **Suspicious Connections**")
+        sc = g_exp.get("suspicious_connections", [])
+        if sc:
+            for s in sc:
+                st.markdown(f"- **{s.get('type')}**: {s.get('description')}")
+        else:
+            st.success("No suspicious topological connections detected.")
+
+        st.markdown("##### 🌐 **High-Degree Entities in Ego-Network**")
+        hde = g_exp.get("high_degree_entities", [])
+        if hde:
+            for h in hde:
+                st.markdown(f"- **{h.get('entity_type')}** (`{h.get('entity_id')}`): {h.get('description')}")
+        else:
+            st.info("No unusual high-degree entity hubs in ego-network.")
+
+    with gev2:
+        st.markdown("##### 🔁 **Repeated Relationships**")
+        rr = g_exp.get("repeated_relationships", [])
+        if rr:
+            for r in rr:
+                st.markdown(f"- **{r.get('relationship_type')}**: {r.get('description')}")
+        else:
+            st.success("No repeated claimant-provider or vehicle pairings.")
+
+        st.markdown("##### ⚠️ **Neighboring Flagged Claims**")
+        nfc = g_exp.get("neighboring_flagged_claims", [])
+        if nfc:
+            for n in nfc:
+                st.markdown(f"- 🚩 **{n.get('claim_id')}** (${n.get('claim_amount', 0):,.2f}): {n.get('description')}")
+        else:
+            st.success("No confirmed fraud or high-risk claims in immediate ego-network.")
 
 st.markdown("---")
 

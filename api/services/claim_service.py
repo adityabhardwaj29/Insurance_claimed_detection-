@@ -18,6 +18,8 @@ from src.utils.config import settings
 
 logger = logging.getLogger(__name__)
 
+ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 class ClaimService:
     """Handles claim entity lookups and analytical views."""
@@ -246,6 +248,26 @@ class ClaimService:
         if reasons:
             summary += f" Specific risk triggers detected: {len(reasons)} factor(s)."
 
+        # Load Phase 12 SHAP & Graph explanations if available
+        exp_file = ROOT / "data" / "features" / "claim_explanations.json"
+        top_factors = []
+        top_pos = []
+        top_neg = []
+        graph_exp = {}
+        if exp_file.exists():
+            try:
+                import json
+                with open(exp_file, "r", encoding="utf-8") as f:
+                    all_exp = json.load(f)
+                    if claim_id in all_exp:
+                        e = all_exp[claim_id]
+                        top_factors = e.get("top_factors", [])
+                        top_pos = e.get("top_positive_factors", [])
+                        top_neg = e.get("top_negative_factors", [])
+                        graph_exp = e.get("graph_explanation", {})
+            except Exception:
+                pass
+
         return {
             "claim_id": claim_id,
             "final_risk_score": score,
@@ -254,6 +276,11 @@ class ClaimService:
             "weights": weights,
             "reasons": reasons,
             "summary": summary,
+            "fraud_probability": signals["fraud_probability"],
+            "top_factors": top_factors,
+            "top_positive_factors": top_pos,
+            "top_negative_factors": top_neg,
+            "graph_explanation": graph_exp,
         }
 
     def get_dashboard_summary(self) -> Dict[str, Any]:

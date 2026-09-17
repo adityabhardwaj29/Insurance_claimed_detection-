@@ -669,3 +669,45 @@ def load_experiment_reports() -> Dict[str, Any]:
 
     return results
 
+
+EXPLANATIONS_JSON = ROOT / "data" / "features" / "claim_explanations.json"
+
+
+@st.cache_data(ttl=60)
+def load_claim_explanation(claim_id: str) -> Dict[str, Any]:
+    """
+    Loads precomputed SHAP and Graph explanation for a claim,
+    or generates it on-demand if not found in precomputed cache.
+    """
+    cid = claim_id.strip()
+    if EXPLANATIONS_JSON.exists():
+        try:
+            import json
+            with open(EXPLANATIONS_JSON, "r", encoding="utf-8") as f:
+                exp_dict = json.load(f)
+                if cid in exp_dict:
+                    return exp_dict[cid]
+        except Exception:
+            pass
+
+    # Fallback to on-demand generation
+    try:
+        from src.explainability.claim_explainer import explain_claim
+        return explain_claim(cid)
+    except Exception as e:
+        return {
+            "claim_id": cid,
+            "fraud_probability": 0.0,
+            "top_factors": [],
+            "top_positive_factors": [],
+            "top_negative_factors": [],
+            "graph_explanation": {
+                "suspicious_connections": [],
+                "high_degree_entities": [],
+                "repeated_relationships": [],
+                "neighboring_flagged_claims": [],
+            },
+            "summary_text": f"Explanation not available ({e})",
+        }
+
+
