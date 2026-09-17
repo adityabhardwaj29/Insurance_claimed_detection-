@@ -1,0 +1,26 @@
+{
+  "total_cases_queued": 28,
+  "status_distribution": {
+    "FALSE_POSITIVE": 1,
+    "NEW": 27
+  },
+  "priority_distribution": {
+    "CRITICAL": 1,
+    "HIGH": 27
+  },
+  "assigned_cases": 1,
+  "unassigned_cases": 27,
+  "total_audit_events": 32,
+  "total_notes": 2,
+  "workflow_policy": {
+    "human_in_the_loop": true,
+    "automated_fraud_labeling": false,
+    "allowed_statuses": [
+      "NEW",
+      "UNDER_REVIEW",
+      "ESCALATED",
+      "RESOLVED",
+      "FALSE_POSITIVE"
+    ]
+  }
+}

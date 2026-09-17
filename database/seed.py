@@ -123,6 +123,41 @@ CREATE TABLE IF NOT EXISTS locations (
     longitude   REAL
 );
 
+-- Phase 9: Fraud Investigation Case Management
+CREATE TABLE IF NOT EXISTS investigation_cases (
+    case_id     TEXT NOT NULL PRIMARY KEY,
+    claim_id    TEXT NOT NULL REFERENCES claims(claim_id),
+    risk_score  REAL CHECK (risk_score >= 0 AND risk_score <= 1),
+    risk_band   TEXT CHECK (risk_band IN ('LOW','MEDIUM','HIGH','CRITICAL')),
+    priority    TEXT CHECK (priority IN ('LOW','MEDIUM','HIGH','CRITICAL')),
+    status      TEXT NOT NULL CHECK (status IN ('NEW','UNDER_REVIEW','ESCALATED','RESOLVED','FALSE_POSITIVE')),
+    assigned_to TEXT,
+    reason      TEXT,
+    notes       TEXT,
+    resolution  TEXT,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS case_notes (
+    note_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id     TEXT NOT NULL REFERENCES investigation_cases(case_id) ON DELETE CASCADE,
+    author      TEXT NOT NULL,
+    note_text   TEXT NOT NULL,
+    created_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS case_events (
+    event_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id     TEXT NOT NULL REFERENCES investigation_cases(case_id) ON DELETE CASCADE,
+    event_type  TEXT NOT NULL,
+    actor       TEXT NOT NULL,
+    old_value   TEXT,
+    new_value   TEXT,
+    details     TEXT,
+    timestamp   TEXT NOT NULL
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_claims_claimant_id  ON claims(claimant_id);
 CREATE INDEX IF NOT EXISTS idx_claims_policy_id    ON claims(policy_id);
@@ -135,6 +170,12 @@ CREATE INDEX IF NOT EXISTS idx_claims_claim_date   ON claims(claim_date);
 CREATE INDEX IF NOT EXISTS idx_policies_claimant   ON policies(claimant_id);
 CREATE INDEX IF NOT EXISTS idx_vehicles_claimant   ON vehicles(claimant_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_provider   ON invoices(provider_id);
+CREATE INDEX IF NOT EXISTS idx_cases_claim_id      ON investigation_cases(claim_id);
+CREATE INDEX IF NOT EXISTS idx_cases_status        ON investigation_cases(status);
+CREATE INDEX IF NOT EXISTS idx_cases_priority      ON investigation_cases(priority);
+CREATE INDEX IF NOT EXISTS idx_cases_assigned_to   ON investigation_cases(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_case_notes_case     ON case_notes(case_id);
+CREATE INDEX IF NOT EXISTS idx_case_events_case    ON case_events(case_id);
 
 -- Views (SQLite syntax)
 CREATE VIEW IF NOT EXISTS provider_summary AS
@@ -285,6 +326,44 @@ def seed_database(db_path: Path) -> dict:
         logger.info("  Loaded %-14s  %d rows", table_name, len(df))
 
     conn.commit()
+
+    # Load investigation cases from final_risk_scores if available
+    risk_scores_path = ROOT / "data" / "features" / "final_risk_scores.csv"
+    if risk_scores_path.exists():
+        risk_df = pd.read_csv(risk_scores_path, keep_default_na=False)
+        high_risk = risk_df[risk_df["risk_band"].isin(["HIGH", "CRITICAL"])].copy()
+        case_rows = []
+        event_rows = []
+        cur_init = conn.cursor()
+        for _, r in high_risk.iterrows():
+            cid = str(r["claim_id"])
+            case_id = f"CASE-{cid}"
+            r_score = float(r["final_risk_score"])
+            r_band = str(r["risk_band"])
+            priority = r_band
+            reason = str(r.get("risk_reasons", ""))
+            case_rows.append((
+                case_id, cid, r_score, r_band, priority, "NEW", None, reason, None, None, ts, ts
+            ))
+            event_rows.append((
+                case_id, "CASE_CREATED", "SYSTEM", None, "NEW",
+                f"Auto-created from risk scoring ({r_band} band, score {r_score:.4f})", ts
+            ))
+        cur_init.executemany("""
+            INSERT OR IGNORE INTO investigation_cases
+            (case_id, claim_id, risk_score, risk_band, priority, status, assigned_to, reason, notes, resolution, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, case_rows)
+        cur_init.executemany("""
+            INSERT INTO case_events
+            (case_id, event_type, actor, old_value, new_value, details, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, event_rows)
+        conn.commit()
+        row_counts["investigation_cases"] = len(case_rows)
+        row_counts["case_events"] = len(event_rows)
+        row_counts["case_notes"] = 0
+        logger.info("  Loaded investigation_cases %d rows", len(case_rows))
 
     # Verify row counts
     logger.info("Verifying row counts")

@@ -13,6 +13,9 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Drop order (reverse FK dependency)
 -- ─────────────────────────────────────────────────────────────────────────────
+DROP TABLE IF EXISTS case_events;
+DROP TABLE IF EXISTS case_notes;
+DROP TABLE IF EXISTS investigation_cases;
 DROP TABLE IF EXISTS claims;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS policies;
@@ -169,3 +172,61 @@ COMMENT ON TABLE  locations               IS
     'Join only via city string match. Source-data limitation.';
 COMMENT ON COLUMN locations.location_id IS 'Primary key. Format: LOC followed by 3 digits.';
 COMMENT ON COLUMN locations.latitude    IS 'Decimal degrees. India bounding box: lat 6–36, lon 68–98.';
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- INVESTIGATION CASES (Phase 9: Fraud Investigation Case Management)
+-- Operational triage and human-in-the-loop fraud investigation queue.
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE investigation_cases (
+    case_id         VARCHAR(24)   NOT NULL PRIMARY KEY,
+    claim_id        VARCHAR(12)   NOT NULL REFERENCES claims(claim_id),
+    risk_score      DECIMAL(5,4)  CHECK (risk_score >= 0 AND risk_score <= 1),
+    risk_band       VARCHAR(10)   CHECK (risk_band IN ('LOW','MEDIUM','HIGH','CRITICAL')),
+    priority        VARCHAR(10)   CHECK (priority IN ('LOW','MEDIUM','HIGH','CRITICAL')),
+    status          VARCHAR(20)   NOT NULL CHECK (status IN ('NEW','UNDER_REVIEW','ESCALATED','RESOLVED','FALSE_POSITIVE')),
+    assigned_to     VARCHAR(80),
+    reason          TEXT,
+    notes           TEXT,
+    resolution      TEXT,
+    created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE  investigation_cases             IS 'Operational case queue for suspected fraudulent insurance claims.';
+COMMENT ON COLUMN investigation_cases.case_id     IS 'Unique case identifier, e.g. CASE-CLM00001.';
+COMMENT ON COLUMN investigation_cases.claim_id    IS 'References claims.claim_id.';
+COMMENT ON COLUMN investigation_cases.status      IS 'Workflow status: NEW, UNDER_REVIEW, ESCALATED, RESOLVED, FALSE_POSITIVE.';
+COMMENT ON COLUMN investigation_cases.resolution  IS 'Investigator final conclusion and findings (human-verified).';
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- CASE NOTES
+-- Running audit notes logged by investigators during reviews.
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE case_notes (
+    note_id         SERIAL        PRIMARY KEY,
+    case_id         VARCHAR(24)   NOT NULL REFERENCES investigation_cases(case_id) ON DELETE CASCADE,
+    author          VARCHAR(80)   NOT NULL,
+    note_text       TEXT          NOT NULL,
+    created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE  case_notes          IS 'Detailed timestamped notes recorded by investigators during review.';
+COMMENT ON COLUMN case_notes.author   IS 'Name or investigator ID who authored the note.';
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- CASE EVENTS (Audit Log)
+-- Immutable audit log capturing all lifecycle changes to a case.
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE case_events (
+    event_id        SERIAL        PRIMARY KEY,
+    case_id         VARCHAR(24)   NOT NULL REFERENCES investigation_cases(case_id) ON DELETE CASCADE,
+    event_type      VARCHAR(40)   NOT NULL,
+    actor           VARCHAR(80)   NOT NULL,
+    old_value       VARCHAR(100),
+    new_value       VARCHAR(100),
+    details         TEXT,
+    timestamp       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE  case_events         IS 'Immutable audit trail of all status changes, assignments, and notes.';
+
