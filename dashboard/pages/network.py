@@ -191,8 +191,10 @@ for entity_type, color in ENTITY_COLORS.items():
 fig = go.Figure(
     data=[edge_trace, edge_label_trace, *node_traces],
     layout=go.Layout(
-        title=f"Knowledge Subgraph for Claim: {selected_claim_id} ({len(G.nodes)} Nodes, {len(G.edges)} Edges)",
-        titlefont=dict(size=16),
+        title=dict(
+            text=f"Knowledge Subgraph for Claim: {selected_claim_id} ({len(G.nodes)} Nodes, {len(G.edges)} Edges)",
+            font=dict(size=16),
+        ),
         showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode="closest",
