@@ -26,6 +26,15 @@ os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
 
 
+# Configure standard streams for UTF-8 on Windows consoles
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+
 def run_pipeline() -> None:
     """Executes the full end-to-end analytical pipeline."""
     from src.pipeline import run_full_pipeline
@@ -42,7 +51,7 @@ def run_journey(claim_id: str) -> None:
 def run_api(host: str = "0.0.0.0", port: int = 8000, reload: bool = True) -> None:
     """Launches the production FastAPI server using Uvicorn."""
     import uvicorn
-    print(f"\n🚀 Launching FastAPI Backend on http://{host}:{port} (Swagger docs: http://localhost:{port}/docs)")
+    print(f"\n[API] Launching FastAPI Backend on http://{host}:{port} (Swagger docs: http://localhost:{port}/docs)")
     uvicorn.run("api.main:app", host=host, port=port, reload=reload)
 
 
@@ -50,7 +59,7 @@ def run_dashboard(port: int = 8501) -> None:
     """Launches the Streamlit Fraud Analytics Dashboard."""
     dashboard_app = ROOT / "dashboard" / "app.py"
     cmd = [sys.executable, "-m", "streamlit", "run", str(dashboard_app), "--server.port", str(port)]
-    print(f"\n🛡️ Launching Streamlit Dashboard on http://localhost:{port}")
+    print(f"\n[DASHBOARD] Launching Streamlit Dashboard on http://localhost:{port}")
     try:
         subprocess.run(cmd, check=True)
     except KeyboardInterrupt:
@@ -60,7 +69,7 @@ def run_dashboard(port: int = 8501) -> None:
 def run_tests() -> None:
     """Runs the full repository automated test suite."""
     cmd = [sys.executable, "-m", "pytest", "tests/", "-v"]
-    print("\n🧪 Running full automated test suite...")
+    print("\n[TESTS] Running full automated test suite...")
     subprocess.run(cmd)
 
 
@@ -80,7 +89,7 @@ def run_all(api_port: int = 8000, dash_port: int = 8501) -> None:
         "--host", "0.0.0.0", "--port", str(api_port)
     ]
     api_proc = subprocess.Popen(api_cmd, cwd=str(ROOT))
-    print(f"✅ FastAPI server started (PID: {api_proc.pid}) -> http://localhost:{api_port}/docs")
+    print(f"[API] FastAPI server started (PID: {api_proc.pid}) -> http://localhost:{api_port}/docs")
 
     time.sleep(2)  # Allow API to bind
 
@@ -90,7 +99,7 @@ def run_all(api_port: int = 8000, dash_port: int = 8501) -> None:
         sys.executable, "-m", "streamlit", "run", str(dash_app),
         "--server.port", str(dash_port)
     ]
-    print(f"✅ Streamlit Dashboard launching -> http://localhost:{dash_port}")
+    print(f"[DASHBOARD] Streamlit Dashboard launching -> http://localhost:{dash_port}")
     print("Press Ctrl+C to terminate both services.\n")
 
     try:
