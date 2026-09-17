@@ -586,6 +586,79 @@ class CaseManager:
         assert resolved is not None
         return resolved
 
+    def patch_case(
+        self,
+        case_id: str,
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
+        assigned_to: Optional[str] = None,
+        notes: Optional[str] = None,
+        resolution: Optional[str] = None,
+        actor: str = "INVESTIGATOR",
+        reason: Optional[str] = None,
+    ) -> InvestigationCase:
+        """
+        Partially updates an investigation case with audit trail logging.
+        """
+        case = self.get_case(case_id)
+        if not case:
+            raise KeyError(f"Case '{case_id}' not found")
+
+        # 1. Assigned to update
+        if assigned_to is not None and assigned_to != case.assigned_to:
+            case = self.assign_investigator(case_id=case_id, investigator=assigned_to, actor=actor)
+
+        # 2. Priority update
+        if priority is not None and priority.upper() != case.priority:
+            new_prio = priority.upper()
+            if new_prio in CasePriority.__members__:
+                now = _utc_now()
+                with self._get_connection() as conn:
+                    cur = conn.cursor()
+                    cur.execute(
+                        "UPDATE investigation_cases SET priority = ?, updated_at = ? WHERE case_id = ?",
+                        (new_prio, now, case_id),
+                    )
+                    cur.execute(
+                        """
+                        INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (case_id, CaseEventType.PRIORITY_CHANGED.value, actor, case.priority, new_prio, "Priority updated via PATCH", now),
+                    )
+                case = self.get_case(case_id)
+                assert case is not None
+
+        # 3. Notes update
+        if notes:
+            self.add_note(case_id=case_id, author=actor, note_text=notes)
+
+        # 4. Status update
+        if status is not None and status.upper() != case.status:
+            if status.upper() in (CaseStatus.RESOLVED.value, CaseStatus.FALSE_POSITIVE.value):
+                case = self.resolve_case(
+                    case_id=case_id,
+                    resolution_status=status.upper(),
+                    resolution_notes=resolution or notes or "Resolved via PATCH update",
+                    actor=actor,
+                )
+            else:
+                case = self.update_status(case_id=case_id, new_status=status.upper(), actor=actor, reason=reason)
+
+        # 5. Standalone resolution text update if status already resolved
+        elif resolution is not None:
+            now = _utc_now()
+            with self._get_connection() as conn:
+                cur = conn.cursor()
+                cur.execute(
+                    "UPDATE investigation_cases SET resolution = ?, updated_at = ? WHERE case_id = ?",
+                    (resolution, now, case_id),
+                )
+            case = self.get_case(case_id)
+            assert case is not None
+
+        return case
+
     def get_case_history(self, case_id: str) -> Dict[str, Any]:
         """
         Returns chronological timeline of all events and notes for a case.

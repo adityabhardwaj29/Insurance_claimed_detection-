@@ -15,6 +15,7 @@ from api.schemas.case_schema import (
     CaseHistoryResponse,
     CaseNoteCreateRequest,
     CaseNoteResponse,
+    CasePatchRequest,
     CaseResolveRequest,
     CaseResponse,
     CaseStatusUpdateRequest,
@@ -58,6 +59,29 @@ def get_case_by_id(case_id: str):
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
     return case
+
+
+@router.patch("/{case_id}", response_model=CaseResponse)
+def patch_investigation_case(case_id: str, req: CasePatchRequest):
+    """
+    Partially update an investigation case: status, priority, investigator, notes, resolution.
+    """
+    try:
+        return service.patch_case(
+            case_id=case_id,
+            status=req.status,
+            priority=req.priority,
+            assigned_to=req.assigned_to,
+            notes=req.notes,
+            resolution=req.resolution,
+            actor=req.actor,
+            reason=req.reason,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 
 @router.post("", response_model=CaseResponse, status_code=201)

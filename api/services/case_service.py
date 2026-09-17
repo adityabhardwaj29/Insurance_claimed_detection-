@@ -116,6 +116,31 @@ class CaseService:
         )
         return case.to_dict()
 
+    def patch_case(
+        self,
+        case_id: str,
+        status: Optional[str] = None,
+        priority: Optional[str] = None,
+        assigned_to: Optional[str] = None,
+        notes: Optional[str] = None,
+        resolution: Optional[str] = None,
+        actor: str = "INVESTIGATOR",
+        reason: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Partially updates case attributes."""
+        case = self.manager.patch_case(
+            case_id=case_id,
+            status=status,
+            priority=priority,
+            assigned_to=assigned_to,
+            notes=notes,
+            resolution=resolution,
+            actor=actor,
+            reason=reason,
+        )
+        return case.to_dict()
+
+
     def get_case(self, case_id: str) -> Optional[Dict[str, Any]]:
         """Retrieves single case by ID."""
         case = self.manager.get_case(case_id)

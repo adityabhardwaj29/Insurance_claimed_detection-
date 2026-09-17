@@ -44,6 +44,17 @@ class CaseResolveRequest(BaseModel):
     actor: str = "INVESTIGATOR"
 
 
+class CasePatchRequest(BaseModel):
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    assigned_to: Optional[str] = None
+    notes: Optional[str] = None
+    resolution: Optional[str] = None
+    actor: str = "INVESTIGATOR"
+    reason: Optional[str] = None
+
+
+
 class CaseResponse(BaseModel):
     case_id: str
     claim_id: str
