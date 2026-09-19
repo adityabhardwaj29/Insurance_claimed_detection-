@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -327,3 +328,122 @@ class ClaimService:
             "average_risk_score": avg_risk,
             "high_risk_claims_count": high_risk_count,
         }
+
+    def create_claim(self, data: Dict[str, Any], actor: str = "system") -> Dict[str, Any]:
+        """Creates a new claim with auto-generated ID, invoice creation if needed, and audit logging."""
+        with self._get_connection() as conn:
+            cur = conn.cursor()
+            # Determine next CLM ID
+            cur.execute("SELECT claim_id FROM claims ORDER BY claim_id DESC LIMIT 1")
+            row = cur.fetchone()
+            next_num = 321
+            if row and row[0].startswith("CLM"):
+                try:
+                    next_num = int(row[0][3:]) + 1
+                except ValueError:
+                    next_num = 321
+            new_claim_id = f"CLM{next_num:05d}"
+
+            # Ensure invoice exists
+            invoice_id = data.get("invoice_id")
+            if not invoice_id:
+                invoice_id = f"INV{next_num:05d}"
+                inv_amt = float(data.get("invoice_amount") or data.get("claim_amount") or 10000.0)
+                cur.execute(
+                    "INSERT OR IGNORE INTO invoices (invoice_id, provider_id, invoice_amount, invoice_date, description) VALUES (?, ?, ?, ?, ?)",
+                    (invoice_id, data["provider_id"], inv_amt, data["claim_date"], f"Service invoice for {new_claim_id}")
+                )
+
+            # Insert claim
+            cur.execute("""
+                INSERT INTO claims (
+                    claim_id, claimant_id, policy_id, vehicle_id, provider_id, invoice_id,
+                    claim_date, claim_amount, claim_type, status, fraud_label, description
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', 0, ?)
+            """, (
+                new_claim_id,
+                data["claimant_id"],
+                data["policy_id"],
+                data["vehicle_id"],
+                data["provider_id"],
+                invoice_id,
+                data["claim_date"],
+                float(data["claim_amount"]),
+                data.get("claim_type", "Accident"),
+                data.get("description", f"Submitted claim {new_claim_id}")
+            ))
+
+            # Record event
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS case_events (
+                    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    case_id VARCHAR(30),
+                    event_type TEXT,
+                    actor TEXT,
+                    old_value TEXT,
+                    new_value TEXT,
+                    details TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            case_id = f"CASE-{new_claim_id}"
+            cur.execute("""
+                INSERT OR IGNORE INTO investigation_cases (case_id, claim_id, status, priority, reason, created_at, updated_at)
+                VALUES (?, ?, 'NEW', 'MEDIUM', 'Initial claim intake', ?, ?)
+            """, (case_id, new_claim_id, now_ts, now_ts))
+
+            cur.execute("""
+                INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+                VALUES (?, 'CLAIM_CREATED', ?, 'None', 'Open', ?, ?)
+            """, (case_id, actor, f"Created claim for amount INR {float(data['claim_amount']):,.2f}", now_ts))
+
+            conn.commit()
+
+        return self.get_claim_detail(new_claim_id) or {"claim_id": new_claim_id, "status": "Open"}
+
+    def record_decision(self, claim_id: str, decision: str, reason: str, actor: str = "system") -> Dict[str, Any]:
+        """Records a human decision (Approve, Reject, Manual Review, Escalate) with audit trail."""
+        cid = claim_id.strip()
+        status_map = {
+            "Approve": "Approved",
+            "Reject": "Rejected",
+            "Request Manual Review": "Under Review",
+            "Escalate Investigation": "Under Review"
+        }
+        new_status = status_map.get(decision, "Under Review")
+
+        with self._get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT status FROM claims WHERE claim_id = ?", (cid,))
+            old_row = cur.fetchone()
+            old_status = old_row[0] if old_row else "Submitted"
+
+            cur.execute("UPDATE claims SET status = ? WHERE claim_id = ?", (new_status, cid))
+
+            # Also update case if exists
+            case_id = f"CASE-{cid}"
+            case_status = "RESOLVED" if decision in ("Approve", "Reject") else "ESCALATED"
+            cur.execute("""
+                UPDATE investigation_cases 
+                SET status = ?, resolution = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE case_id = ?
+            """, (case_status, f"{decision}: {reason} (Decided by {actor})", case_id))
+
+            # Audit event
+            now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            cur.execute("""
+                INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+                VALUES (?, 'CLAIM_DECISION_RECORDED', ?, ?, ?, ?, ?)
+            """, (case_id, actor, old_status, new_status, f"Decision: {decision} | Reason: {reason}", now_ts))
+
+            conn.commit()
+
+        return {
+            "claim_id": cid,
+            "decision": decision,
+            "status": new_status,
+            "reason": reason,
+            "decided_by": actor,
+        }
+

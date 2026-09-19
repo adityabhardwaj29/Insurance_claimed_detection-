@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Query
 
 from api.schemas.claim_schema import (
+    ClaimCreateRequest,
+    ClaimDecisionRequest,
     ClaimDetailResponse,
     ClaimDuplicatesResponse,
     ClaimExplanationResponse,
@@ -122,3 +124,74 @@ def get_claim_explanation(claim_id: str):
     if not exp:
         raise HTTPException(status_code=404, detail=f"Explanation not found for claim '{claim_id}'")
     return exp
+
+
+@router.post("", status_code=201)
+def create_new_claim(data: ClaimCreateRequest):
+    """
+    Creates a new insurance claim with auto-generated ID, invoice binding,
+    and initial 'Submitted' status ready for automated fraud analysis.
+    """
+    return claim_service.create_claim(data.model_dump(), actor="claims_officer")
+
+
+@router.post("/{claim_id}/submit")
+def submit_claim(claim_id: str):
+    """Marks a draft claim as submitted and queues it for analysis."""
+    claim = claim_service.get_claim_detail(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found")
+    return {"claim_id": claim_id, "status": "Submitted", "message": "Claim queued for fraud analysis"}
+
+
+@router.post("/{claim_id}/analyze")
+def run_fraud_analysis(claim_id: str):
+    """
+    Executes the automated multi-signal fraud analysis pipeline on demand:
+    1. Feature Engineering
+    2. Duplicate Check
+    3. Supervised XGBoost ML
+    4. Isolation Forest Anomaly Detection
+    5. Knowledge Graph Collusion Analysis
+    6. Hybrid Risk Scoring
+    7. SHAP Feature Attribution
+    """
+    from api.services.fraud_pipeline import fraud_pipeline
+    try:
+        res = fraud_pipeline.analyze_claim(claim_id, actor="claims_officer")
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Analysis failed: {str(e)}")
+
+
+@router.get("/{claim_id}/analysis")
+def get_claim_full_analysis(claim_id: str):
+    """Retrieves synthesized multi-signal fraud analysis dossier."""
+    risk = claim_service.get_claim_risk(claim_id)
+    exp = claim_service.get_claim_explanation(claim_id)
+    dup = claim_service.get_claim_duplicates(claim_id)
+    graph = graph_service.get_claim_subnetwork(claim_id)
+    detail = claim_service.get_claim_detail(claim_id)
+
+    return {
+        "claim": detail,
+        "risk": risk,
+        "explanation": exp,
+        "duplicate_detection": dup,
+        "graph_topology": graph,
+    }
+
+
+@router.post("/{claim_id}/decision")
+def record_claim_decision(claim_id: str, req: ClaimDecisionRequest):
+    """
+    Records an authorized human decision:
+    Approve, Reject, Request Manual Review, Escalate Investigation.
+    """
+    return claim_service.record_decision(
+        claim_id=claim_id,
+        decision=req.decision,
+        reason=req.reason,
+        actor="authorized_officer",
+    )
+

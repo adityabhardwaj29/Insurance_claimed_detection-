@@ -1,7 +1,34 @@
 services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
   api:
     build:
       context: ..
       dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-enterprise-fraudshield-ai-key-secret-2024}
+    restart: unless-stopped
+
+  research-console:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    command: streamlit run dashboard/app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    restart: unless-stopped

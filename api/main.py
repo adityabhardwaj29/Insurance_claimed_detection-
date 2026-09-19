@@ -20,7 +20,16 @@ from api.routes.claims import router as claims_router
 from api.routes.cases import router as cases_router
 from api.routes.analytics import router as analytics_router
 from api.routes.predictions import router as predictions_router
+from api.routes.auth import router as auth_router
+from api.routes.customers import router as customers_router
+from api.routes.policies import router as policies_router
+from api.routes.providers import router as providers_router
+from api.routes.documents import router as documents_router
+from api.routes.reports import router as reports_router
+from api.routes.audit_logs import router as audit_logs_router
+from api.routes.health import router as health_router
 from api.schemas.response_schema import HealthResponse
+
 
 # Logging configuration
 logging.basicConfig(
@@ -90,11 +99,25 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Register domain routers
+# Register domain routers (supporting both /api/* and legacy routes)
 app.include_router(claims_router)
+app.include_router(claims_router, prefix="/api")
 app.include_router(cases_router)
+app.include_router(cases_router, prefix="/api")
 app.include_router(analytics_router)
+app.include_router(analytics_router, prefix="/api")
 app.include_router(predictions_router)
+app.include_router(predictions_router, prefix="/api")
+
+app.include_router(auth_router)
+app.include_router(customers_router)
+app.include_router(policies_router)
+app.include_router(providers_router)
+app.include_router(documents_router)
+app.include_router(reports_router)
+app.include_router(audit_logs_router)
+app.include_router(health_router)
+
 
 
 @app.get("/health", response_model=HealthResponse, tags=["health"])

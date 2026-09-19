@@ -85,3 +85,27 @@ class ClaimExplanationResponse(BaseModel):
     top_positive_factors: Optional[List[Dict[str, Any]]] = None
     top_negative_factors: Optional[List[Dict[str, Any]]] = None
     graph_explanation: Optional[Dict[str, Any]] = None
+
+
+class ClaimCreateRequest(BaseModel):
+    claimant_id: str
+    policy_id: str
+    vehicle_id: str
+    provider_id: str
+    invoice_id: Optional[str] = None
+    claim_date: str
+    claim_amount: float = Field(..., gt=0)
+    claim_type: str = Field("Accident", pattern="^(Theft|Glass Damage|Fire|Accident|Natural Disaster|Other)$")
+    description: Optional[str] = None
+    incident_time: Optional[str] = None
+    incident_location: Optional[str] = None
+    police_report: Optional[bool] = False
+    severity: Optional[str] = "Medium"
+    invoice_amount: Optional[float] = None
+    service_type: Optional[str] = "Inspection & Repair"
+
+
+class ClaimDecisionRequest(BaseModel):
+    decision: str = Field(..., pattern="^(Approve|Reject|Request Manual Review|Escalate Investigation)$")
+    reason: str = Field(..., min_length=2)
+
