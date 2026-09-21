@@ -63,9 +63,9 @@ export const CustomersPage: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {filtered.length > 0 ? (
-          filtered.map((c) => (
+          filtered.map((c, idx) => (
             <div
-              key={c.id}
+              key={c.customer_number || c.id || `cust-${idx}`}
               className="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all space-y-4"
             >
               <div className="flex items-center justify-between">

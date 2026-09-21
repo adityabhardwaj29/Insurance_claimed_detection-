@@ -113,7 +113,9 @@ def run_services(start_frontend: bool = True, start_api: bool = True, start_dash
             dash_app = ROOT / "dashboard" / "app.py"
             dash_cmd = [
                 sys.executable, "-m", "streamlit", "run", str(dash_app),
-                "--server.port", str(dash_port)
+                "--server.port", str(dash_port),
+                "--server.headless", "true",
+                "--browser.gatherUsageStats", "false"
             ]
             dash_p = subprocess.Popen(dash_cmd, cwd=str(ROOT))
             procs.append(dash_p)
@@ -148,7 +150,7 @@ def main() -> None:
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--platform", action="store_true", help="Launch React Frontend, FastAPI, and Streamlit")
-    group.add_argument("--all", action="store_true", help="Launch React Frontend and FastAPI Backend")
+    group.add_argument("--all", action="store_true", help="Launch React Frontend, FastAPI Backend, and Streamlit Dashboard")
     group.add_argument("--frontend", action="store_true", help="Launch React Frontend on port 3000")
     group.add_argument("--api", action="store_true", help="Launch FastAPI backend on port 8000")
     group.add_argument("--dashboard", action="store_true", help="Launch Streamlit dashboard on port 8501")
@@ -162,12 +164,9 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    if args.platform:
+    if args.platform or args.all:
         run_services(start_frontend=True, start_api=True, start_dashboard=True,
                      api_port=args.api_port, frontend_port=args.frontend_port, dash_port=args.dash_port)
-    elif args.all:
-        run_services(start_frontend=True, start_api=True, start_dashboard=False,
-                     api_port=args.api_port, frontend_port=args.frontend_port)
     elif args.frontend:
         run_frontend(port=args.frontend_port)
     elif args.api:
