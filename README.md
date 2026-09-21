@@ -5,34 +5,52 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green.svg)](https://fastapi.tiangolo.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-emerald.svg)](https://supabase.com/)
-[![XGBoost](https://img.shields.io/badge/XGBoost-1.7%2B-orange.svg)](https://xgboost.readthedocs.io/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-2.0%2B-orange.svg)](https://xgboost.readthedocs.io/)
 [![NetworkX](https://img.shields.io/badge/NetworkX-3.0%2B-blueviolet.svg)](https://networkx.org/)
-[![Tests Passing](https://img.shields.io/badge/tests-373%20passed-brightgreen.svg)]()
-[![Academic Integrity](https://img.shields.io/badge/research-evidence--based-success.svg)]()
+[![Tests Passing](https://img.shields.io/badge/tests-380%20passed-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Production-Ready Enterprise Platform**: FraudShield AI is an end-to-end insurance claim processing, multi-signal fraud detection, and Special Investigation Unit (SIU) platform. It provides automated underwriting validation, a guided 6-step claim intake wizard, real-time 4-pillar fraud detection (XGBoost, Isolation Forest, Duplicate Hashing, Bipartite Graph Syndicates), 360° forensic dossiers with SHAP explanations, investigator case management, and immutable audit logs.
-
----
-
-## Comprehensive Architecture Documentation
-- [System Architecture](docs/ARCHITECTURE.md)
-- [Database Schema & Supabase Migrations](docs/DATABASE.md)
-- [Machine Learning & Detection Pipeline](docs/ML_PIPELINE.md)
-- [Operational Claims & SIU Workflow](docs/FRAUD_WORKFLOW.md)
-- [Security & RBAC Matrix](docs/SECURITY.md)
-- [Deployment & Docker Guide](docs/DEPLOYMENT.md)
-- [REST API Reference](docs/API.md)
-- [Data Provenance & Academic Integrity](docs/DATA_PROVENANCE.md)
+> **Production-Ready Enterprise Platform**: FraudShield AI is an end-to-end insurance claim processing, multi-signal fraud detection, and Special Investigation Unit (SIU) platform. It provides automated underwriting validation, a guided claim intake wizard, real-time 4-pillar fraud scoring (XGBoost, Isolation Forest, Lexical Duplicate Hashing, Bipartite Graph Syndicates), 360° forensic dossiers with SHAP explanations, investigator case management, and immutable audit logs.
 
 ---
 
-## Table of Contents
+## ⚡ 5-Minute One-Click Quick Start (Windows)
 
-1. [Project Overview](#1-project-overview)
-2. [Problem Statement](#2-problem-statement)
-3. [Objectives](#3-objectives)
-4. [Architecture](#4-architecture)
-5. [Quick Start & One-Command Launch](#5-quick-start--one-command-launch)
+The platform includes production-ready one-click scripts for instant Windows setup:
+
+| Script | Purpose | Command |
+| :--- | :--- | :--- |
+| **`setup.bat`** | Creates virtual environment, installs Python + npm dependencies, creates `.env`, and runs health checks. | Double-click or run `setup.bat` |
+| **`run.bat`** | Starts FastAPI (port 8000) & React UI (port 3000), and auto-opens default web browser. | Double-click or run `run.bat` |
+| **`test.bat`** | Runs full 380 backend tests, builds frontend TypeScript, and verifies system health. | Run `test.bat` |
+| **`stop.bat`** | Safely frees ports 8000, 3000, 5173, and 8501. | Run `stop.bat` |
+
+```cmd
+# 1. Setup everything (runs once):
+setup.bat
+
+# 2. Launch the full application:
+run.bat
+
+# 3. (Optional) Launch with Streamlit Research Console included:
+run.bat --with-dashboard
+```
+
+---
+
+## 📖 Comprehensive Documentation Library
+
+- **[Project Directory Structure & Guide](docs/PROJECT_STRUCTURE.md)** — Folder map and "Where do I edit X?" guide
+- **[System Architecture](docs/ARCHITECTURE.md)** — Layered architecture, API gateway, and hybrid risk engine
+- **[Codebase Cleanup & Audit Report](docs/CLEANUP_REPORT.md)** — Full audit manifest of retained vs safely removed files
+- **[Master File Catalog](docs/FILE_INDEX.md)** — Exhaustive index of every production file, caller, and criticality
+- **[Graph Analytics & Collusion Rings](docs/GRAPH.md)** — Heterogeneous knowledge graph methodology & metrics
+- **[Database Schema & Migrations](database/README.md)** — Relational tables, SQLite seeder, and Supabase sync
+- **[Troubleshooting & Operations](docs/TROUBLESHOOTING.md)** — Fast solutions for ports, virtualenvs, and Node.js
+- **[Machine Learning Pipeline](docs/ML_PIPELINE.md)** — Training, feature engineering, and calibration
+- **[Operational SIU Workflow](docs/FRAUD_WORKFLOW.md)** — Investigator triage, case lifecycle, and audit logs
+- **[REST API Reference](docs/API.md)** — FastAPI endpoint contracts and schemas
+- **[Docker Deployment Guide](docs/DEPLOYMENT.md)** — Multi-stage container instructions
 
 ---
 
