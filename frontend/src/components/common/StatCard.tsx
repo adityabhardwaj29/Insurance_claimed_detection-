@@ -20,48 +20,32 @@ export const StatCard: React.FC<StatCardProps> = ({
   trend,
   highlightColor = 'blue',
 }) => {
-  const getGlow = () => {
-    switch (highlightColor) {
-      case 'red':
-        return 'border-red-500/20 hover:border-red-500/40 hover:glow-red';
-      case 'amber':
-        return 'border-amber-500/20 hover:border-amber-500/40 hover:glow-amber';
-      case 'emerald':
-        return 'border-emerald-500/20 hover:border-emerald-500/40 hover:glow-emerald';
-      case 'blue':
-      default:
-        return 'border-sky-500/20 hover:border-sky-500/40 hover:glow-cyan';
-    }
-  };
-
   const getIconBg = () => {
     switch (highlightColor) {
       case 'red':
-        return 'bg-red-500/10 text-red-400 border border-red-500/20';
+        return 'bg-red-50 text-red-600 border border-red-100';
       case 'amber':
-        return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+        return 'bg-amber-50 text-amber-600 border border-amber-100';
       case 'emerald':
-        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+        return 'bg-emerald-50 text-emerald-600 border border-emerald-100';
       case 'blue':
       default:
-        return 'bg-sky-500/10 text-sky-400 border border-sky-500/20';
+        return 'bg-blue-50 text-blue-600 border border-blue-100';
     }
   };
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-xl bg-slate-900/70 backdrop-blur-md p-5 border transition-all duration-200 ${getGlow()}`}
-    >
+    <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
             {title}
           </p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-white">
+          <p className="mt-2 text-2xl font-extrabold tracking-tight text-[#0F172A]">
             {value}
           </p>
         </div>
-        <div className={`p-3 rounded-lg ${getIconBg()}`}>
+        <div className={`p-2.5 rounded-lg ${getIconBg()}`}>
           {icon}
         </div>
       </div>
@@ -70,7 +54,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           {trend && (
             <span
               className={`font-semibold ${
-                trend.isPositive ? 'text-emerald-400' : 'text-red-400'
+                trend.isPositive ? 'text-emerald-600' : 'text-red-600'
               }`}
             >
               {trend.value}

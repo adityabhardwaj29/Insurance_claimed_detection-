@@ -16,36 +16,36 @@ export const Topbar: React.FC = () => {
   ];
 
   return (
-    <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-6 flex items-center justify-between z-20">
+    <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-20 shadow-xs">
       {/* Search Bar */}
       <div className="flex-1 max-w-md">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Search claims (e.g. CLM-2024-001), policies, or claimants..."
-            className="w-full bg-slate-950/70 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
           />
         </div>
       </div>
 
       {/* Action Controls & Persona Switcher */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3">
         {/* Quick Role Switcher Dropdown */}
         <div className="relative">
           <button
             onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-            className="flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs text-slate-200 transition-all"
+            className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 transition-all cursor-pointer"
           >
-            <ShieldCheck className="h-3.5 w-3.5 text-sky-400" />
-            <span className="font-medium text-slate-300">Persona:</span>
-            <span className="font-semibold text-white">{role.replace('_', ' ')}</span>
+            <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+            <span className="font-medium text-slate-500">Persona:</span>
+            <span className="font-semibold text-slate-900">{role.replace('_', ' ')}</span>
             <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
           </button>
 
           {roleDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-2 z-50">
-              <div className="px-3 py-2 border-b border-slate-800 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50 animate-fadeIn">
+              <div className="px-3 py-2 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Switch Active Role
               </div>
               <div className="py-1">
@@ -56,15 +56,15 @@ export const Topbar: React.FC = () => {
                       switchRole(r.role);
                       setRoleDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs flex flex-col transition-colors ${
+                    className={`w-full text-left px-3 py-2 text-xs flex flex-col transition-colors cursor-pointer ${
                       role === r.role
-                        ? 'bg-sky-500/10 text-sky-400 font-semibold'
-                        : 'text-slate-300 hover:bg-slate-800'
+                        ? 'bg-blue-50 text-blue-700 font-semibold'
+                        : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span>{r.label}</span>
-                      {role === r.role && <UserCheck className="h-3 w-3 text-sky-400" />}
+                      {role === r.role && <UserCheck className="h-3.5 w-3.5 text-blue-600" />}
                     </div>
                     <span className="text-[10px] text-slate-500 mt-0.5">{r.desc}</span>
                   </button>
@@ -75,21 +75,21 @@ export const Topbar: React.FC = () => {
         </div>
 
         {/* Notifications Icon */}
-        <button className="relative p-2 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white transition-all">
+        <button className="relative p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-all cursor-pointer">
           <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-slate-900 animate-pulse" />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600 ring-2 ring-white" />
         </button>
 
         {/* User Card */}
-        <div className="flex items-center space-x-3 pl-3 border-l border-slate-800">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white uppercase">
-            {user?.full_name ? user.full_name.charAt(0) : 'U'}
+        <div className="flex items-center space-x-3 pl-3 border-l border-slate-200">
+          <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white uppercase shadow-xs">
+            {user?.full_name ? user.full_name.charAt(0) : 'A'}
           </div>
           <div className="hidden md:block">
-            <p className="text-xs font-medium text-white leading-tight">
-              {user?.full_name || 'Sarah Connor'}
+            <p className="text-xs font-semibold text-slate-900 leading-tight">
+              {user?.full_name || 'Aditya Bhardwaj'}
             </p>
-            <p className="text-[11px] text-slate-400 leading-tight">
+            <p className="text-[11px] text-slate-500 leading-tight">
               {user?.department || 'Claims Operations'}
             </p>
           </div>

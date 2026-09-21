@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ShieldAlert,
   FolderGit2,
   DollarSign,
   Activity,
   ArrowRight,
-  TrendingUp,
   FilePlus,
-  AlertTriangle,
-  FileCheck
+  FileCheck,
+  ShieldCheck,
+  Zap,
+  Network
 } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { RiskBadge } from '../components/common/RiskBadge';
@@ -50,30 +50,34 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-900/90 to-sky-950/40 p-6 rounded-2xl border border-slate-800">
+      <div className="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+          <div className="flex items-center space-x-2 text-xs font-bold text-[#2563EB] uppercase tracking-wider mb-1">
+            <ShieldCheck className="h-4 w-4" />
+            <span>Insurance Fraud Intelligence Overview</span>
+          </div>
+          <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">
             Fraud Operations & SIU Command Center
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Real-time hybrid fraud detection combining Supervised ML, Isolation Forest, Graph Syndicates, and SHAP Explainability.
+          <p className="text-xs text-slate-500 mt-1 max-w-2xl">
+            Real-time multi-signal fraud scoring engine combining Supervised XGBoost, Unsupervised Isolation Forest, Bipartite Graph Syndicates, and SHAP Attribution.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-shrink-0">
           <button
             onClick={() => navigate('/claims/new')}
-            className="flex items-center space-x-2 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-lg shadow-sky-600/20 hover:shadow-sky-500/30 transition-all cursor-pointer"
+            className="flex items-center space-x-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer"
           >
             <FilePlus className="h-4 w-4" />
             <span>New Claim Intake</span>
           </button>
           <button
             onClick={() => navigate('/cases')}
-            className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2.5 rounded-xl font-semibold text-xs transition-all cursor-pointer"
+            className="flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer"
           >
-            <FolderGit2 className="h-4 w-4 text-amber-400" />
+            <FolderGit2 className="h-4 w-4 text-amber-600" />
             <span>SIU Worklist</span>
           </button>
         </div>
@@ -83,31 +87,31 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Total Claims Volume"
-          value={kpis ? kpis.total_claims.toLocaleString() : '1,000'}
-          subtitle={kpis ? `${formatCurrency(kpis.total_claims_amount)} exposure` : '$52,761,940 exposure'}
+          value={kpis ? kpis.total_claims.toLocaleString() : '320'}
+          subtitle={kpis ? `${formatCurrency(kpis.total_claims_amount)} exposure` : '$18,450,000 exposure'}
           icon={<FileCheck className="h-5 w-5" />}
           highlightColor="blue"
         />
         <StatCard
           title="Active SIU Cases"
-          value={kpis ? kpis.active_investigations : '42'}
-          subtitle="Critical priority fraud triage"
+          value={kpis ? kpis.active_investigations : '27'}
+          subtitle="High & critical priority triage"
           icon={<FolderGit2 className="h-5 w-5" />}
           highlightColor="red"
-          trend={{ value: '+4 today', isPositive: false }}
+          trend={{ value: '+4 this week', isPositive: false }}
         />
         <StatCard
           title="Fraud Loss Prevented"
-          value={kpis ? formatCurrency(kpis.fraud_amount_prevented) : '$14,820,000'}
-          subtitle="247 confirmed fraudulent claims"
+          value={kpis ? formatCurrency(kpis.fraud_amount_prevented) : '$4,820,000'}
+          subtitle="Confirmed fraudulent exposure"
           icon={<DollarSign className="h-5 w-5" />}
           highlightColor="emerald"
-          trend={{ value: '28.1% of volume', isPositive: true }}
+          trend={{ value: '16.3% fraud rate', isPositive: true }}
         />
         <StatCard
           title="Auto-Triage Rate"
           value={kpis ? `${kpis.automation_rate}%` : '68.5%'}
-          subtitle="Straight-through low risk processing"
+          subtitle="Low-risk straight-through processing"
           icon={<Activity className="h-5 w-5" />}
           highlightColor="amber"
           trend={{ value: 'Avg Risk 0.28', isPositive: true }}
@@ -117,156 +121,163 @@ export const DashboardPage: React.FC = () => {
       {/* Signal Detection Grid & Risk Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Risk Distribution Breakdown */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800">
-          <h2 className="text-base font-bold text-white mb-4 flex items-center justify-between">
-            <span>Portfolio Risk Tiering</span>
-            <span className="text-xs font-mono text-slate-400">1,000 Policies</span>
-          </h2>
+        <div className="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-xs">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-[#0F172A] uppercase tracking-wider">
+              Portfolio Risk Tiering
+            </h2>
+            <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+              320 Claims
+            </span>
+          </div>
+
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-xs font-medium mb-1">
-                <span className="text-emerald-400">Low Risk (Auto-Approve / Fast Track)</span>
-                <span className="font-mono text-slate-300">55% (550)</span>
+                <span className="text-emerald-700 font-semibold">Low Risk (Auto-Approve / Fast Track)</span>
+                <span className="font-mono text-slate-700 font-bold">55% (176)</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '55%' }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-xs font-medium mb-1">
-                <span className="text-amber-400">Medium Risk (Standard Adjuster Review)</span>
-                <span className="font-mono text-slate-300">20% (200)</span>
-              </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-500 h-2 rounded-full" style={{ width: '20%' }} />
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-emerald-600 h-2.5 rounded-full" style={{ width: '55%' }} />
               </div>
             </div>
             <div>
               <div className="flex justify-between text-xs font-medium mb-1">
-                <span className="text-orange-400">High Risk (Desk Audit Required)</span>
-                <span className="font-mono text-slate-300">15% (150)</span>
+                <span className="text-amber-700 font-semibold">Medium Risk (Standard Adjuster Review)</span>
+                <span className="font-mono text-slate-700 font-bold">20% (64)</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div className="bg-orange-500 h-2 rounded-full" style={{ width: '15%' }} />
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: '20%' }} />
               </div>
             </div>
             <div>
               <div className="flex justify-between text-xs font-medium mb-1">
-                <span className="text-red-400">Critical Risk (SIU Fraud Escalation)</span>
-                <span className="font-mono text-slate-300">10% (100)</span>
+                <span className="text-red-700 font-semibold">High Risk (Desk Audit Required)</span>
+                <span className="font-mono text-slate-700 font-bold">15% (48)</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div className="bg-red-500 h-2 rounded-full animate-pulse" style={{ width: '10%' }} />
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-red-600 h-2.5 rounded-full" style={{ width: '15%' }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs font-medium mb-1">
+                <span className="text-rose-800 font-bold">Critical Risk (SIU Fraud Escalation)</span>
+                <span className="font-mono text-slate-700 font-bold">10% (32)</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-rose-700 h-2.5 rounded-full" style={{ width: '10%' }} />
               </div>
             </div>
           </div>
 
-          <div className="mt-6 pt-5 border-t border-slate-800/80 text-xs text-slate-400 space-y-2">
+          <div className="mt-6 pt-5 border-t border-[#E2E8F0] text-xs text-slate-600 space-y-2">
             <div className="flex items-center justify-between">
-              <span>Threshold Calibration</span>
-              <span className="font-mono text-sky-400 font-semibold">T_high = 0.50</span>
+              <span>Threshold Calibration (T_high)</span>
+              <span className="font-mono text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-100">0.50</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Auto-Approval Bound</span>
-              <span className="font-mono text-emerald-400 font-semibold">T_low = 0.25</span>
+              <span>Auto-Approval Bound (T_low)</span>
+              <span className="font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">0.25</span>
             </div>
           </div>
         </div>
 
         {/* 4 Multi-Signal Pillars */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-bold text-white">
-                Multi-Signal Detection Architecture
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Every claim passes through four complementary analytical pipelines:
-              </p>
-            </div>
-            <span className="px-2.5 py-1 rounded-full bg-sky-950/70 border border-sky-800 text-sky-300 text-xs font-mono">
-              Hybrid Scoring Model
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">
-                  1. Supervised Machine Learning
-                </span>
-                <span className="font-mono text-xs text-slate-400">Weight: 40%</span>
+        <div className="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-xs lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#0F172A] uppercase tracking-wider">
+                  Multi-Signal Detection Architecture
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Every claim is evaluated concurrently across four distinct forensic analytical models:
+                </p>
               </div>
-              <p className="text-xs text-slate-300 mt-2 font-medium">
-                XGBoost + Random Forest Ensemble
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Trained on 38 engineered features (severity ratio, injury/total, policy tenure) calibrated to ROC-AUC 0.84.
-              </p>
+              <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#2563EB] text-xs font-bold font-mono">
+                Hybrid Formula
+              </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
-                  2. Unsupervised Anomaly
-                </span>
-                <span className="font-mono text-xs text-slate-400">Weight: 20%</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-4">
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-blue-200 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
+                    1. Supervised Machine Learning
+                  </span>
+                  <span className="font-mono text-xs text-slate-500 font-bold">40%</span>
+                </div>
+                <p className="text-xs text-slate-800 mt-1.5 font-semibold">
+                  XGBoost Classifier
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Evaluates 38 engineered relational, financial, and temporal indicators to predict fraud probability.
+                </p>
               </div>
-              <p className="text-xs text-slate-300 mt-2 font-medium">
-                Isolation Forest Outlier Detection
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Flags rare, high-dimension deviations and novel staging schemes without requiring prior fraud labels.
-              </p>
-            </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                  3. Duplicate Claim Matching
-                </span>
-                <span className="font-mono text-xs text-slate-400">Weight: 20%</span>
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-blue-200 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
+                    2. Unsupervised Anomaly
+                  </span>
+                  <span className="font-mono text-xs text-slate-500 font-bold">20%</span>
+                </div>
+                <p className="text-xs text-slate-800 mt-1.5 font-semibold">
+                  Isolation Forest Outlier Model
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Flags high-dimensional multivariate deviations and novel claim staging without requiring historical labels.
+                </p>
               </div>
-              <p className="text-xs text-slate-300 mt-2 font-medium">
-                Multi-Attribute Similarity Engine
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Detects recycled claims across identical VINs, matching damage totals, collision dates, and claimant aliases.
-              </p>
-            </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                  4. Graph Syndicate Collusion
-                </span>
-                <span className="font-mono text-xs text-slate-400">Weight: 20%</span>
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-blue-200 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">
+                    3. Duplicate Matching Engine
+                  </span>
+                  <span className="font-mono text-xs text-slate-500 font-bold">20%</span>
+                </div>
+                <p className="text-xs text-slate-800 mt-1.5 font-semibold">
+                  TF-IDF & Pairwise Cosine Similarity
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Identifies recycled claims across identical VINs, matching damage totals, collision dates, and claimant aliases.
+                </p>
               </div>
-              <p className="text-xs text-slate-300 mt-2 font-medium">
-                NetworkX Bipartite Topology
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Exposes organized fraud rings sharing crooked medical providers, shared addresses, and recycled vehicles.
-              </p>
+
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-blue-200 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                    4. Graph Syndicate Collusion
+                  </span>
+                  <span className="font-mono text-xs text-slate-500 font-bold">20%</span>
+                </div>
+                <p className="text-xs text-slate-800 mt-1.5 font-semibold">
+                  NetworkX Bipartite Topology
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Uncovers organized rings sharing crooked repair providers, shared addresses, and recycled vehicles.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Priority Investigation Worklist (Recent Flagged Claims) */}
-      <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+      {/* Priority Investigation Worklist (Recent Claims) */}
+      <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs overflow-hidden">
+        <div className="p-5 border-b border-[#E2E8F0] flex items-center justify-between bg-slate-50/50">
           <div>
-            <h2 className="text-base font-bold text-white">
+            <h2 className="text-sm font-bold text-[#0F172A] uppercase tracking-wider">
               Recent Claims & Risk Triage Stream
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Live claims feed prioritized by hybrid risk score and automated recommendation.
             </p>
           </div>
           <button
             onClick={() => navigate('/claims')}
-            className="flex items-center space-x-1.5 text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors"
+            className="flex items-center space-x-1.5 text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] transition-colors cursor-pointer"
           >
             <span>View All Claims</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -275,7 +286,7 @@ export const DashboardPage: React.FC = () => {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/70 border-b border-slate-800 text-slate-400 uppercase font-semibold tracking-wider text-[11px]">
+            <thead className="bg-slate-50 border-b border-[#E2E8F0] text-slate-600 uppercase font-bold tracking-wider text-[11px]">
               <tr>
                 <th className="px-5 py-3">Claim Number</th>
                 <th className="px-5 py-3">Claimant / Policy</th>
@@ -286,27 +297,27 @@ export const DashboardPage: React.FC = () => {
                 <th className="px-5 py-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-slate-100 font-medium">
               {recentClaims.length > 0 ? (
                 recentClaims.map((claim) => (
                   <tr
                     key={claim.id}
-                    className="hover:bg-slate-800/40 transition-colors group cursor-pointer"
+                    className="hover:bg-[#EFF6FF]/60 transition-colors group cursor-pointer"
                     onClick={() => navigate(`/claims/${claim.id}`)}
                   >
-                    <td className="px-5 py-3.5 font-mono text-sky-400 font-bold">
+                    <td className="px-5 py-3.5 font-mono text-[#2563EB] font-bold">
                       {claim.claim_number}
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="text-white font-semibold">{claim.claimant_name || 'Policyholder'}</div>
-                      <div className="text-slate-400 font-mono text-[11px]">
+                      <div className="text-[#0F172A] font-semibold">{claim.claimant_name || 'Policyholder'}</div>
+                      <div className="text-slate-500 font-mono text-[11px]">
                         {claim.policy_number || 'POL-782910'}
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-slate-300">
+                    <td className="px-5 py-3.5 text-slate-600">
                       {claim.incident_date}
                     </td>
-                    <td className="px-5 py-3.5 font-mono font-semibold text-white">
+                    <td className="px-5 py-3.5 font-mono font-bold text-[#0F172A]">
                       {formatCurrency(claim.total_claim_amount)}
                     </td>
                     <td className="px-5 py-3.5">
@@ -317,7 +328,7 @@ export const DashboardPage: React.FC = () => {
                       />
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">
+                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-medium">
                         {claim.status}
                       </span>
                     </td>
@@ -327,7 +338,7 @@ export const DashboardPage: React.FC = () => {
                           e.stopPropagation();
                           navigate(`/claims/${claim.id}`);
                         }}
-                        className="text-xs bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition-all font-semibold"
+                        className="text-xs bg-white hover:bg-blue-50 text-[#2563EB] hover:text-[#1D4ED8] px-3 py-1.5 rounded-lg border border-blue-200 transition-all font-semibold cursor-pointer"
                       >
                         Inspect 360°
                       </button>
@@ -337,7 +348,7 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={7} className="text-center py-8 text-slate-500">
-                    Loading claims records from database...
+                    {isLoading ? 'Loading claims records from database...' : 'No claims found.'}
                   </td>
                 </tr>
               )}

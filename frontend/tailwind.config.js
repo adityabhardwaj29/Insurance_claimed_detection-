@@ -4,32 +4,42 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0284c7',
-          600: '#0369a1',
-          700: '#075985',
-          800: '#0c4a6e',
-          900: '#082f49',
+        primary: {
+          DEFAULT: '#2563EB',
+          dark: '#1D4ED8',
+          light: '#EFF6FF',
         },
-        slate: {
-          850: '#151f32',
-          900: '#0f172a',
-          950: '#080d1a',
+        navy: {
+          DEFAULT: '#0F172A',
+          sidebar: '#0F3B82',
+          dark: '#0A2558',
+          card: '#1E293B',
+        },
+        surface: {
+          DEFAULT: '#FFFFFF',
+          muted: '#F8FAFC',
+          border: '#E2E8F0',
+        },
+        brand: {
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
+          800: '#1E40AF',
+          900: '#1E3A8A',
         },
         risk: {
-          low: '#10b981',
-          medium: '#f59e0b',
-          high: '#f97316',
-          critical: '#ef4444',
+          low: '#16A34A',
+          medium: '#D97706',
+          high: '#DC2626',
+          critical: '#991B1B',
         }
       },
       fontFamily: {

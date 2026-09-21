@@ -11,7 +11,7 @@ export const ClaimDetailPage: React.FC = () => {
   const [claim, setClaim] = useState<Claim | null>(null);
   const [analysis, setAnalysis] = useState<RiskAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const loadClaimData = async () => {
     if (!id) return;
@@ -110,9 +110,9 @@ export const ClaimDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] space-y-3">
-        <Loader2 className="h-8 w-8 text-sky-400 animate-spin" />
-        <p className="text-sm font-semibold text-slate-300">
+      <div className="flex flex-col items-center justify-center min-h-[500px] space-y-3 bg-white border border-[#E2E8F0] rounded-xl p-12">
+        <Loader2 className="h-8 w-8 text-[#2563EB] animate-spin" />
+        <p className="text-sm font-semibold text-[#0F172A]">
           Synthesizing 360° Forensic Claim Dossier...
         </p>
       </div>
@@ -121,11 +121,11 @@ export const ClaimDetailPage: React.FC = () => {
 
   if (!claim || !analysis) {
     return (
-      <div className="p-8 text-center space-y-4">
-        <p className="text-sm text-red-400">Claim record not found.</p>
+      <div className="bg-white border border-[#E2E8F0] p-12 text-center rounded-xl space-y-4 shadow-xs">
+        <p className="text-sm font-semibold text-red-600">Claim record not found.</p>
         <button
           onClick={() => navigate('/claims')}
-          className="bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-xs"
+          className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer"
         >
           Back to Claims Queue
         </button>
@@ -138,7 +138,7 @@ export const ClaimDetailPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/claims')}
-          className="flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="flex items-center space-x-2 text-xs font-semibold text-slate-600 hover:text-[#2563EB] transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Claims Queue</span>
@@ -146,7 +146,7 @@ export const ClaimDetailPage: React.FC = () => {
 
         <button
           onClick={loadClaimData}
-          className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-sky-400 transition-colors"
+          className="flex items-center space-x-1.5 text-xs text-slate-600 hover:text-[#2563EB] transition-colors cursor-pointer"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           <span>Refresh Analysis</span>
