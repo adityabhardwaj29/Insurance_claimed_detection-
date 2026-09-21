@@ -152,11 +152,11 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
         </div>
 
         {/* Quick Decision Trigger Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => handleDecision('APPROVE')}
             disabled={isSubmittingDecision}
-            className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            className="flex-1 sm:flex-none justify-center flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             <span>Approve</span>
@@ -164,7 +164,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
           <button
             onClick={() => handleDecision('ESCALATE_SIU')}
             disabled={isSubmittingDecision}
-            className="flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            className="flex-1 sm:flex-none justify-center flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
           >
             <ShieldAlert className="h-3.5 w-3.5" />
             <span>Escalate SIU</span>
@@ -172,7 +172,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
           <button
             onClick={() => handleDecision('REJECT')}
             disabled={isSubmittingDecision}
-            className="flex items-center space-x-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            className="flex-1 sm:flex-none justify-center flex items-center space-x-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
           >
             <XCircle className="h-3.5 w-3.5 text-slate-500" />
             <span>Reject</span>
@@ -333,7 +333,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
         <div className="flex border-b border-[#E2E8F0] bg-slate-50/70 overflow-x-auto">
           <button
             onClick={() => setActiveTab('signals')}
-            className={`px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+            className={`px-4 sm:px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'signals'
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -345,7 +345,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
 
           <button
             onClick={() => setActiveTab('shap')}
-            className={`px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+            className={`px-4 sm:px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'shap'
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -357,7 +357,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
 
           <button
             onClick={() => setActiveTab('duplicates')}
-            className={`px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+            className={`px-4 sm:px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'duplicates'
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -369,7 +369,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
 
           <button
             onClick={() => setActiveTab('graph')}
-            className={`px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+            className={`px-4 sm:px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'graph'
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -381,7 +381,7 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
 
           <button
             onClick={() => setActiveTab('notes')}
-            className={`px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+            className={`px-4 sm:px-5 py-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'notes'
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -558,8 +558,8 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
               </span>
             </div>
 
-            {/* SVG Network Graph Visualization - Clean White/Blue styling */}
-            <div className="relative h-80 bg-slate-50 rounded-xl border border-[#E2E8F0] overflow-hidden flex items-center justify-center p-4">
+            {/* SVG Network Graph Visualization - Clean White/Blue styling with Responsive Height */}
+            <div className="relative h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] bg-slate-50 rounded-xl border border-[#E2E8F0] overflow-hidden flex items-center justify-center p-4">
               <svg className="w-full h-full" viewBox="0 0 600 300">
                 {/* Edges */}
                 <line x1="300" y1="150" x2="150" y2="80" stroke="#93C5FD" strokeWidth="2" strokeDasharray="4" />

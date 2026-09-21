@@ -218,10 +218,10 @@ export const NewClaimWizard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Wizard Progress Stepper */}
-      <div className="bg-white p-5 rounded-xl border border-[#E2E8F0] shadow-xs">
-        <div className="flex items-center justify-between">
+      <div className="bg-white p-3 sm:p-5 rounded-xl border border-[#E2E8F0] shadow-xs overflow-x-auto">
+        <div className="flex items-center justify-between min-w-[300px]">
           {steps.map((s, idx) => {
             const Icon = s.icon;
             const isDone = step > s.num;
@@ -230,7 +230,7 @@ export const NewClaimWizard: React.FC = () => {
               <React.Fragment key={s.num}>
                 <div className="flex flex-col items-center">
                   <div
-                    className={`h-10 w-10 rounded-xl flex items-center justify-center font-bold text-xs transition-all ${
+                    className={`h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-xs transition-all ${
                       isDone
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : isCurrent
@@ -238,10 +238,10 @@ export const NewClaimWizard: React.FC = () => {
                         : 'bg-slate-100 text-slate-400 border border-slate-200'
                     }`}
                   >
-                    {isDone ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                    {isDone ? <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" /> : <Icon className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </div>
                   <span
-                    className={`text-[11px] font-medium mt-2 hidden sm:block ${
+                    className={`text-[10px] sm:text-[11px] font-medium mt-1 sm:mt-2 hidden sm:block ${
                       isCurrent ? 'text-[#2563EB] font-bold' : isDone ? 'text-slate-700' : 'text-slate-400'
                     }`}
                   >
@@ -250,7 +250,7 @@ export const NewClaimWizard: React.FC = () => {
                 </div>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-0.5 mx-2 rounded ${
+                    className={`flex-1 h-0.5 mx-1 sm:mx-2 transition-all ${
                       step > s.num ? 'bg-emerald-400' : 'bg-slate-200'
                     }`}
                   />
@@ -262,7 +262,7 @@ export const NewClaimWizard: React.FC = () => {
       </div>
 
       {/* Main Form Body */}
-      <div className="bg-white p-7 rounded-xl border border-[#E2E8F0] shadow-xs">
+      <div className="bg-white p-4 sm:p-7 rounded-xl border border-[#E2E8F0] shadow-xs">
         {/* STEP 1: CUSTOMER */}
         {step === 1 && (
           <div className="space-y-6">
@@ -815,12 +815,12 @@ export const NewClaimWizard: React.FC = () => {
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-between pt-6 mt-6 border-t border-slate-200">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-200">
           <button
             type="button"
             onClick={() => setStep((s) => Math.max(s - 1, 1))}
             disabled={step === 1 || isSubmitting}
-            className="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 bg-white border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 bg-white border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Previous</span>
@@ -830,7 +830,7 @@ export const NewClaimWizard: React.FC = () => {
             <button
               type="button"
               onClick={() => setStep((s) => Math.min(s + 1, 6))}
-              className="flex items-center space-x-2 px-5 py-2.5 rounded-lg text-xs font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs transition-all cursor-pointer"
+              className="flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg text-xs font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs transition-all cursor-pointer w-full sm:w-auto"
             >
               <span>Next Step</span>
               <ArrowRight className="h-4 w-4" />
@@ -840,7 +840,7 @@ export const NewClaimWizard: React.FC = () => {
               type="button"
               onClick={handleFinalSubmit}
               disabled={isSubmitting}
-              className="flex items-center space-x-2 px-6 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center justify-center space-x-2 px-6 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs transition-all disabled:opacity-50 cursor-pointer w-full sm:w-auto"
             >
               {isSubmitting ? (
                 <>

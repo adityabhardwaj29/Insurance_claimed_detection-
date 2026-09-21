@@ -121,7 +121,7 @@ def run_services(start_frontend: bool = True, start_api: bool = True, start_dash
 
         if start_frontend:
             npm_cmd = shutil.which("npm") or "npm"
-            front_cmd = f"{npm_cmd} run dev -- --port {frontend_port}"
+            front_cmd = f'"{npm_cmd}" run dev -- --port {frontend_port}'
             front_p = subprocess.Popen(front_cmd, cwd=str(ROOT / "frontend"), shell=True)
             procs.append(front_p)
             print(f"[FRONTEND] React Enterprise UI running -> http://localhost:{frontend_port}")

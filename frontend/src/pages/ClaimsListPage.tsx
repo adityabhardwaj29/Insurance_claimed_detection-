@@ -84,7 +84,7 @@ export const ClaimsListPage: React.FC = () => {
         </div>
         <button
           onClick={() => navigate('/claims/new')}
-          className="flex items-center space-x-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer"
+          className="flex items-center justify-center space-x-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer w-full sm:w-auto"
         >
           <FilePlus className="h-4 w-4" />
           <span>New Claim Intake</span>
@@ -144,7 +144,7 @@ export const ClaimsListPage: React.FC = () => {
       {/* Claims Table */}
       <div className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[720px] text-left text-xs">
             <thead className="bg-slate-50 border-b border-[#E2E8F0] text-slate-600 uppercase font-bold tracking-wider text-[11px]">
               <tr>
                 <th className="px-5 py-3.5">Claim ID</th>

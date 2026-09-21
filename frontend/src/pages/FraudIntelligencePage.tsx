@@ -65,8 +65,8 @@ export const FraudIntelligencePage: React.FC = () => {
           </span>
         </div>
 
-        {/* SVG Graph on Light Canvas */}
-        <div className="h-80 bg-slate-50 rounded-xl border border-slate-200 relative flex items-center justify-center overflow-hidden">
+        {/* SVG Graph on Light Canvas - Responsive Height per Spec */}
+        <div className="h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] bg-slate-50 rounded-xl border border-slate-200 relative flex items-center justify-center overflow-hidden">
           {/* Subtle Grid Dot Pattern */}
           <div
             className="absolute inset-0 opacity-40"

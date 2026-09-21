@@ -71,12 +71,12 @@ export const CasesPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 text-xs font-medium space-x-1">
+      <div className="flex border-b border-slate-200 text-xs font-medium space-x-1 overflow-x-auto">
         {(['ALL', 'OPEN', 'IN_PROGRESS', 'CLOSED'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 -mb-px rounded-t-lg transition-all cursor-pointer font-semibold ${
+            className={`px-4 py-2.5 -mb-px rounded-t-lg transition-all cursor-pointer font-semibold whitespace-nowrap shrink-0 ${
               activeTab === tab
                 ? 'bg-white border-t-2 border-x border-b-0 border-blue-600 text-blue-600 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
@@ -99,7 +99,7 @@ export const CasesPage: React.FC = () => {
       </div>
 
       {/* Cases Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {filteredCases.map((cs) => (
           <div
             key={cs.id}

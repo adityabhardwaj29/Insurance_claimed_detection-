@@ -52,30 +52,30 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E2E8F0] p-4 sm:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-xs font-bold text-[#2563EB] uppercase tracking-wider mb-1">
             <ShieldCheck className="h-4 w-4" />
             <span>Insurance Fraud Intelligence Overview</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-tight">
             Fraud Operations & SIU Command Center
           </h1>
           <p className="text-xs text-slate-500 mt-1 max-w-2xl">
             Real-time multi-signal fraud scoring engine combining Supervised XGBoost, Unsupervised Isolation Forest, Bipartite Graph Syndicates, and SHAP Attribution.
           </p>
         </div>
-        <div className="flex items-center gap-2.5 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 flex-shrink-0 w-full sm:w-auto">
           <button
             onClick={() => navigate('/claims/new')}
-            className="flex items-center space-x-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer"
+            className="flex items-center justify-center space-x-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer w-full sm:w-auto"
           >
             <FilePlus className="h-4 w-4" />
             <span>New Claim Intake</span>
           </button>
           <button
             onClick={() => navigate('/cases')}
-            className="flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer"
+            className="flex items-center justify-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer w-full sm:w-auto"
           >
             <FolderGit2 className="h-4 w-4 text-amber-600" />
             <span>SIU Worklist</span>
@@ -83,8 +83,8 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Ribbon */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* KPI Ribbon: 1 col on XS, 2 col on SM & MD, 4 col on LG+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
         <StatCard
           title="Total Claims Volume"
           value={kpis ? kpis.total_claims.toLocaleString() : '320'}
@@ -285,7 +285,7 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[700px] text-left text-xs">
             <thead className="bg-slate-50 border-b border-[#E2E8F0] text-slate-600 uppercase font-bold tracking-wider text-[11px]">
               <tr>
                 <th className="px-5 py-3">Claim Number</th>

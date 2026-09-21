@@ -63,7 +63,7 @@ export const AuditLogsPage: React.FC = () => {
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[700px] text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold tracking-wider text-[11px]">
               <tr>
                 <th className="px-5 py-3.5">Timestamp</th>
