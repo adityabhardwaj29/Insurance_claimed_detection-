@@ -211,7 +211,7 @@ st.markdown("### 🏗️ End-to-End Multi-Signal Analytical Architecture")
 st.markdown(
     """
     <div class="saas-card">
-        <div style="font-family: var(--font-mono); font-size: 0.82rem; color: #93c5fd; background-color: #0d1527; padding: 1.25rem; border-radius: 8px; overflow-x: auto; line-height: 1.6;">
+        <div style="font-family: var(--font-mono); font-size: 0.82rem; color: #1E3A8A; background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 1.25rem; border-radius: 8px; overflow-x: auto; line-height: 1.6; font-weight: 500;">
 [1. RAW CSVs] ──> [2. 3NF NORMALIZATION (SQLite)] ──> [3. CAUSAL FEATURE ENGINEERING]
                            |                                        |
                            +──────────────────+─────────────────────+

@@ -1,56 +1,57 @@
 /* ==========================================================================
-   ENTERPRISE SAAS DESIGN SYSTEM - THEME.CSS
+   ENTERPRISE WHITE & BLUE SAAS DESIGN SYSTEM - THEME.CSS
    Graph-Enhanced Insurance Claim Fraud Detection Platform
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
   /* Typography */
-  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Color Palette - Dark Enterprise SaaS */
-  --bg-app: #080c14;
-  --bg-surface: #0f172a;
-  --bg-card: #131d35;
-  --bg-card-hover: #182544;
-  --bg-card-subtle: #0d1527;
-  --border-subtle: #1e293b;
-  --border-medium: #2a3a55;
-  --border-focus: #3b82f6;
+  /* Color Palette - White & Blue Enterprise Theme */
+  --bg-app: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-card-subtle: #F1F5F9;
+  --border-subtle: #E2E8F0;
+  --border-medium: #CBD5E1;
+  --border-focus: #2563EB;
 
   /* Text Colors */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-white: #ffffff;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-white: #0F172A;
 
   /* Brand / Primary */
-  --brand-primary: #3b82f6;
-  --brand-primary-hover: #2563eb;
-  --brand-glow: rgba(59, 130, 246, 0.2);
+  --brand-primary: #2563EB;
+  --brand-primary-hover: #1D4ED8;
+  --brand-glow: rgba(37, 99, 235, 0.15);
 
   /* Semantic Risk Colors */
-  --risk-critical: #ef4444;
-  --risk-critical-bg: rgba(239, 68, 68, 0.12);
-  --risk-critical-border: #dc2626;
+  --risk-critical: #DC2626;
+  --risk-critical-bg: #FEF2F2;
+  --risk-critical-border: #FCA5A5;
 
-  --risk-high: #f59e0b;
-  --risk-high-bg: rgba(245, 158, 11, 0.12);
-  --risk-high-border: #d97706;
+  --risk-high: #D97706;
+  --risk-high-bg: #FFFBEB;
+  --risk-high-border: #FCD34D;
 
-  --risk-medium: #eab308;
-  --risk-medium-bg: rgba(234, 179, 8, 0.12);
-  --risk-medium-border: #ca8a04;
+  --risk-medium: #CA8A04;
+  --risk-medium-bg: #FEFCE8;
+  --risk-medium-border: #FDE047;
 
-  --risk-low: #10b981;
-  --risk-low-bg: rgba(16, 185, 129, 0.12);
-  --risk-low-border: #059669;
+  --risk-low: #16A34A;
+  --risk-low-bg: #F0FDF4;
+  --risk-low-border: #86EFAC;
 
   /* Informational */
-  --info-blue: #0ea5e9;
-  --info-blue-bg: rgba(14, 165, 233, 0.12);
+  --info-blue: #2563EB;
+  --info-blue-bg: #EFF6FF;
 
   /* Spacing Tokens */
   --space-2xs: 4px;
@@ -70,10 +71,10 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.15);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(37, 99, 235, 0.08), 0 4px 6px -4px rgba(37, 99, 235, 0.05);
+  --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.12);
 }
 
 /* ==========================================================================
@@ -88,6 +89,12 @@ html, body, [class*="css"], .stApp {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, .stApp h1, .stApp h2, .stApp h3 {
+  font-family: var(--font-display) !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.02em !important;
+}
+
 /* Hide default streamlit decorations cleanly */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
@@ -99,38 +106,61 @@ header[data-testid="stHeader"] {
 .block-container {
   padding-top: 1.5rem !important;
   padding-bottom: 3rem !important;
-  padding-left: 2.5rem !important;
-  padding-right: 2.5rem !important;
-  max-width: 1400px !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+  max-width: 1500px !important;
 }
 
 /* ==========================================================================
-   ENTERPRISE SIDEBAR STYLING
+   ENTERPRISE SIDEBAR STYLING (NAVY OPTION B)
    ========================================================================== */
 
 section[data-testid="stSidebar"] {
-  background-color: var(--bg-surface) !important;
-  border-right: 1px solid var(--border-subtle) !important;
+  background-color: #0F3B82 !important;
+  border-right: 1px solid #0D326E !important;
   padding-top: 1rem !important;
+  color: #FFFFFF !important;
+}
+
+section[data-testid="stSidebar"] * {
+  color: #E0E7FF !important;
 }
 
 section[data-testid="stSidebar"] h1,
 section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
   font-weight: 700 !important;
-  font-size: 1rem !important;
+  font-size: 1.05rem !important;
   letter-spacing: -0.01em;
 }
 
 section[data-testid="stSidebar"] .stSelectbox label,
 section[data-testid="stSidebar"] .stMultiSelect label,
 section[data-testid="stSidebar"] .stSlider label {
-  color: var(--text-secondary) !important;
+  color: #BFDBFE !important;
   font-size: 0.82rem !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a {
+  border-radius: var(--radius-md) !important;
+  transition: all 0.2s ease !important;
+  color: #DBEAFE !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a[aria-current="page"] {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ==========================================================================
@@ -142,12 +172,12 @@ section[data-testid="stSidebar"] .stSlider label {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1.25rem 1.5rem;
-  background: linear-gradient(180deg, #111a2e 0%, var(--bg-surface) 100%);
+  padding: 1.35rem 1.75rem;
+  background: #FFFFFF;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   margin-bottom: var(--space-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .saas-header-text {
@@ -160,93 +190,94 @@ section[data-testid="stSidebar"] .stSlider label {
   align-items: center;
   gap: 6px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--brand-primary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   margin-bottom: 4px;
 }
 
 .saas-header-title {
-  font-size: 1.65rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display) !important;
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em;
   color: var(--text-primary) !important;
   margin: 0 !important;
   line-height: 1.25;
 }
 
 .saas-header-subtitle {
-  font-size: 0.9rem !important;
-  color: var(--text-secondary) !important;
-  margin-top: 4px !important;
+  font-size: 0.88rem !important;
+  color: var(--text-muted) !important;
+  margin-top: 6px !important;
   font-weight: 400;
+  max-width: 800px;
 }
 
 .saas-header-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
-  background-color: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 6px 14px;
+  background-color: #EFF6FF;
+  border: 1px solid #BFDBFE;
   border-radius: var(--radius-full);
   font-size: 0.78rem;
-  font-weight: 600;
-  color: #60a5fa;
+  font-weight: 700;
+  color: #1D4ED8;
   gap: 6px;
 }
 
 .saas-header-badge.info {
-  background-color: rgba(6, 182, 212, 0.12);
-  border-color: rgba(6, 182, 212, 0.3);
-  color: #22d3ee;
+  background-color: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1D4ED8;
 }
 
 .saas-header-badge.success {
-  background-color: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background-color: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #15803D;
 }
 
 .saas-header-badge.warning {
-  background-color: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
+  background-color: #FFFBEB;
+  border-color: #FDE68A;
+  color: #B45309;
 }
 
 .saas-header-badge.critical {
-  background-color: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background-color: #FEF2F2;
+  border-color: #FECACA;
+  color: #B91C1C;
 }
 
 .saas-header-badge.primary {
-  background-color: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #818cf8;
+  background-color: #EEF2FF;
+  border-color: #C7D2FE;
+  color: #4338CA;
 }
-
 
 /* Metric / KPI Cards */
 .saas-kpi-card {
-  background-color: var(--bg-card);
+  background-color: #FFFFFF;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 1.2rem 1.4rem;
+  padding: 1.25rem 1.4rem;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
   height: 100%;
 }
 
 .saas-kpi-card:hover {
-  border-color: var(--border-medium);
-  box-shadow: var(--shadow-md);
+  border-color: #93C5FD;
+  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
-  background-color: var(--bg-card-hover);
+  background-color: #FFFFFF;
 }
 
 .saas-kpi-card::before {
@@ -272,25 +303,26 @@ section[data-testid="stSidebar"] .stSlider label {
 }
 
 .saas-kpi-label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .saas-kpi-icon {
   font-size: 1.15rem;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .saas-kpi-value {
+  font-family: var(--font-display) !important;
   font-size: 1.85rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  color: var(--text-white);
+  color: var(--text-primary);
   line-height: 1.1;
-  margin: 0.3rem 0;
+  margin: 0.25rem 0;
 }
 
 .saas-kpi-footer {
@@ -304,10 +336,10 @@ section[data-testid="stSidebar"] .stSlider label {
 
 /* Card Box Container */
 .saas-card {
-  background-color: var(--bg-surface);
+  background-color: #FFFFFF;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 1.4rem;
+  padding: 1.5rem;
   margin-bottom: var(--space-lg);
   box-shadow: var(--shadow-sm);
 }
@@ -322,8 +354,9 @@ section[data-testid="stSidebar"] .stSlider label {
 }
 
 .saas-card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-family: var(--font-display) !important;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   display: flex;
@@ -341,10 +374,10 @@ section[data-testid="stSidebar"] .stSlider label {
 .saas-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 9px;
-  border-radius: var(--radius-sm);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.3;
 }
@@ -352,44 +385,44 @@ section[data-testid="stSidebar"] .stSlider label {
 .saas-badge.critical {
   background-color: var(--risk-critical-bg);
   border: 1px solid var(--risk-critical-border);
-  color: #fca5a5;
+  color: #B91C1C;
 }
 
 .saas-badge.high {
   background-color: var(--risk-high-bg);
   border: 1px solid var(--risk-high-border);
-  color: #fcd34d;
+  color: #B45309;
 }
 
 .saas-badge.medium {
   background-color: var(--risk-medium-bg);
   border: 1px solid var(--risk-medium-border);
-  color: #fef08a;
+  color: #A16207;
 }
 
 .saas-badge.low {
   background-color: var(--risk-low-bg);
   border: 1px solid var(--risk-low-border);
-  color: #86efac;
+  color: #15803D;
 }
 
 .saas-badge.info {
   background-color: var(--info-blue-bg);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  color: #7dd3fc;
+  border: 1px solid #BFDBFE;
+  color: #1D4ED8;
 }
 
 .saas-badge.neutral {
-  background-color: rgba(100, 116, 139, 0.15);
-  border: 1px solid rgba(100, 116, 139, 0.3);
-  color: #cbd5e1;
+  background-color: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #475569;
 }
 
 /* Empty State Component */
 .saas-empty-state {
   text-align: center;
   padding: 3.5rem 2rem;
-  background-color: var(--bg-surface);
+  background-color: #FFFFFF;
   border: 1px dashed var(--border-medium);
   border-radius: var(--radius-lg);
   margin: var(--space-xl) 0;
@@ -402,8 +435,9 @@ section[data-testid="stSidebar"] .stSlider label {
 }
 
 .saas-empty-title {
+  font-family: var(--font-display) !important;
   font-size: 1.15rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.4rem;
 }
@@ -421,20 +455,24 @@ section[data-testid="stSidebar"] .stSlider label {
   align-items: flex-start;
   gap: 12px;
   padding: 1rem 1.25rem;
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: #EFF6FF;
   border-left: 4px solid var(--brand-primary);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   margin: var(--space-md) 0;
+  border-top: 1px solid #DBEAFE;
+  border-right: 1px solid #DBEAFE;
+  border-bottom: 1px solid #DBEAFE;
 }
 
 .saas-callout.warning {
-  background-color: rgba(245, 158, 11, 0.08);
+  background-color: #FFFBEB;
   border-left-color: var(--risk-high);
+  border-color: #FEF3C7;
 }
 
 .saas-callout-text {
   font-size: 0.86rem;
-  color: var(--text-secondary);
+  color: #1E3A8A;
   line-height: 1.5;
 }
 
@@ -443,7 +481,8 @@ section[data-testid="stSidebar"] .stSlider label {
   border: 1px solid var(--border-subtle) !important;
   border-radius: var(--radius-md) !important;
   overflow: hidden !important;
-  background-color: var(--bg-surface) !important;
+  background-color: #FFFFFF !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 /* Buttons */
@@ -454,29 +493,38 @@ section[data-testid="stSidebar"] .stSlider label {
   border-radius: var(--radius-md) !important;
   padding: 0.45rem 1.1rem !important;
   transition: all 0.15s ease-in-out !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: var(--text-primary) !important;
 }
 
 .stButton > button:hover {
   border-color: var(--brand-primary) !important;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3) !important;
+  color: var(--brand-primary) !important;
+  background-color: #EFF6FF !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1) !important;
 }
 
 /* Primary Button */
 .stButton > button[kind="primary"] {
   background-color: var(--brand-primary) !important;
   border-color: var(--brand-primary) !important;
-  color: #ffffff !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
 }
 
 .stButton > button[kind="primary"]:hover {
   background-color: var(--brand-primary-hover) !important;
+  border-color: var(--brand-primary-hover) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
 }
 
-/* Input Fields */
+/* Input Fields & Selectboxes */
 .stTextInput > div > div > input,
 .stSelectbox > div > div,
 .stMultiSelect > div > div {
-  background-color: var(--bg-card-subtle) !important;
+  background-color: #FFFFFF !important;
   border: 1px solid var(--border-subtle) !important;
   border-radius: var(--radius-md) !important;
   color: var(--text-primary) !important;
@@ -485,7 +533,7 @@ section[data-testid="stSidebar"] .stSlider label {
 
 .stTextInput > div > div > input:focus {
   border-color: var(--brand-primary) !important;
-  box-shadow: 0 0 0 2px var(--brand-glow) !important;
+  box-shadow: 0 0 0 3px var(--brand-glow) !important;
 }
 
 /* Tabs */
@@ -493,21 +541,28 @@ section[data-testid="stSidebar"] .stSlider label {
   gap: 8px;
   border-bottom: 1px solid var(--border-subtle) !important;
   margin-bottom: 1.25rem;
+  background: transparent !important;
 }
 
 .stTabs [data-baseweb="tab"] {
-  padding: 8px 16px !important;
+  padding: 8px 18px !important;
   background-color: transparent !important;
   border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
   color: var(--text-muted) !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   font-size: 0.88rem !important;
   border: none !important;
+  transition: all 0.15s ease !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+  color: var(--text-primary) !important;
+  background-color: #F1F5F9 !important;
 }
 
 .stTabs [aria-selected="true"] {
   color: var(--brand-primary) !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   border-bottom: 2px solid var(--brand-primary) !important;
-  background-color: rgba(59, 130, 246, 0.05) !important;
+  background-color: #EFF6FF !important;
 }

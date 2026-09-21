@@ -19,9 +19,9 @@ def apply_chart_theme(
     Applies the centralized enterprise dark SaaS styling to any Plotly chart.
     """
     layout_update = dict(
-        font=dict(family="Inter, -apple-system, sans-serif", size=12, color="#94a3b8"),
+        font=dict(family="'Plus Jakarta Sans', -apple-system, sans-serif", size=12, color="#475569"),
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(15, 23, 42, 0.4)",
+        plot_bgcolor="#FFFFFF",
         height=height,
         margin=dict(l=40, r=20, t=50 if title else 20, b=40),
         legend=dict(
@@ -30,26 +30,26 @@ def apply_chart_theme(
             y=1.02,
             xanchor="right",
             x=1,
-            font=dict(color="#f8fafc", size=11),
+            font=dict(color="#0F172A", size=11),
         ),
         xaxis=dict(
-            gridcolor="#1e293b",
-            zerolinecolor="#1e293b",
-            tickfont=dict(color="#64748b", size=11),
-            title_font=dict(color="#94a3b8", size=12),
+            gridcolor="#E2E8F0",
+            zerolinecolor="#CBD5E1",
+            tickfont=dict(color="#64748B", size=11),
+            title_font=dict(color="#1E293B", size=12),
         ),
         yaxis=dict(
-            gridcolor="#1e293b",
-            zerolinecolor="#1e293b",
-            tickfont=dict(color="#64748b", size=11),
-            title_font=dict(color="#94a3b8", size=12),
+            gridcolor="#E2E8F0",
+            zerolinecolor="#CBD5E1",
+            tickfont=dict(color="#64748B", size=11),
+            title_font=dict(color="#1E293B", size=12),
         ),
     )
 
     if title:
         layout_update["title"] = dict(
             text=title,
-            font=dict(size=14, color="#f8fafc", family="Inter, sans-serif"),
+            font=dict(size=14, color="#0F172A", family="'Plus Jakarta Sans', sans-serif"),
             x=0.0,
             xanchor="left",
         )
