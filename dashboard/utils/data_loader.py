@@ -24,11 +24,12 @@ DUP_FEATURES_PATH = ROOT / "data" / "features" / "duplicate_features.csv"
 GRAPH_FEATURES_PATH = ROOT / "data" / "features" / "graph_features.csv"
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=5)
 def load_all_claims_data() -> pd.DataFrame:
     """
-    Loads all 320 claims enriched with relational attributes,
-    Phase 8 risk scores, and investigation case statuses.
+    Loads all claims enriched with relational attributes,
+    live risk scores from SQLite, and investigation case statuses.
+    Supports real-time live detection sync with React frontend and FastAPI.
     """
     if not DB_PATH.exists():
         return pd.DataFrame()
@@ -66,7 +67,14 @@ def load_all_claims_data() -> pd.DataFrame:
             ic.case_status,
             ic.case_priority,
             ic.assigned_to,
-            ic.resolution
+            ic.resolution,
+            rs.final_risk_score,
+            rs.risk_band,
+            rs.fraud_probability,
+            rs.anomaly_score,
+            rs.duplicate_score,
+            rs.graph_risk_score,
+            rs.risk_reasons
         FROM claims c
         LEFT JOIN claimants cl ON c.claimant_id = cl.claimant_id
         LEFT JOIN policies p ON c.policy_id = p.policy_id
@@ -83,26 +91,32 @@ def load_all_claims_data() -> pd.DataFrame:
                 ROW_NUMBER() OVER (PARTITION BY claim_id ORDER BY updated_at DESC, rowid DESC) as rn
             FROM investigation_cases
         ) ic ON c.claim_id = ic.claim_id AND ic.rn = 1
+        LEFT JOIN risk_scores rs ON c.claim_id = rs.claim_id
+        ORDER BY c.claim_id DESC
         """
         df = pd.read_sql_query(query, conn)
 
-    # Merge Phase 8 risk scores if available
-    if RISK_SCORES_PATH.exists():
+    # Fallback merge from static CSV if any claim lacks risk scores in DB
+    if df["final_risk_score"].isna().any() and RISK_SCORES_PATH.exists():
         risk_df = pd.read_csv(RISK_SCORES_PATH, keep_default_na=False)
         risk_cols = [
             "claim_id", "final_risk_score", "risk_band", "fraud_probability",
             "anomaly_score", "duplicate_score", "graph_risk_score", "risk_reasons"
         ]
         available_cols = [c for c in risk_cols if c in risk_df.columns]
-        df = df.merge(risk_df[available_cols], on="claim_id", how="left")
-    else:
-        df["final_risk_score"] = 0.0
-        df["risk_band"] = "LOW"
-        df["fraud_probability"] = 0.0
-        df["anomaly_score"] = 0.0
-        df["duplicate_score"] = 0.0
-        df["graph_risk_score"] = 0.0
-        df["risk_reasons"] = ""
+        fallback_df = risk_df[available_cols].set_index("claim_id")
+        for col in available_cols:
+            if col != "claim_id":
+                df[col] = df[col].fillna(df["claim_id"].map(fallback_df[col]))
+
+    # Default fallbacks
+    df["final_risk_score"] = df["final_risk_score"].fillna(0.0)
+    df["risk_band"] = df["risk_band"].fillna("LOW")
+    df["fraud_probability"] = df["fraud_probability"].fillna(0.0)
+    df["anomaly_score"] = df["anomaly_score"].fillna(0.0)
+    df["duplicate_score"] = df["duplicate_score"].fillna(0.0)
+    df["graph_risk_score"] = df["graph_risk_score"].fillna(0.0)
+    df["risk_reasons"] = df["risk_reasons"].fillna("")
 
     # Clean case_status default
     df["case_status"] = df["case_status"].fillna("UNASSIGNED")
@@ -112,7 +126,7 @@ def load_all_claims_data() -> pd.DataFrame:
     return df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=5)
 def compute_executive_kpis(df: pd.DataFrame) -> Dict[str, Any]:
     """
     Computes exact executive KPIs directly from claims dataframe.
@@ -179,7 +193,7 @@ def load_duplicate_records() -> pd.DataFrame:
     return dup_df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=5)
 def load_investigation_cases() -> pd.DataFrame:
     """Loads all investigation cases with claim details and audit stats."""
     if not DB_PATH.exists():

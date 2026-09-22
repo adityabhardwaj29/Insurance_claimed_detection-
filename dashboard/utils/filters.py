@@ -12,11 +12,16 @@ from typing import Tuple
 import pandas as pd
 import streamlit as st
 
+from dashboard.utils.live_sync import render_live_sync_controller
+
 
 def render_sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
     """
     Renders standard sidebar filters and returns the filtered DataFrame.
+    Includes real-time live sync controller for polling SQLite & FastAPI.
     """
+    render_live_sync_controller(total_records=len(df))
+
     st.sidebar.markdown("### 🔍 Global Claim Filters")
 
     if df.empty:

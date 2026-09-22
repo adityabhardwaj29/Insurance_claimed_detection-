@@ -13,6 +13,7 @@ from dashboard.components.layout import inject_theme
 from dashboard.components.header import render_header
 from dashboard.components.metrics import render_kpi_card
 from dashboard.utils.data_loader import compute_executive_kpis, load_all_claims_data
+from dashboard.utils.live_sync import render_live_sync_controller
 
 st.set_page_config(
     page_title="Fraud Intelligence | Graph-Enhanced Platform",
@@ -48,6 +49,7 @@ st.markdown(
 
 # ── Executive KPI Ribbon ─────────────────────────────────────────────────────
 df = load_all_claims_data()
+render_live_sync_controller(total_records=len(df))
 kpis = compute_executive_kpis(df)
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
