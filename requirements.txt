@@ -6,8 +6,17 @@ networkx
 fastapi
 uvicorn
 streamlit
+streamlit-autorefresh
 sqlalchemy
 plotly
 openpyxl
 pydantic
+email-validator
+python-multipart
+pyyaml
+python-jose[cryptography]
+bcrypt
+passlib[bcrypt]
+psycopg2-binary
 pytest
+
