@@ -18,5 +18,6 @@ python-jose[cryptography]
 bcrypt
 passlib[bcrypt]
 psycopg2-binary
+matplotlib
 pytest
 

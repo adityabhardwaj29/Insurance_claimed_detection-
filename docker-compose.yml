@@ -7,6 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - PYTHONPATH=/app
       - DATABASE_URL=${DATABASE_URL:-}
       - SUPABASE_URL=${SUPABASE_URL:-}
       - SUPABASE_KEY=${SUPABASE_KEY:-}
@@ -37,6 +38,8 @@ services:
     command: streamlit run dashboard/app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
     depends_on:
       - api
     volumes:
