@@ -21,6 +21,7 @@ class RegisterRequest(BaseModel):
     full_name: str = Field(..., min_length=2)
     role_id: str = Field("CLAIMS_OFFICER", pattern="^(ADMIN|CLAIMS_OFFICER|INVESTIGATOR|SUPERVISOR|ANALYST)$")
     department: Optional[str] = "Claims & Fraud Operations"
+    badge_number: Optional[str] = None
 
 
 class UserProfileResponse(BaseModel):
@@ -29,6 +30,7 @@ class UserProfileResponse(BaseModel):
     full_name: str
     role_id: str
     department: Optional[str] = None
+    badge_number: Optional[str] = None
     is_active: bool = True
 
 

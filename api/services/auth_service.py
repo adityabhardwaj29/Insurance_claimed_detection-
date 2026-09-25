@@ -110,12 +110,9 @@ class AuthService:
     @staticmethod
     def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
         norm_email = email.lower().strip()
-        if norm_email in DEMO_USERS:
-            return DEMO_USERS[norm_email]
-
-        # Check in database profiles
+        # 1. Check in database users table
         try:
-            row = db.query_one("SELECT * FROM profiles WHERE lower(email) = ?", (norm_email,))
+            row = db.query_one("SELECT * FROM users WHERE lower(email) = ?", (norm_email,))
             if row:
                 return {
                     "id": str(row.get("id")),
@@ -123,30 +120,59 @@ class AuthService:
                     "full_name": row.get("full_name"),
                     "role_id": row.get("role_id", "CLAIMS_OFFICER"),
                     "department": row.get("department"),
-                    "password_hash": DEMO_USERS["claims.officer@insurance.com"]["password_hash"],
+                    "badge_number": row.get("badge_number"),
+                    "password_hash": row.get("password_hash"),
+                    "is_active": bool(row.get("is_active", 1)),
                 }
         except Exception as e:
-            logger.debug("Profiles query failed: %s", e)
+            logger.debug("Users query failed: %s", e)
+
+        # 2. Check in DEMO_USERS memory cache
+        if norm_email in DEMO_USERS:
+            return DEMO_USERS[norm_email]
 
         return None
 
     @staticmethod
-    def register_user(email: str, password: str, full_name: str, role_id: str, department: str) -> Dict[str, Any]:
+    def register_user(
+        email: str,
+        password: str,
+        full_name: str,
+        role_id: str,
+        department: str,
+        badge_number: Optional[str] = None
+    ) -> Dict[str, Any]:
         norm_email = email.lower().strip()
         if AuthService.get_user_by_email(norm_email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this email already exists"
+                detail="An officer account with this email already exists"
             )
 
+        user_id = f"usr-{int(time.time())}-{os.urandom(2).hex()}"
+        pwd_hash = AuthService.hash_password(password)
+        if not badge_number:
+            badge_number = f"OFF-{role_id[:3]}-{int(time.time()) % 10000:04d}"
+
         new_user = {
-            "id": f"usr-{int(time.time())}",
+            "id": user_id,
             "email": norm_email,
             "full_name": full_name,
             "role_id": role_id,
-            "department": department,
-            "password_hash": AuthService.hash_password(password),
+            "department": department or "Special Operations",
+            "badge_number": badge_number,
+            "password_hash": pwd_hash,
+            "is_active": True,
         }
+
+        try:
+            db.execute("""
+                INSERT INTO users (id, email, password_hash, full_name, role_id, department, badge_number, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+            """, (user_id, norm_email, pwd_hash, full_name, role_id, department, badge_number))
+        except Exception as e:
+            logger.error("Failed to insert user into DB: %s", e)
+
         DEMO_USERS[norm_email] = new_user
         return new_user
 
@@ -156,30 +182,29 @@ class AuthService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
+                detail="Invalid officer credentials: email not found",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         if not AuthService.verify_password(password, user["password_hash"]):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
+                detail="Invalid officer credentials: password does not match",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        try:
+            db.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", (user["id"],))
+        except Exception:
+            pass
         return user
 
 
 def get_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> UserProfileResponse:
     """Dependency for extracting and validating the authenticated user."""
-    # If no token provided in local dev, default to CLAIMS_OFFICER for ease of test
     if not token:
-        demo = DEMO_USERS["claims.officer@insurance.com"]
-        return UserProfileResponse(
-            id=demo["id"],
-            email=demo["email"],
-            full_name=demo["full_name"],
-            role_id=demo["role_id"],
-            department=demo["department"],
-            is_active=True,
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication credentials were not provided",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     try:
@@ -200,6 +225,7 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> UserProfi
         full_name=user["full_name"],
         role_id=user["role_id"],
         department=user.get("department"),
+        badge_number=user.get("badge_number"),
         is_active=True,
     )
 

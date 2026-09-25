@@ -125,6 +125,7 @@ st.markdown(
                     Claim ID: {selected_cid}
                 </span>
                 <span style="margin-left: 12px; font-size: 0.92rem; color: var(--text-secondary);">
+                    👤 Claimant: <strong style="color: #60a5fa;">{claimant.get('name', 'N/A')}</strong> (📱 <strong style="color: #34d399;">{claimant.get('phone', 'N/A')}</strong>) |
                     Type: <strong style="color: var(--text-primary);">{claim.get('claim_type', 'N/A')}</strong> |
                     Amount: <strong style="color: var(--text-primary);">${claim.get('claim_amount', 0):,.2f}</strong> |
                     Date: <strong style="color: var(--text-primary);">{str(claim.get('claim_date', ''))[:10]}</strong>
@@ -339,12 +340,15 @@ with tab_claimant:
         with c1:
             st.markdown(f"**Claimant ID:** `{claimant.get('claimant_id')}`")
             st.markdown(f"**Name:** {claimant.get('name')}")
+            st.markdown(f"**Mobile / Phone:** 📱 `{claimant.get('phone', '+91-980000-0000')}`")
         with c2:
             st.markdown(f"**Age:** {claimant.get('age')}")
             st.markdown(f"**Gender:** {claimant.get('gender')}")
+            st.markdown(f"**Email:** ✉️ `{claimant.get('email', 'N/A')}`")
         with c3:
             st.markdown(f"**City:** {claimant.get('city')}")
-            st.markdown(f"**Marital Status:** {claimant.get('marital_status', 'N/A')}")
+            st.markdown(f"**Occupation:** `{claimant.get('occupation', 'Policyholder')}`")
+            st.markdown(f"**Address:** `{claimant.get('address', 'N/A')}`")
     else:
         st.info("No claimant record attached.")
 

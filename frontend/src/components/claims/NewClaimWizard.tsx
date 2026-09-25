@@ -159,6 +159,8 @@ export const NewClaimWizard: React.FC = () => {
       const claimPayload = {
         claim_number: `CLM-2024-${Math.floor(1000 + Math.random() * 9000)}`,
         claimant_name: form.claimant_name,
+        claimant_phone: form.claimant_phone,
+        claimant_email: form.claimant_email,
         policy_number: form.policy_number,
         incident_date: form.incident_date,
         report_date: new Date().toISOString().split('T')[0],

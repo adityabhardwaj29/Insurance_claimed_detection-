@@ -5,8 +5,10 @@ export interface User {
   email: string;
   full_name: string;
   role: UserRole;
+  role_id?: string;
   department?: string;
   badge_number?: string;
+  is_active?: boolean;
 }
 
 export interface Customer {
@@ -54,6 +56,8 @@ export interface Claim {
   policy_id?: string;
   claimant_id?: string;
   claimant_name?: string;
+  claimant_phone?: string;
+  claimant_email?: string;
   incident_date: string;
   report_date: string;
   incident_type: string;

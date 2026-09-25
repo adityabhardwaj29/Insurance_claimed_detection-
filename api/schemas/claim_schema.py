@@ -23,6 +23,12 @@ class ClaimListItem(BaseModel):
     claim_type: str
     status: str
     fraud_label: int
+    claimant_name: Optional[str] = None
+    claimant_phone: Optional[str] = None
+    claimant_email: Optional[str] = None
+    policy_type: Optional[str] = None
+    final_risk_score: Optional[float] = None
+    risk_band: Optional[str] = None
 
 
 class ClaimDetailResponse(BaseModel):
@@ -88,21 +94,46 @@ class ClaimExplanationResponse(BaseModel):
 
 
 class ClaimCreateRequest(BaseModel):
-    claimant_id: str
-    policy_id: str
-    vehicle_id: str
-    provider_id: str
+    claimant_id: Optional[str] = None
+    claimant_name: Optional[str] = None
+    claimant_phone: Optional[str] = None
+    claimant_email: Optional[str] = None
+    policy_id: Optional[str] = None
+    policy_number: Optional[str] = None
+    vehicle_id: Optional[str] = None
+    provider_id: Optional[str] = None
+    provider_name: Optional[str] = None
+    vehicle_make: Optional[str] = None
+    vehicle_model: Optional[str] = None
+    auto_year: Optional[int] = None
+    auto_vin: Optional[str] = None
     invoice_id: Optional[str] = None
-    claim_date: str
-    claim_amount: float = Field(..., gt=0)
-    claim_type: str = Field("Accident", pattern="^(Theft|Glass Damage|Fire|Accident|Natural Disaster|Other)$")
+    claim_date: Optional[str] = None
+    incident_date: Optional[str] = None
+    claim_amount: Optional[float] = None
+    total_claim_amount: Optional[float] = None
+    injury_claim: Optional[float] = 0.0
+    property_claim: Optional[float] = 0.0
+    vehicle_claim: Optional[float] = 0.0
+    claim_type: Optional[str] = "Accident"
     description: Optional[str] = None
     incident_time: Optional[str] = None
     incident_location: Optional[str] = None
+    incident_type: Optional[str] = None
+    collision_type: Optional[str] = None
+    incident_severity: Optional[str] = None
+    incident_state: Optional[str] = None
+    incident_city: Optional[str] = None
+    incident_hour_of_the_day: Optional[int] = None
+    number_of_vehicles_involved: Optional[int] = None
+    witnesses: Optional[int] = None
+    bodily_injuries: Optional[int] = None
+    police_report_available: Optional[str] = None
     police_report: Optional[bool] = False
     severity: Optional[str] = "Medium"
     invoice_amount: Optional[float] = None
     service_type: Optional[str] = "Inspection & Repair"
+    status: Optional[str] = "Submitted"
 
 
 class ClaimDecisionRequest(BaseModel):

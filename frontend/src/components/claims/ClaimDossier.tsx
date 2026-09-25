@@ -15,7 +15,9 @@ import {
   DollarSign,
   Activity,
   Layers,
-  FileCheck
+  FileCheck,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { Claim, RiskAnalysis } from '../../types';
 import { RiskBadge } from '../common/RiskBadge';
@@ -126,15 +128,29 @@ export const ClaimDossier: React.FC<ClaimDossierProps> = ({
               {claim.status}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
             <span className="flex items-center space-x-1">
-              <UserCheck className="h-3.5 w-3.5 text-slate-400" />
+              <UserCheck className="h-3.5 w-3.5 text-blue-600" />
               <strong className="text-[#0F172A]">{claim.claimant_name || 'Policyholder'}</strong>
             </span>
             <span>•</span>
+            <span className="flex items-center space-x-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              <Phone className="h-3 w-3 text-emerald-600" />
+              <span className="font-mono font-bold">{claim.claimant_phone || '+91-980000-0000'}</span>
+            </span>
+            {claim.claimant_email && (
+              <>
+                <span>•</span>
+                <span className="flex items-center space-x-1 text-slate-600">
+                  <Mail className="h-3 w-3 text-slate-400" />
+                  <span>{claim.claimant_email}</span>
+                </span>
+              </>
+            )}
+            <span>•</span>
             <span className="flex items-center space-x-1">
               <FileText className="h-3.5 w-3.5 text-slate-400" />
-              <span>Policy: <strong className="text-[#0F172A] font-mono">{claim.policy_number || 'POL-521948'}</strong></span>
+              <span>Policy: <strong className="text-[#0F172A] font-mono">{claim.policy_number || 'POL-DEFAULT'}</strong></span>
             </span>
             <span>•</span>
             <span className="flex items-center space-x-1">

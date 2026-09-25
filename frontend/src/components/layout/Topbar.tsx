@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Bell, ShieldCheck, ChevronDown, UserCheck, Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Bell, ShieldCheck, ChevronDown, UserCheck, Menu, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 
@@ -8,7 +9,8 @@ interface TopbarProps {
 }
 
 export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const { user, role, switchRole } = useAuth();
+  const { user, role, switchRole, logout } = useAuth();
+  const navigate = useNavigate();
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
 
   const roles: { role: UserRole; label: string; desc: string }[] = [
@@ -109,19 +111,39 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600 ring-2 ring-white" />
         </button>
 
-        {/* User Card */}
+        {/* Officer Profile & Logout */}
         <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200 shrink-0">
-          <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white uppercase shadow-xs shrink-0">
-            {user?.full_name ? user.full_name.charAt(0) : 'A'}
+          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-xs font-bold text-white uppercase shadow-xs shrink-0 ring-2 ring-blue-100">
+            {user?.full_name ? user.full_name.charAt(0) : 'O'}
           </div>
-          <div className="hidden lg:block">
-            <p className="text-xs font-semibold text-slate-900 leading-tight">
-              {user?.full_name || 'Aditya Bhardwaj'}
-            </p>
-            <p className="text-[11px] text-slate-500 leading-tight">
-              {user?.department || 'Claims Operations'}
+          <div className="hidden lg:block text-left">
+            <div className="flex items-center space-x-1.5">
+              <p className="text-xs font-semibold text-slate-900 leading-tight">
+                {user?.full_name || 'Officer Session'}
+              </p>
+              {user?.badge_number && (
+                <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                  {user.badge_number}
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-500 leading-tight truncate max-w-[140px]">
+              {user?.department || 'Special Operations'}
             </p>
           </div>
+
+          {/* Quick Sign Out Button */}
+          <button
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
+            title="Sign Out of Officer Console"
+            className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-red-200 bg-red-50/70 hover:bg-red-100 text-red-700 text-xs font-medium transition-all cursor-pointer shadow-xs ml-1"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </button>
         </div>
       </div>
     </header>

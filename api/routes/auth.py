@@ -33,6 +33,7 @@ def login(req: LoginRequest):
             "full_name": user["full_name"],
             "role_id": user["role_id"],
             "department": user.get("department"),
+            "badge_number": user.get("badge_number"),
             "is_active": True,
         },
     }
@@ -47,6 +48,7 @@ def register(req: RegisterRequest):
         full_name=req.full_name,
         role_id=req.role_id,
         department=req.department or "Claims & Fraud Operations",
+        badge_number=req.badge_number,
     )
     token = AuthService.create_access_token(data={"sub": user["email"], "role": user["role_id"]})
     return {
@@ -58,6 +60,7 @@ def register(req: RegisterRequest):
             "full_name": user["full_name"],
             "role_id": user["role_id"],
             "department": user.get("department"),
+            "badge_number": user.get("badge_number"),
             "is_active": True,
         },
     }

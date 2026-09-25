@@ -62,40 +62,65 @@ class ApiClient {
   }
 
   // --- AUTH ---
-  async login(email: string, role?: UserRole): Promise<{ access_token: string; user: User }> {
-    try {
-      const res = await this.request<{ access_token: string; user: User }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, role }),
-      });
-      this.setToken(res.access_token);
-      return res;
-    } catch {
-      // Offline / demo fallback if backend is offline or starting
-      const mockUser: User = {
-        id: 'usr_' + Math.random().toString(36).substring(7),
-        email,
-        full_name: email.split('@')[0].replace('.', ' ').toUpperCase(),
-        role: role || 'CLAIMS_OFFICER',
-        department: role === 'INVESTIGATOR' ? 'SIU Special Investigations' : 'Claims Operations',
-      };
-      this.setToken('demo_token_' + Date.now());
-      return { access_token: 'demo_token', user: mockUser };
-    }
+  async login(email: string, password?: string, role?: UserRole): Promise<{ access_token: string; user: User }> {
+    const res = await this.request<{ access_token: string; user: any }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: password || 'officer123' }),
+    });
+    this.setToken(res.access_token);
+    const u = res.user;
+    const mappedUser: User = {
+      id: u.id,
+      email: u.email,
+      full_name: u.full_name,
+      role: (u.role_id || u.role || role || 'CLAIMS_OFFICER') as UserRole,
+      role_id: u.role_id,
+      department: u.department,
+      badge_number: u.badge_number,
+      is_active: u.is_active,
+    };
+    return { access_token: res.access_token, user: mappedUser };
+  }
+
+  async register(payload: {
+    email: string;
+    password: string;
+    full_name: string;
+    role_id: string;
+    department?: string;
+    badge_number?: string;
+  }): Promise<{ access_token: string; user: User }> {
+    const res = await this.request<{ access_token: string; user: any }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    this.setToken(res.access_token);
+    const u = res.user;
+    const mappedUser: User = {
+      id: u.id,
+      email: u.email,
+      full_name: u.full_name,
+      role: (u.role_id || u.role || 'CLAIMS_OFFICER') as UserRole,
+      role_id: u.role_id,
+      department: u.department,
+      badge_number: u.badge_number,
+      is_active: u.is_active,
+    };
+    return { access_token: res.access_token, user: mappedUser };
   }
 
   async getMe(): Promise<User> {
-    try {
-      return await this.request<User>('/auth/me');
-    } catch {
-      return {
-        id: 'usr_default',
-        email: 'claims.officer@insurance.com',
-        full_name: 'Sarah Connor',
-        role: 'CLAIMS_OFFICER',
-        department: 'Claims Operations',
-      };
-    }
+    const u = await this.request<any>('/auth/me');
+    return {
+      id: u.id,
+      email: u.email,
+      full_name: u.full_name,
+      role: (u.role_id || u.role || 'CLAIMS_OFFICER') as UserRole,
+      role_id: u.role_id,
+      department: u.department,
+      badge_number: u.badge_number,
+      is_active: u.is_active,
+    };
   }
 
   // --- DASHBOARD KPIS ---
@@ -188,7 +213,9 @@ class ApiClient {
       return list.map((c: any) => ({
         id: c.claim_id,
         claim_number: c.claim_id,
-        claimant_name: c.claimant_name || (c.claimant ? `${c.claimant.first_name} ${c.claimant.last_name}` : `Claimant ${c.claimant_id || ''}`),
+        claimant_name: c.claimant_name || (c.claimant ? (c.claimant.name || `${c.claimant.first_name || ''} ${c.claimant.last_name || ''}`.trim()) : `Claimant ${c.claimant_id || ''}`),
+        claimant_phone: c.claimant_phone || (c.claimant ? c.claimant.phone : undefined),
+        claimant_email: c.claimant_email || (c.claimant ? c.claimant.email : undefined),
         policy_number: c.policy_id || (c.policy ? c.policy.policy_number : 'POL-DEFAULT'),
         total_claim_amount: c.claim_amount || c.total_claim_amount || 0,
         incident_date: c.claim_date || c.incident_date || '2024-01-01',
@@ -209,7 +236,9 @@ class ApiClient {
       return {
         id: c.claim_id || id,
         claim_number: c.claim_id || id,
-        claimant_name: c.claimant ? `${c.claimant.first_name} ${c.claimant.last_name}` : (c.claimant_id ? `Claimant ${c.claimant_id}` : 'Insured Policyholder'),
+        claimant_name: c.claimant_name || (c.claimant ? (c.claimant.name || `${c.claimant.first_name || ''} ${c.claimant.last_name || ''}`.trim()) : (c.claimant_id ? `Claimant ${c.claimant_id}` : 'Insured Policyholder')),
+        claimant_phone: c.claimant_phone || (c.claimant ? c.claimant.phone : undefined),
+        claimant_email: c.claimant_email || (c.claimant ? c.claimant.email : undefined),
         policy_number: c.policy ? c.policy.policy_number : (c.policy_id || 'POL-DEFAULT'),
         total_claim_amount: c.claim_amount || 0,
         incident_date: c.claim_date || '2024-01-01',

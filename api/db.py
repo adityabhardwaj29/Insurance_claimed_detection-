@@ -69,6 +69,20 @@ class DatabaseManager:
             );
         """)
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                full_name TEXT NOT NULL,
+                role_id TEXT NOT NULL,
+                department TEXT,
+                badge_number TEXT,
+                is_active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP
+            );
+        """)
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS case_events (
                 event_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 case_id VARCHAR(30),

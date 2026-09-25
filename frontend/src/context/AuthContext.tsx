@@ -2,43 +2,25 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { User, UserRole } from '../types';
 
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  full_name: string;
+  role_id: string;
+  department?: string;
+  badge_number?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   role: UserRole;
   isAuthenticated: boolean;
   isLoading: boolean;
   switchRole: (role: UserRole) => void;
-  login: (email: string, role?: UserRole) => Promise<void>;
+  login: (email: string, password?: string, role?: UserRole) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
 }
-
-const DEMO_PERSONAS: Record<UserRole, { email: string; name: string; department: string }> = {
-  CLAIMS_OFFICER: {
-    email: 'claims.officer@insurance.com',
-    name: 'Sarah Connor',
-    department: 'Claims Intake & Triage',
-  },
-  INVESTIGATOR: {
-    email: 'investigator@insurance.com',
-    name: 'John Doe, CFE',
-    department: 'Special Investigation Unit (SIU)',
-  },
-  SUPERVISOR: {
-    email: 'supervisor@insurance.com',
-    name: 'Marcus Vance',
-    department: 'Claims Operations Management',
-  },
-  ANALYST: {
-    email: 'analyst@insurance.com',
-    name: 'Elena Rostova',
-    department: 'Fraud Analytics & Risk Modeling',
-  },
-  ADMIN: {
-    email: 'admin@insurance.com',
-    name: 'David Chen',
-    department: 'System & Security Administration',
-  },
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -49,44 +31,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const rawRole = localStorage.getItem('user_role') as UserRole;
-        const validRole = (rawRole && DEMO_PERSONAS[rawRole]) ? rawRole : 'CLAIMS_OFFICER';
-        setRole(validRole);
-        const persona = DEMO_PERSONAS[validRole];
-        setUser({
-          id: 'usr_' + validRole.toLowerCase(),
-          email: persona.email,
-          full_name: persona.name,
-          role: validRole,
-          department: persona.department,
-        });
+        const currentUser = await api.getMe();
+        setUser(currentUser);
+        setRole(currentUser.role);
+        localStorage.setItem('user_role', currentUser.role);
       } catch (err) {
-        console.error('Error initializing auth', err);
+        console.warn('Session verification failed, logging out:', err);
+        api.setToken(null);
+        setUser(null);
+        localStorage.removeItem('user_role');
       } finally {
         setIsLoading(false);
       }
     };
+
     initAuth();
   }, []);
 
   const switchRole = (newRole: UserRole) => {
     setRole(newRole);
     localStorage.setItem('user_role', newRole);
-    const persona = DEMO_PERSONAS[newRole];
-    setUser({
-      id: 'usr_' + newRole.toLowerCase(),
-      email: persona.email,
-      full_name: persona.name,
-      role: newRole,
-      department: persona.department,
-    });
+    if (user) {
+      setUser({
+        ...user,
+        role: newRole,
+      });
+    }
   };
 
-  const login = async (email: string, selectedRole?: UserRole) => {
+  const login = async (email: string, password?: string, selectedRole?: UserRole) => {
     setIsLoading(true);
     try {
-      const res = await api.login(email, selectedRole);
+      const res = await api.login(email, password, selectedRole);
+      setUser(res.user);
+      setRole(res.user.role);
+      localStorage.setItem('user_role', res.user.role);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (payload: RegisterPayload) => {
+    setIsLoading(true);
+    try {
+      const res = await api.register(payload);
       setUser(res.user);
       setRole(res.user.role);
       localStorage.setItem('user_role', res.user.role);
@@ -99,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     api.setToken(null);
     setUser(null);
     localStorage.removeItem('user_role');
+    localStorage.removeItem('auth_token');
   };
 
   return (
@@ -110,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         switchRole,
         login,
+        register,
         logout,
       }}
     >
@@ -121,21 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    return {
-      user: {
-        id: 'usr_claims_officer',
-        email: 'claims.officer@insurance.com',
-        full_name: 'Sarah Connor',
-        role: 'CLAIMS_OFFICER' as UserRole,
-        department: 'Claims Operations',
-      },
-      role: 'CLAIMS_OFFICER' as UserRole,
-      isAuthenticated: true,
-      isLoading: false,
-      login: async () => {},
-      logout: () => {},
-      switchRole: () => {},
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

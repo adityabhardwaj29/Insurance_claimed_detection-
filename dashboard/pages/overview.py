@@ -187,12 +187,13 @@ if not high_risk_subset.empty:
     display_cols = [
         "claim_id",
         "claim_date",
+        "claimant_name",
+        "claimant_phone",
         "claim_amount",
         "claim_type",
         "risk_band",
         "final_risk_score",
         "fraud_probability",
-        "claimant_name",
         "provider_name",
         "case_status",
     ]

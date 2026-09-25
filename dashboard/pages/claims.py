@@ -81,6 +81,7 @@ if search_term.strip():
     filtered_df = filtered_df[
         filtered_df["claim_id"].astype(str).str.lower().str.contains(t)
         | filtered_df["claimant_name"].astype(str).str.lower().str.contains(t)
+        | filtered_df["claimant_phone"].astype(str).str.lower().str.contains(t)
         | filtered_df["provider_name"].astype(str).str.lower().str.contains(t)
         | filtered_df["claimant_city"].astype(str).str.lower().str.contains(t)
         | filtered_df["claim_type"].astype(str).str.lower().str.contains(t)
@@ -106,13 +107,14 @@ if filtered_df.empty:
 cols_to_show = [
     "claim_id",
     "claim_date",
+    "claimant_name",
+    "claimant_phone",
     "claim_amount",
     "claim_type",
     "risk_band",
     "final_risk_score",
     "fraud_probability",
     "anomaly_score",
-    "claimant_name",
     "provider_name",
     "claimant_city",
     "case_status",

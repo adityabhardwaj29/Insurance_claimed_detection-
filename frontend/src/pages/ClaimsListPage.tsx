@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search,
   FilePlus,
-  FileSpreadsheet
+  FileSpreadsheet,
+  User,
+  Phone,
+  Mail,
+  ShieldAlert
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Claim } from '../types';
@@ -43,6 +47,8 @@ export const ClaimsListPage: React.FC = () => {
         (c) =>
           c.claim_number.toLowerCase().includes(q) ||
           (c.claimant_name || '').toLowerCase().includes(q) ||
+          (c.claimant_phone || '').toLowerCase().includes(q) ||
+          (c.claimant_email || '').toLowerCase().includes(q) ||
           (c.policy_number || '').toLowerCase().includes(q)
       );
     }
@@ -169,9 +175,18 @@ export const ClaimsListPage: React.FC = () => {
                       {c.claim_number}
                     </td>
                     <td className="px-5 py-4">
-                      <div className="text-[#0F172A] font-semibold">{c.claimant_name || 'Policyholder'}</div>
-                      <div className="text-slate-500 font-mono text-[11px]">
-                        {c.policy_number || 'POL-521948'}
+                      <div className="text-[#0F172A] font-bold flex items-center space-x-1.5">
+                        <User className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                        <span className="truncate">{c.claimant_name || 'Policyholder'}</span>
+                      </div>
+                      <div className="text-slate-600 flex items-center space-x-1 text-[11px] mt-0.5">
+                        <Phone className="h-3 w-3 text-emerald-600 shrink-0" />
+                        <span className="font-mono font-medium text-emerald-700 bg-emerald-50 px-1 rounded border border-emerald-200">
+                          {c.claimant_phone || '+91-980000-0000'}
+                        </span>
+                      </div>
+                      <div className="text-slate-400 font-mono text-[10px] mt-0.5">
+                        {c.policy_number || 'POL-DEFAULT'}
                       </div>
                     </td>
                     <td className="px-5 py-4 text-slate-600">

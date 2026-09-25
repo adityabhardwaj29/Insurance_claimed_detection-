@@ -17,7 +17,7 @@ if str(_ROOT) not in sys.path:
 
 import streamlit as st
 
-from dashboard.components.layout import inject_theme
+from dashboard.components.layout import inject_theme, render_sidebar_officer_session
 from dashboard.components.header import render_header
 from dashboard.components.metrics import render_kpi_card
 from dashboard.utils.data_loader import compute_executive_kpis, load_all_claims_data
@@ -32,6 +32,9 @@ st.set_page_config(
 
 # Inject centralized design tokens and component styling
 inject_theme()
+
+# Render Officer Session Widget in Sidebar
+render_sidebar_officer_session()
 
 # Top Header Bar
 render_header(
