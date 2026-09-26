@@ -13,6 +13,8 @@ services:
       - SUPABASE_KEY=${SUPABASE_KEY:-}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-enterprise-fraudshield-ai-key-secret-2024}
     volumes:
+      - ./api:/app/api
+      - ./src:/app/src
       - ./data:/app/data
       - ./database:/app/database
       - ./models:/app/models
@@ -43,6 +45,8 @@ services:
     depends_on:
       - api
     volumes:
+      - ./dashboard:/app/dashboard
+      - ./src:/app/src
       - ./data:/app/data
       - ./database:/app/database
       - ./models:/app/models
