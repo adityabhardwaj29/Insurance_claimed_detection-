@@ -10,7 +10,7 @@ import {
   UserRole
 } from '../types';
 
-const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://fraudshield-api-3j07.onrender.com/api').replace(/\/+$/, '');
 
 class ApiClient {
   private token: string | null = null;

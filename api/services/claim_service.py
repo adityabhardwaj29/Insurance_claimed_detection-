@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
+from api.db import db
 from src.utils.config import settings
 
 logger = logging.getLogger(__name__)
@@ -27,11 +28,6 @@ class ClaimService:
 
     def __init__(self, db_path: Optional[Path] = None):
         self.db_path = db_path or settings.DATABASE_PATH
-
-    def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
 
     def list_claims(
         self,
@@ -75,35 +71,38 @@ class ClaimService:
 
         where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
 
-        with self._get_connection() as conn:
-            cur = conn.cursor()
+        # Count query
+        count_query = f"SELECT COUNT(*) as cnt FROM claims{where_sql}"
+        cnt_row = db.query_one(count_query, params)
+        total = int(cnt_row["cnt"]) if cnt_row and cnt_row.get("cnt") is not None else 0
 
-            # Count query
-            count_query = f"SELECT COUNT(*) FROM claims{where_sql}"
-            cur.execute(count_query, params)
-            total = cur.fetchone()[0]
-
-            # Enriched data query with claimant name, phone, email, policy and risk band
-            where_sql_c = where_sql.replace("WHERE ", "WHERE c.").replace("status", "c.status").replace("claim_type", "c.claim_type").replace("fraud_label", "c.fraud_label").replace("claim_amount", "c.claim_amount") if where_sql else ""
-            data_query = f"""
-                SELECT 
-                    c.claim_id, c.claimant_id, c.policy_id, c.provider_id, c.vehicle_id, c.invoice_id,
-                    c.claim_date, c.claim_amount, c.claim_type, c.status, c.fraud_label, c.description,
-                    cl.name AS claimant_name,
-                    cl.phone AS claimant_phone,
-                    cl.email AS claimant_email,
-                    p.policy_type,
-                    rs.final_risk_score,
-                    rs.risk_band
-                FROM claims c
-                LEFT JOIN claimants cl ON c.claimant_id = cl.claimant_id
-                LEFT JOIN policies p ON c.policy_id = p.policy_id
-                LEFT JOIN risk_scores rs ON c.claim_id = rs.claim_id
-                {where_sql_c}
-                ORDER BY c.{order_col} {direction} LIMIT ? OFFSET ?
-            """
-            cur.execute(data_query, params + [int(limit), int(offset)])
-            items = [dict(r) for r in cur.fetchall()]
+        # Enriched data query with claimant name, phone, email, policy and risk band
+        where_sql_c = where_sql.replace("WHERE ", "WHERE c.").replace("status", "c.status").replace("claim_type", "c.claim_type").replace("fraud_label", "c.fraud_label").replace("claim_amount", "c.claim_amount") if where_sql else ""
+        data_query = f"""
+            SELECT 
+                c.claim_id, c.claimant_id, c.policy_id, c.provider_id, c.vehicle_id, c.invoice_id,
+                c.claim_date, c.claim_amount, c.claim_type, c.status, c.fraud_label, c.description,
+                cl.name AS claimant_name,
+                cl.phone AS claimant_phone,
+                cl.email AS claimant_email,
+                p.policy_type,
+                rs.final_risk_score,
+                rs.risk_band
+            FROM claims c
+            LEFT JOIN claimants cl ON c.claimant_id = cl.claimant_id
+            LEFT JOIN policies p ON c.policy_id = p.policy_id
+            LEFT JOIN risk_scores rs ON c.claim_id = rs.claim_id
+            {where_sql_c}
+            ORDER BY c.{order_col} {direction} LIMIT ? OFFSET ?
+        """
+        items = db.query_all(data_query, params + [int(limit), int(offset)])
+        for item in items:
+            if "claim_amount" in item and item["claim_amount"] is not None:
+                item["claim_amount"] = float(item["claim_amount"])
+            if "final_risk_score" in item and item["final_risk_score"] is not None:
+                item["final_risk_score"] = float(item["final_risk_score"])
+            if "claim_date" in item and item["claim_date"] is not None:
+                item["claim_date"] = str(item["claim_date"])
 
         return items, total
 
@@ -112,46 +111,28 @@ class ClaimService:
         Returns full relational record: claim, claimant, provider, policy, vehicle, invoice.
         """
         cid = claim_id.strip()
-        with self._get_connection() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM claims WHERE claim_id = ?", (cid,))
-            c_row = cur.fetchone()
-            if not c_row:
-                return None
-            claim_dict = dict(c_row)
+        claim_dict = db.query_one("SELECT * FROM claims WHERE claim_id = ?", (cid,))
+        if not claim_dict:
+            return None
 
-            # Claimant
-            cur.execute("SELECT * FROM claimants WHERE claimant_id = ?", (claim_dict["claimant_id"],))
-            clt = cur.fetchone()
-            claimant_dict = dict(clt) if clt else {}
+        claimant_dict = db.query_one("SELECT * FROM claimants WHERE claimant_id = ?", (claim_dict["claimant_id"],)) or {}
+        provider_dict = db.query_one("SELECT * FROM providers WHERE provider_id = ?", (claim_dict["provider_id"],)) or {}
+        policy_dict = db.query_one("SELECT * FROM policies WHERE policy_id = ?", (claim_dict["policy_id"],)) or {}
+        vehicle_dict = db.query_one("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim_dict["vehicle_id"],)) or {}
+        invoice_dict = db.query_one("SELECT * FROM invoices WHERE invoice_id = ?", (claim_dict["invoice_id"],)) or {}
 
-            # Provider
-            cur.execute("SELECT * FROM providers WHERE provider_id = ?", (claim_dict["provider_id"],))
-            prv = cur.fetchone()
-            provider_dict = dict(prv) if prv else {}
-
-            # Policy
-            cur.execute("SELECT * FROM policies WHERE policy_id = ?", (claim_dict["policy_id"],))
-            pol = cur.fetchone()
-            policy_dict = dict(pol) if pol else {}
-
-            # Vehicle
-            cur.execute("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim_dict["vehicle_id"],))
-            veh = cur.fetchone()
-            vehicle_dict = dict(veh) if veh else {}
-
-            # Invoice
-            cur.execute("SELECT * FROM invoices WHERE invoice_id = ?", (claim_dict["invoice_id"],))
-            inv = cur.fetchone()
-            invoice_dict = dict(inv) if inv else {}
+        if "premium" in policy_dict and policy_dict["premium"] is not None:
+            policy_dict["premium"] = float(policy_dict["premium"])
+        if "invoice_amount" in invoice_dict and invoice_dict["invoice_amount"] is not None:
+            invoice_dict["invoice_amount"] = float(invoice_dict["invoice_amount"])
 
         return {
             "claim_id": claim_dict["claim_id"],
-            "claim_date": claim_dict.get("claim_date"),
+            "claim_date": str(claim_dict.get("claim_date", "")),
             "claim_amount": float(claim_dict["claim_amount"]),
             "claim_type": claim_dict["claim_type"],
             "status": claim_dict["status"],
-            "fraud_label": int(claim_dict["fraud_label"]),
+            "fraud_label": int(claim_dict["fraud_label"] or 0),
             "description": claim_dict.get("description"),
             "claimant": claimant_dict,
             "provider": provider_dict,
@@ -300,26 +281,23 @@ class ClaimService:
 
     def get_dashboard_summary(self) -> Dict[str, Any]:
         """
-        Calculates high-level business & fraud metrics from SQLite DB and risk scores.
+        Calculates high-level business & fraud metrics from database and risk scores.
         """
-        with self._get_connection() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT COUNT(*), SUM(claim_amount), SUM(CASE WHEN fraud_label=1 THEN 1 ELSE 0 END) FROM claims")
-            c_row = cur.fetchone()
-            total_claims = c_row[0] or 0
-            total_amount = float(c_row[1] or 0.0)
-            fraud_count = c_row[2] or 0
-            fraud_rate = round((fraud_count / total_claims * 100.0) if total_claims > 0 else 0.0, 2)
+        c_row = db.query_one("SELECT COUNT(*) as total_claims, SUM(claim_amount) as total_amount, SUM(CASE WHEN fraud_label=1 THEN 1 ELSE 0 END) as fraud_count FROM claims")
+        total_claims = int(c_row["total_claims"]) if c_row and c_row.get("total_claims") else 0
+        total_amount = float(c_row["total_amount"] or 0.0) if c_row and c_row.get("total_amount") else 0.0
+        fraud_count = int(c_row["fraud_count"]) if c_row and c_row.get("fraud_count") else 0
+        fraud_rate = round((fraud_count / total_claims * 100.0) if total_claims > 0 else 0.0, 2)
 
-            # Cases stats
-            cur.execute("SELECT COUNT(*) FROM investigation_cases WHERE status NOT IN ('RESOLVED', 'FALSE_POSITIVE')")
-            active_cases = cur.fetchone()[0] or 0
+        # Cases stats
+        active_row = db.query_one("SELECT COUNT(*) as cnt FROM investigation_cases WHERE status NOT IN ('RESOLVED', 'FALSE_POSITIVE')")
+        active_cases = int(active_row["cnt"]) if active_row and active_row.get("cnt") else 0
 
-            cur.execute("SELECT status, COUNT(*) FROM investigation_cases GROUP BY status")
-            cases_by_status = dict(cur.fetchall())
+        status_rows = db.query_all("SELECT status, COUNT(*) as cnt FROM investigation_cases GROUP BY status")
+        cases_by_status = {r["status"]: int(r["cnt"]) for r in status_rows}
 
-            cur.execute("SELECT priority, COUNT(*) FROM investigation_cases GROUP BY priority")
-            cases_by_priority = dict(cur.fetchall())
+        priority_rows = db.query_all("SELECT priority, COUNT(*) as cnt FROM investigation_cases GROUP BY priority")
+        cases_by_priority = {r["priority"]: int(r["cnt"]) for r in priority_rows}
 
         avg_risk = 0.0
         high_risk_count = 0
@@ -345,152 +323,132 @@ class ClaimService:
 
     def create_claim(self, data: Dict[str, Any], actor: str = "system") -> Dict[str, Any]:
         """Creates a new claim with auto-generated ID, claimant resolution/creation with phone and email, invoice creation if needed, and audit logging."""
-        with self._get_connection() as conn:
-            cur = conn.cursor()
-            # Determine next CLM ID
-            cur.execute("SELECT claim_id FROM claims ORDER BY claim_id DESC LIMIT 1")
-            row = cur.fetchone()
-            next_num = 321
-            if row and row[0].startswith("CLM"):
+        # Determine next CLM ID
+        row = db.query_one("SELECT claim_id FROM claims ORDER BY claim_id DESC LIMIT 1")
+        next_num = 324
+        if row and row.get("claim_id") and str(row["claim_id"]).startswith("CLM"):
+            try:
+                next_num = int(str(row["claim_id"])[3:]) + 1
+            except ValueError:
+                next_num = 324
+        new_claim_id = f"CLM{next_num:05d}"
+
+        # Resolve or create claimant with name, phone, email
+        claimant_id = data.get("claimant_id")
+        claimant_name = data.get("claimant_name")
+        claimant_phone = data.get("claimant_phone")
+        claimant_email = data.get("claimant_email")
+
+        if not claimant_id:
+            cl_row = db.query_one("SELECT claimant_id FROM claimants ORDER BY claimant_id DESC LIMIT 1")
+            cl_num = 124
+            if cl_row and cl_row.get("claimant_id") and str(cl_row["claimant_id"]).startswith("CLT"):
                 try:
-                    next_num = int(row[0][3:]) + 1
+                    cl_num = int(str(cl_row["claimant_id"])[3:]) + 1
                 except ValueError:
-                    next_num = 321
-            new_claim_id = f"CLM{next_num:05d}"
-
-            # Resolve or create claimant with name, phone, email
-            claimant_id = data.get("claimant_id")
-            claimant_name = data.get("claimant_name")
-            claimant_phone = data.get("claimant_phone")
-            claimant_email = data.get("claimant_email")
-
-            if not claimant_id:
-                cur.execute("SELECT claimant_id FROM claimants ORDER BY claimant_id DESC LIMIT 1")
-                cl_row = cur.fetchone()
-                cl_num = 121
-                if cl_row and cl_row[0].startswith("CLT"):
-                    try:
-                        cl_num = int(cl_row[0][3:]) + 1
-                    except ValueError:
-                        cl_num = 121
-                claimant_id = f"CLT{cl_num:04d}"
-                cur.execute("""
-                    INSERT INTO claimants (claimant_id, name, age, city, gender, marital_status, phone, email, address, occupation)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    claimant_id,
-                    claimant_name or f"Claimant {cl_num}",
-                    35,
-                    data.get("incident_city") or "Mumbai",
-                    "M",
-                    "Single",
-                    claimant_phone or f"+91-98{cl_num:04d}-{cl_num:04d}",
-                    claimant_email or f"{claimant_id.lower()}@example.com",
-                    f"{data.get('incident_city', 'City Center')}",
-                    "Policyholder"
-                ))
-            elif claimant_name or claimant_phone:
-                cur.execute("""
-                    UPDATE claimants 
-                    SET name = COALESCE(?, name),
-                        phone = COALESCE(?, phone),
-                        email = COALESCE(?, email)
-                    WHERE claimant_id = ?
-                """, (claimant_name, claimant_phone, claimant_email, claimant_id))
-
-            # Policy
-            policy_id = data.get("policy_id") or data.get("policy_number") or f"POL{next_num:05d}"
-            cur.execute("""
-                INSERT OR IGNORE INTO policies (policy_id, claimant_id, start_date, end_date, policy_type, premium, date_order_invalid)
-                VALUES (?, ?, '2024-01-01', '2025-01-01', ?, ?, 0)
-            """, (policy_id, claimant_id, data.get("policy_type", "Comprehensive Auto Coverage"), 15000.0))
-
-            # Vehicle
-            vehicle_id = data.get("vehicle_id") or f"VEH{next_num:05d}"
-            cur.execute("""
-                INSERT OR IGNORE INTO vehicles (vehicle_id, claimant_id, make, vehicle_type, registration_no, model_year)
-                VALUES (?, ?, ?, ?, ?, ?)
+                    cl_num = 124
+            claimant_id = f"CLT{cl_num:04d}"
+            db.execute("""
+                INSERT INTO claimants (claimant_id, name, age, city, gender, marital_status, phone, email, address, occupation)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                vehicle_id,
                 claimant_id,
-                data.get("vehicle_make") or "Honda",
-                data.get("vehicle_model") or "Sedan",
-                data.get("auto_vin") or f"REG-{next_num:05d}",
-                int(data.get("auto_year") or 2021)
+                claimant_name or f"Claimant {cl_num}",
+                35,
+                data.get("incident_city") or "Mumbai",
+                "M",
+                "Single",
+                claimant_phone or f"+91-98{cl_num:04d}-{cl_num:04d}",
+                claimant_email or f"{claimant_id.lower()}@example.com",
+                f"{data.get('incident_city', 'City Center')}",
+                "Policyholder"
             ))
+        elif claimant_name or claimant_phone:
+            db.execute("""
+                UPDATE claimants 
+                SET name = COALESCE(?, name),
+                    phone = COALESCE(?, phone),
+                    email = COALESCE(?, email)
+                WHERE claimant_id = ?
+            """, (claimant_name, claimant_phone, claimant_email, claimant_id))
 
-            # Provider
-            provider_id = data.get("provider_id") or "PRV0001"
-            if data.get("provider_name"):
-                cur.execute("SELECT provider_id FROM providers WHERE provider_name = ?", (data["provider_name"],))
-                p_match = cur.fetchone()
-                if p_match:
-                    provider_id = p_match[0]
-                else:
-                    prov_id = f"PRV{next_num:04d}"
-                    cur.execute("""
-                        INSERT OR IGNORE INTO providers (provider_id, provider_name, city, provider_type, rating)
-                        VALUES (?, ?, ?, 'Body Shop', 4.2)
-                    """, (prov_id, data["provider_name"], data.get("incident_city") or "Mumbai"))
-                    provider_id = prov_id
+        # Policy
+        policy_id = data.get("policy_id") or data.get("policy_number") or f"POL{next_num:05d}"
+        db.execute("""
+            INSERT OR IGNORE INTO policies (policy_id, claimant_id, start_date, end_date, policy_type, premium, date_order_invalid)
+            VALUES (?, ?, '2024-01-01', '2025-01-01', ?, ?, 0)
+        """, (policy_id, claimant_id, data.get("policy_type", "Comprehensive Auto Coverage"), 15000.0))
 
-            # Ensure invoice exists
-            claim_amt = float(data.get("total_claim_amount") or data.get("claim_amount") or 50000.0)
-            claim_dt = data.get("incident_date") or data.get("claim_date") or datetime.now().strftime("%Y-%m-%d")
-            invoice_id = data.get("invoice_id")
-            if not invoice_id:
-                invoice_id = f"INV{next_num:05d}"
-                inv_amt = float(data.get("invoice_amount") or claim_amt)
-                cur.execute(
-                    "INSERT OR IGNORE INTO invoices (invoice_id, provider_id, invoice_amount, invoice_date, description) VALUES (?, ?, ?, ?, ?)",
-                    (invoice_id, provider_id, inv_amt, claim_dt, f"Service invoice for {new_claim_id}")
-                )
+        # Vehicle
+        vehicle_id = data.get("vehicle_id") or f"VEH{next_num:05d}"
+        db.execute("""
+            INSERT OR IGNORE INTO vehicles (vehicle_id, claimant_id, make, vehicle_type, registration_no, model_year)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            vehicle_id,
+            claimant_id,
+            data.get("vehicle_make") or "Honda",
+            data.get("vehicle_model") or "Sedan",
+            data.get("auto_vin") or f"REG-{next_num:05d}",
+            int(data.get("auto_year") or 2021)
+        ))
 
-            # Insert claim
-            cur.execute("""
-                INSERT INTO claims (
-                    claim_id, claimant_id, policy_id, vehicle_id, provider_id, invoice_id,
-                    claim_date, claim_amount, claim_type, status, fraud_label, description
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', 0, ?)
-            """, (
-                new_claim_id,
-                claimant_id,
-                policy_id,
-                vehicle_id,
-                provider_id,
-                invoice_id,
-                claim_dt,
-                claim_amt,
-                data.get("claim_type", "Accident"),
-                data.get("description", f"Submitted claim {new_claim_id}")
-            ))
+        # Provider
+        provider_id = data.get("provider_id") or "PRV0001"
+        if data.get("provider_name"):
+            p_match = db.query_one("SELECT provider_id FROM providers WHERE provider_name = ?", (data["provider_name"],))
+            if p_match:
+                provider_id = p_match["provider_id"]
+            else:
+                prov_id = f"PRV{next_num:04d}"
+                db.execute("""
+                    INSERT OR IGNORE INTO providers (provider_id, provider_name, city, provider_type, rating)
+                    VALUES (?, ?, ?, 'Body Shop', 4.2)
+                """, (prov_id, data["provider_name"], data.get("incident_city") or "Mumbai"))
+                provider_id = prov_id
 
-            # Record event
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS case_events (
-                    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    case_id VARCHAR(30),
-                    event_type TEXT,
-                    actor TEXT,
-                    old_value TEXT,
-                    new_value TEXT,
-                    details TEXT,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-            case_id = f"CASE-{new_claim_id}"
-            cur.execute("""
-                INSERT OR IGNORE INTO investigation_cases (case_id, claim_id, status, priority, reason, created_at, updated_at)
-                VALUES (?, ?, 'NEW', 'MEDIUM', 'Initial claim intake', ?, ?)
-            """, (case_id, new_claim_id, now_ts, now_ts))
+        # Ensure invoice exists
+        claim_amt = float(data.get("total_claim_amount") or data.get("claim_amount") or 50000.0)
+        claim_dt = data.get("incident_date") or data.get("claim_date") or datetime.now().strftime("%Y-%m-%d")
+        invoice_id = data.get("invoice_id")
+        if not invoice_id:
+            invoice_id = f"INV{next_num:05d}"
+            inv_amt = float(data.get("invoice_amount") or claim_amt)
+            db.execute(
+                "INSERT OR IGNORE INTO invoices (invoice_id, provider_id, invoice_amount, invoice_date, description) VALUES (?, ?, ?, ?, ?)",
+                (invoice_id, provider_id, inv_amt, claim_dt, f"Service invoice for {new_claim_id}")
+            )
 
-            cur.execute("""
-                INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
-                VALUES (?, 'CLAIM_CREATED', ?, 'None', 'Open', ?, ?)
-            """, (case_id, actor, f"Created claim for {claimant_name or claimant_id} (Mobile: {claimant_phone or 'N/A'}) for amount INR {claim_amt:,.2f}", now_ts))
+        # Insert claim
+        db.execute("""
+            INSERT INTO claims (
+                claim_id, claimant_id, policy_id, vehicle_id, provider_id, invoice_id,
+                claim_date, claim_amount, claim_type, status, fraud_label, description
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', 0, ?)
+        """, (
+            new_claim_id,
+            claimant_id,
+            policy_id,
+            vehicle_id,
+            provider_id,
+            invoice_id,
+            claim_dt,
+            claim_amt,
+            data.get("claim_type", "Accident"),
+            data.get("description", f"Submitted claim {new_claim_id}")
+        ))
 
-            conn.commit()
+        now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        case_id = f"CASE-{new_claim_id}"
+        db.execute("""
+            INSERT OR IGNORE INTO investigation_cases (case_id, claim_id, status, priority, reason, created_at, updated_at)
+            VALUES (?, ?, 'NEW', 'MEDIUM', 'Initial claim intake', ?, ?)
+        """, (case_id, new_claim_id, now_ts, now_ts))
+
+        db.execute("""
+            INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+            VALUES (?, 'CLAIM_CREATED', ?, 'None', 'Open', ?, ?)
+        """, (case_id, actor, f"Created claim for {claimant_name or claimant_id} (Mobile: {claimant_phone or 'N/A'}) for amount INR {claim_amt:,.2f}", now_ts))
 
         return self.get_claim_detail(new_claim_id) or {"claim_id": new_claim_id, "status": "Open"}
 
@@ -505,31 +463,26 @@ class ClaimService:
         }
         new_status = status_map.get(decision, "Under Review")
 
-        with self._get_connection() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT status FROM claims WHERE claim_id = ?", (cid,))
-            old_row = cur.fetchone()
-            old_status = old_row[0] if old_row else "Submitted"
+        old_row = db.query_one("SELECT status FROM claims WHERE claim_id = ?", (cid,))
+        old_status = old_row["status"] if old_row and old_row.get("status") else "Submitted"
 
-            cur.execute("UPDATE claims SET status = ? WHERE claim_id = ?", (new_status, cid))
+        db.execute("UPDATE claims SET status = ? WHERE claim_id = ?", (new_status, cid))
 
-            # Also update case if exists
-            case_id = f"CASE-{cid}"
-            case_status = "RESOLVED" if decision in ("Approve", "Reject") else "ESCALATED"
-            cur.execute("""
-                UPDATE investigation_cases 
-                SET status = ?, resolution = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE case_id = ?
-            """, (case_status, f"{decision}: {reason} (Decided by {actor})", case_id))
+        # Also update case if exists
+        case_id = f"CASE-{cid}"
+        case_status = "RESOLVED" if decision in ("Approve", "Reject") else "ESCALATED"
+        db.execute("""
+            UPDATE investigation_cases 
+            SET status = ?, resolution = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE case_id = ?
+        """, (case_status, f"{decision}: {reason} (Decided by {actor})", case_id))
 
-            # Audit event
-            now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-            cur.execute("""
-                INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
-                VALUES (?, 'CLAIM_DECISION_RECORDED', ?, ?, ?, ?, ?)
-            """, (case_id, actor, old_status, new_status, f"Decision: {decision} | Reason: {reason}", now_ts))
-
-            conn.commit()
+        # Audit event
+        now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        db.execute("""
+            INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+            VALUES (?, 'CLAIM_DECISION_RECORDED', ?, ?, ?, ?, ?)
+        """, (case_id, actor, old_status, new_status, f"Decision: {decision} | Reason: {reason}", now_ts))
 
         return {
             "claim_id": cid,

@@ -134,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose })
             Research & Analytics
           </p>
           <a
-            href={import.meta.env.VITE_STREAMLIT_URL || 'http://localhost:8501'}
+            href={import.meta.env.VITE_STREAMLIT_URL || 'https://insurance-fraud-analytics.streamlit.app'}
             target="_blank"
             rel="noopener noreferrer"
             title="Streamlit Console"

@@ -24,80 +24,108 @@ DUP_FEATURES_PATH = ROOT / "data" / "features" / "duplicate_features.csv"
 GRAPH_FEATURES_PATH = ROOT / "data" / "features" / "graph_features.csv"
 
 
+import sys
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from api.db import db
+except Exception:
+    db = None
+
+
 @st.cache_data(ttl=5)
 def load_all_claims_data() -> pd.DataFrame:
     """
     Loads all claims enriched with relational attributes,
-    live risk scores from SQLite, and investigation case statuses.
+    live risk scores from database (Supabase PostgreSQL / SQLite),
+    and investigation case statuses.
     Supports real-time live detection sync with React frontend and FastAPI.
     """
-    if not DB_PATH.exists():
+    query = """
+    SELECT
+        c.claim_id,
+        c.claim_date,
+        c.claim_amount,
+        c.claim_type,
+        c.status AS claim_status,
+        c.fraud_label,
+        c.description,
+        c.claimant_id,
+        cl.name AS claimant_name,
+        cl.phone AS claimant_phone,
+        cl.email AS claimant_email,
+        cl.address AS claimant_address,
+        cl.city AS claimant_city,
+        cl.age AS claimant_age,
+        c.policy_id,
+        p.policy_type,
+        p.premium,
+        p.date_order_invalid,
+        c.provider_id,
+        pr.provider_name,
+        pr.provider_type,
+        pr.city AS provider_city,
+        pr.rating AS provider_rating,
+        c.vehicle_id,
+        v.make AS vehicle_make,
+        v.vehicle_type,
+        v.model_year,
+        c.invoice_id,
+        i.invoice_amount,
+        i.invoice_date,
+        ic.case_status,
+        ic.case_priority,
+        ic.assigned_to,
+        ic.resolution,
+        rs.final_risk_score,
+        rs.risk_band,
+        rs.fraud_probability,
+        rs.anomaly_score,
+        rs.duplicate_score,
+        rs.graph_risk_score,
+        rs.risk_reasons
+    FROM claims c
+    LEFT JOIN claimants cl ON c.claimant_id = cl.claimant_id
+    LEFT JOIN policies p ON c.policy_id = p.policy_id
+    LEFT JOIN providers pr ON c.provider_id = pr.provider_id
+    LEFT JOIN vehicles v ON c.vehicle_id = v.vehicle_id
+    LEFT JOIN invoices i ON c.invoice_id = i.invoice_id
+    LEFT JOIN (
+        SELECT
+            claim_id,
+            status AS case_status,
+            priority AS case_priority,
+            assigned_to,
+            resolution,
+            ROW_NUMBER() OVER (PARTITION BY claim_id ORDER BY updated_at DESC) as rn
+        FROM investigation_cases
+    ) ic ON c.claim_id = ic.claim_id AND ic.rn = 1
+    LEFT JOIN risk_scores rs ON c.claim_id = rs.claim_id
+    ORDER BY c.claim_id DESC
+    """
+    df = pd.DataFrame()
+    if db:
+        try:
+            rows = db.query_all(query)
+            if rows:
+                df = pd.DataFrame(rows)
+        except Exception:
+            pass
+
+    if df.empty and DB_PATH.exists():
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                df = pd.read_sql_query(query, conn)
+        except Exception:
+            pass
+
+    if df.empty:
         return pd.DataFrame()
 
-    with sqlite3.connect(DB_PATH) as conn:
-        query = """
-        SELECT
-            c.claim_id,
-            c.claim_date,
-            c.claim_amount,
-            c.claim_type,
-            c.status AS claim_status,
-            c.fraud_label,
-            c.description,
-            c.claimant_id,
-            cl.name AS claimant_name,
-            cl.phone AS claimant_phone,
-            cl.email AS claimant_email,
-            cl.address AS claimant_address,
-            cl.city AS claimant_city,
-            cl.age AS claimant_age,
-            c.policy_id,
-            p.policy_type,
-            p.premium,
-            p.date_order_invalid,
-            c.provider_id,
-            pr.provider_name,
-            pr.provider_type,
-            pr.city AS provider_city,
-            pr.rating AS provider_rating,
-            c.vehicle_id,
-            v.make AS vehicle_make,
-            v.vehicle_type,
-            v.model_year,
-            c.invoice_id,
-            i.invoice_amount,
-            i.invoice_date,
-            ic.case_status,
-            ic.case_priority,
-            ic.assigned_to,
-            ic.resolution,
-            rs.final_risk_score,
-            rs.risk_band,
-            rs.fraud_probability,
-            rs.anomaly_score,
-            rs.duplicate_score,
-            rs.graph_risk_score,
-            rs.risk_reasons
-        FROM claims c
-        LEFT JOIN claimants cl ON c.claimant_id = cl.claimant_id
-        LEFT JOIN policies p ON c.policy_id = p.policy_id
-        LEFT JOIN providers pr ON c.provider_id = pr.provider_id
-        LEFT JOIN vehicles v ON c.vehicle_id = v.vehicle_id
-        LEFT JOIN invoices i ON c.invoice_id = i.invoice_id
-        LEFT JOIN (
-            SELECT
-                claim_id,
-                status AS case_status,
-                priority AS case_priority,
-                assigned_to,
-                resolution,
-                ROW_NUMBER() OVER (PARTITION BY claim_id ORDER BY updated_at DESC, rowid DESC) as rn
-            FROM investigation_cases
-        ) ic ON c.claim_id = ic.claim_id AND ic.rn = 1
-        LEFT JOIN risk_scores rs ON c.claim_id = rs.claim_id
-        ORDER BY c.claim_id DESC
-        """
-        df = pd.read_sql_query(query, conn)
+    for col in ["claim_amount", "final_risk_score", "fraud_probability", "anomaly_score", "duplicate_score", "graph_risk_score"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
     # Fallback merge from static CSV if any claim lacks risk scores in DB
     if df["final_risk_score"].isna().any() and RISK_SCORES_PATH.exists():
@@ -185,13 +213,25 @@ def load_duplicate_records() -> pd.DataFrame:
     if "duplicate_flag" in dup_df.columns and "is_duplicate_flag" not in dup_df.columns:
         dup_df["is_duplicate_flag"] = dup_df["duplicate_flag"]
 
-    if DB_PATH.exists():
-        with sqlite3.connect(DB_PATH) as conn:
-            claims = pd.read_sql_query(
-                "SELECT claim_id, claim_amount, claim_type, claim_date, claimant_id, provider_id FROM claims",
-                conn,
-            )
-        dup_df = dup_df.merge(claims, on="claim_id", how="left")
+    claims_rows = []
+    if db:
+        try:
+            claims_rows = db.query_all("SELECT claim_id, claim_amount, claim_type, claim_date, claimant_id, provider_id FROM claims")
+        except Exception:
+            pass
+    if not claims_rows and DB_PATH.exists():
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                claims = pd.read_sql_query(
+                    "SELECT claim_id, claim_amount, claim_type, claim_date, claimant_id, provider_id FROM claims",
+                    conn,
+                )
+                claims_rows = claims.to_dict("records")
+        except Exception:
+            pass
+    if claims_rows:
+        claims_df = pd.DataFrame(claims_rows)
+        dup_df = dup_df.merge(claims_df, on="claim_id", how="left")
 
     return dup_df
 
@@ -199,12 +239,19 @@ def load_duplicate_records() -> pd.DataFrame:
 @st.cache_data(ttl=5)
 def load_investigation_cases() -> pd.DataFrame:
     """Loads all investigation cases with claim details and audit stats."""
-    if not DB_PATH.exists():
-        return pd.DataFrame()
-
-    with sqlite3.connect(DB_PATH) as conn:
-        cases = pd.read_sql_query("SELECT * FROM investigation_cases ORDER BY risk_score DESC", conn)
-    return cases
+    cases_rows = []
+    if db:
+        try:
+            cases_rows = db.query_all("SELECT * FROM investigation_cases ORDER BY updated_at DESC")
+        except Exception:
+            pass
+    if not cases_rows and DB_PATH.exists():
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                return pd.read_sql_query("SELECT * FROM investigation_cases ORDER BY updated_at DESC", conn)
+        except Exception:
+            pass
+    return pd.DataFrame(cases_rows)
 
 
 def build_claim_network_graph(claim_id: str) -> Tuple[nx.Graph, Dict[str, Dict[str, Any]]]:
@@ -216,51 +263,66 @@ def build_claim_network_graph(claim_id: str) -> Tuple[nx.Graph, Dict[str, Dict[s
     G = nx.Graph()
     node_details: Dict[str, Dict[str, Any]] = {}
 
-    if not DB_PATH.exists():
-        return G, node_details
-
     cid = claim_id.strip()
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM claims WHERE claim_id = ?", (cid,))
-        c_row = cur.fetchone()
-        if not c_row:
-            return G, node_details
-        claim = dict(c_row)
+    claim = None
+    clt = {}
+    pol = {}
+    veh = {}
+    prv = {}
+    connected = []
 
-        clt_id = claim["claimant_id"]
-        pol_id = claim["policy_id"]
-        veh_id = claim["vehicle_id"]
-        prv_id = claim["provider_id"]
+    if db:
+        try:
+            claim = db.query_one("SELECT * FROM claims WHERE claim_id = ?", (cid,))
+            if claim:
+                clt = db.query_one("SELECT * FROM claimants WHERE claimant_id = ?", (claim["claimant_id"],)) or {}
+                pol = db.query_one("SELECT * FROM policies WHERE policy_id = ?", (claim["policy_id"],)) or {}
+                veh = db.query_one("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim["vehicle_id"],)) or {}
+                prv = db.query_one("SELECT * FROM providers WHERE provider_id = ?", (claim["provider_id"],)) or {}
+                connected = db.query_all(
+                    """
+                    SELECT claim_id, claim_amount, fraud_label, claim_type
+                    FROM claims
+                    WHERE (claimant_id = ? OR provider_id = ?) AND claim_id != ?
+                    LIMIT 12
+                    """,
+                    (claim["claimant_id"], claim["provider_id"], cid),
+                )
+        except Exception:
+            pass
 
-        # Fetch claimant
-        cur.execute("SELECT * FROM claimants WHERE claimant_id = ?", (clt_id,))
-        clt = dict(cur.fetchone() or {})
+    if not claim and DB_PATH.exists():
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM claims WHERE claim_id = ?", (cid,))
+                c_row = cur.fetchone()
+                if c_row:
+                    claim = dict(c_row)
+                    cur.execute("SELECT * FROM claimants WHERE claimant_id = ?", (claim["claimant_id"],))
+                    clt = dict(cur.fetchone() or {})
+                    cur.execute("SELECT * FROM policies WHERE policy_id = ?", (claim["policy_id"],))
+                    pol = dict(cur.fetchone() or {})
+                    cur.execute("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim["vehicle_id"],))
+                    veh = dict(cur.fetchone() or {})
+                    cur.execute("SELECT * FROM providers WHERE provider_id = ?", (claim["provider_id"],))
+                    prv = dict(cur.fetchone() or {})
+                    cur.execute(
+                        """
+                        SELECT claim_id, claim_amount, fraud_label, claim_type
+                        FROM claims
+                        WHERE (claimant_id = ? OR provider_id = ?) AND claim_id != ?
+                        LIMIT 12
+                        """,
+                        (claim["claimant_id"], claim["provider_id"], cid),
+                    )
+                    connected = [dict(r) for r in cur.fetchall()]
+        except Exception:
+            pass
 
-        # Fetch policy
-        cur.execute("SELECT * FROM policies WHERE policy_id = ?", (pol_id,))
-        pol = dict(cur.fetchone() or {})
-
-        # Fetch vehicle
-        cur.execute("SELECT * FROM vehicles WHERE vehicle_id = ?", (veh_id,))
-        veh = dict(cur.fetchone() or {})
-
-        # Fetch provider
-        cur.execute("SELECT * FROM providers WHERE provider_id = ?", (prv_id,))
-        prv = dict(cur.fetchone() or {})
-
-        # Fetch connected claims
-        cur.execute(
-            """
-            SELECT claim_id, claim_amount, fraud_label, claim_type
-            FROM claims
-            WHERE (claimant_id = ? OR provider_id = ?) AND claim_id != ?
-            LIMIT 12
-            """,
-            (clt_id, prv_id, cid),
-        )
-        connected = [dict(r) for r in cur.fetchall()]
+    if not claim:
+        return G, node_details
 
     # 1. Add Central Claim Node
     G.add_node(cid, type="Claim", label=f"Claim: {cid}")
@@ -378,62 +440,71 @@ def load_claim_investigation_dossier(claim_id: str) -> Dict[str, Any]:
         "events": [],
     }
 
-    if not DB_PATH.exists():
-        return result
+    claim = None
+    if db:
+        try:
+            claim = db.query_one("SELECT * FROM claims WHERE claim_id = ?", (cid,))
+            if claim:
+                result["found"] = True
+                result["claim"] = claim
+                result["claimant"] = db.query_one("SELECT * FROM claimants WHERE claimant_id = ?", (claim.get("claimant_id"),)) or {}
+                result["policy"] = db.query_one("SELECT * FROM policies WHERE policy_id = ?", (claim.get("policy_id"),)) or {}
+                result["vehicle"] = db.query_one("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim.get("vehicle_id"),)) or {}
+                result["provider"] = db.query_one("SELECT * FROM providers WHERE provider_id = ?", (claim.get("provider_id"),)) or {}
+                result["invoice"] = db.query_one("SELECT * FROM invoices WHERE invoice_id = ?", (claim.get("invoice_id"),)) or {}
 
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
+                case_row = db.query_one("SELECT * FROM investigation_cases WHERE claim_id = ?", (cid,))
+                if case_row:
+                    result["case"] = case_row
+                    case_id = case_row["case_id"]
+                    result["notes"] = db.query_all("SELECT * FROM case_notes WHERE case_id = ? ORDER BY created_at ASC", (case_id,))
+                    result["events"] = db.query_all("SELECT * FROM case_events WHERE case_id = ? ORDER BY timestamp ASC", (case_id,))
+        except Exception:
+            pass
 
-        # 1. Fetch core claim
-        cur.execute("SELECT * FROM claims WHERE claim_id = ?", (cid,))
-        c_row = cur.fetchone()
-        if not c_row:
-            return result
-
-        result["found"] = True
-        claim = dict(c_row)
-        result["claim"] = claim
-
-        # 2. Related entities
-        cur.execute("SELECT * FROM claimants WHERE claimant_id = ?", (claim.get("claimant_id"),))
-        clt_row = cur.fetchone()
-        if clt_row:
-            result["claimant"] = dict(clt_row)
-
-        cur.execute("SELECT * FROM policies WHERE policy_id = ?", (claim.get("policy_id"),))
-        pol_row = cur.fetchone()
-        if pol_row:
-            result["policy"] = dict(pol_row)
-
-        cur.execute("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim.get("vehicle_id"),))
-        veh_row = cur.fetchone()
-        if veh_row:
-            result["vehicle"] = dict(veh_row)
-
-        cur.execute("SELECT * FROM providers WHERE provider_id = ?", (claim.get("provider_id"),))
-        prv_row = cur.fetchone()
-        if prv_row:
-            result["provider"] = dict(prv_row)
-
-        cur.execute("SELECT * FROM invoices WHERE invoice_id = ?", (claim.get("invoice_id"),))
-        inv_row = cur.fetchone()
-        if inv_row:
-            result["invoice"] = dict(inv_row)
-
-        # 3. Investigation case details & audit
-        cur.execute("SELECT * FROM investigation_cases WHERE claim_id = ?", (cid,))
-        case_row = cur.fetchone()
-        if case_row:
-            case_dict = dict(case_row)
-            result["case"] = case_dict
-            case_id = case_dict["case_id"]
-
-            cur.execute("SELECT * FROM case_notes WHERE case_id = ? ORDER BY created_at ASC", (case_id,))
-            result["notes"] = [dict(r) for r in cur.fetchall()]
-
-            cur.execute("SELECT * FROM case_events WHERE case_id = ? ORDER BY timestamp ASC", (case_id,))
-            result["events"] = [dict(r) for r in cur.fetchall()]
+    if not result["found"] and DB_PATH.exists():
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM claims WHERE claim_id = ?", (cid,))
+                c_row = cur.fetchone()
+                if c_row:
+                    result["found"] = True
+                    claim = dict(c_row)
+                    result["claim"] = claim
+                    cur.execute("SELECT * FROM claimants WHERE claimant_id = ?", (claim.get("claimant_id"),))
+                    clt_row = cur.fetchone()
+                    if clt_row:
+                        result["claimant"] = dict(clt_row)
+                    cur.execute("SELECT * FROM policies WHERE policy_id = ?", (claim.get("policy_id"),))
+                    pol_row = cur.fetchone()
+                    if pol_row:
+                        result["policy"] = dict(pol_row)
+                    cur.execute("SELECT * FROM vehicles WHERE vehicle_id = ?", (claim.get("vehicle_id"),))
+                    veh_row = cur.fetchone()
+                    if veh_row:
+                        result["vehicle"] = dict(veh_row)
+                    cur.execute("SELECT * FROM providers WHERE provider_id = ?", (claim.get("provider_id"),))
+                    prv_row = cur.fetchone()
+                    if prv_row:
+                        result["provider"] = dict(prv_row)
+                    cur.execute("SELECT * FROM invoices WHERE invoice_id = ?", (claim.get("invoice_id"),))
+                    inv_row = cur.fetchone()
+                    if inv_row:
+                        result["invoice"] = dict(inv_row)
+                    cur.execute("SELECT * FROM investigation_cases WHERE claim_id = ?", (cid,))
+                    case_row = cur.fetchone()
+                    if case_row:
+                        case_dict = dict(case_row)
+                        result["case"] = case_dict
+                        case_id = case_dict["case_id"]
+                        cur.execute("SELECT * FROM case_notes WHERE case_id = ? ORDER BY created_at ASC", (case_id,))
+                        result["notes"] = [dict(r) for r in cur.fetchall()]
+                        cur.execute("SELECT * FROM case_events WHERE case_id = ? ORDER BY timestamp ASC", (case_id,))
+                        result["events"] = [dict(r) for r in cur.fetchall()]
+        except Exception:
+            pass
 
     # 4. Multi-signal risk breakdown (Phase 8)
     if RISK_SCORES_PATH.exists():
@@ -506,10 +577,91 @@ def create_or_update_case(
     """
     from datetime import datetime, timezone
 
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    if db:
+        try:
+            row = db.query_one("SELECT * FROM investigation_cases WHERE claim_id = ?", (claim_id,))
+            if row:
+                case_id = row["case_id"]
+                old_status = row["status"]
+                new_status = status or old_status
+                new_priority = priority or row["priority"]
+                new_assigned = assigned_to if assigned_to is not None else row["assigned_to"]
+
+                db.execute(
+                    """
+                    UPDATE investigation_cases
+                    SET status = ?, priority = ?, assigned_to = ?, updated_at = ?
+                    WHERE case_id = ?
+                    """,
+                    (new_status, new_priority, new_assigned, now_iso, case_id),
+                )
+
+                if new_status != old_status:
+                    db.execute(
+                        """
+                        INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+                        VALUES (?, 'STATUS_CHANGE', ?, ?, ?, ?, ?)
+                        """,
+                        (case_id, actor, old_status, new_status, f"Status updated via dashboard by {actor}", now_iso),
+                    )
+            else:
+                case_id = f"CASE-{claim_id}"
+                new_status = status or "NEW"
+                new_priority = priority or "MEDIUM"
+                new_assigned = assigned_to or "Unassigned"
+
+                risk_score = 0.0
+                risk_band = "LOW"
+                if RISK_SCORES_PATH.exists():
+                    try:
+                        df_r = pd.read_csv(RISK_SCORES_PATH, keep_default_na=False)
+                        m = df_r[df_r["claim_id"] == claim_id]
+                        if not m.empty:
+                            risk_score = float(m.iloc[0].get("final_risk_score", 0.0))
+                            risk_band = str(m.iloc[0].get("risk_band", "LOW"))
+                    except Exception:
+                        pass
+
+                db.execute(
+                    """
+                    INSERT INTO investigation_cases (case_id, claim_id, risk_score, risk_band, priority, status, assigned_to, reason, notes, resolution, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (case_id, claim_id, risk_score, risk_band, new_priority, new_status, new_assigned, "Flagged for investigator review", "", "", now_iso, now_iso),
+                )
+
+                db.execute(
+                    """
+                    INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+                    VALUES (?, 'CASE_CREATED', ?, 'NONE', ?, 'Case initiated via dashboard triage', ?)
+                    """,
+                    (case_id, actor, new_status, now_iso),
+                )
+
+            if note and note.strip():
+                db.execute(
+                    """
+                    INSERT INTO case_notes (case_id, author, note_text, created_at)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (case_id, actor, note.strip(), now_iso),
+                )
+                db.execute(
+                    """
+                    INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)
+                    VALUES (?, 'NOTE_ADDED', ?, '', 'NOTE', ?, ?)
+                    """,
+                    (case_id, actor, note.strip()[:100], now_iso),
+                )
+
+            return {"case_id": case_id, "status": new_status, "priority": new_priority, "assigned_to": new_assigned}
+        except Exception:
+            pass
+
     if not DB_PATH.exists():
         return {"error": "Database not found"}
-
-    now_iso = datetime.now(timezone.utc).isoformat()
 
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row

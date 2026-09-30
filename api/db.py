@@ -29,6 +29,15 @@ class DatabaseManager:
     def __init__(self):
         self.supabase_url = os.getenv("SUPABASE_URL", "").strip()
         raw_db_url = os.getenv("DATABASE_URL", "").strip()
+        if not raw_db_url:
+            try:
+                import streamlit as st
+                if hasattr(st, "secrets") and "DATABASE_URL" in st.secrets:
+                    raw_db_url = str(st.secrets["DATABASE_URL"]).strip()
+            except Exception:
+                pass
+        if not raw_db_url:
+            raw_db_url = "postgresql://postgres.sswdrdxforbqyvbovedw:Insurance%4012345.@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
         self.database_url = self._sanitize_db_url(raw_db_url)
         self.sqlite_path = Path(os.getenv("DATABASE_PATH", str(SQLITE_PATH)))
         self._is_postgres = bool(self.database_url and ("postgres" in self.database_url or "supabase" in self.database_url))
@@ -143,15 +152,21 @@ class DatabaseManager:
         finally:
             conn.close()
 
+    def convert_sql(self, sql: str) -> str:
+        """Translates SQLite query constructs to PostgreSQL when running in production."""
+        converted = sql
+        if self._is_postgres:
+            converted = converted.replace("?", "%s")
+            if "INSERT OR IGNORE INTO" in converted:
+                converted = converted.replace("INSERT OR IGNORE INTO", "INSERT INTO") + " ON CONFLICT DO NOTHING"
+        else:
+            converted = converted.replace("%s", "?")
+        return converted
+
     def query_all(self, sql: str, params: Optional[Union[List[Any], Tuple[Any, ...]]] = None) -> List[Dict[str, Any]]:
         """Executes a SELECT query and returns rows as dictionaries."""
         params = params or ()
-        # Convert parameter placeholders if using PostgreSQL (%s) vs SQLite (?)
-        converted_sql = sql
-        if self._is_postgres:
-            converted_sql = sql.replace("?", "%s")
-        else:
-            converted_sql = sql.replace("%s", "?")
+        converted_sql = self.convert_sql(sql)
 
         with self.connection_scope() as conn:
             cur = conn.cursor()
@@ -169,11 +184,7 @@ class DatabaseManager:
     def execute(self, sql: str, params: Optional[Union[List[Any], Tuple[Any, ...]]] = None) -> int:
         """Executes an INSERT, UPDATE, or DELETE query and returns affected rows."""
         params = params or ()
-        converted_sql = sql
-        if self._is_postgres:
-            converted_sql = sql.replace("?", "%s")
-        else:
-            converted_sql = sql.replace("%s", "?")
+        converted_sql = self.convert_sql(sql)
 
         with self.connection_scope() as conn:
             cur = conn.cursor()

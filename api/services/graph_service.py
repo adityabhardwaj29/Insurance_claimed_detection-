@@ -8,12 +8,11 @@ and real-time graph risk calculations.
 from __future__ import annotations
 
 import logging
-import sqlite3
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
 import pandas as pd
 
+from api.db import db
 from src.utils.config import settings
 
 logger = logging.getLogger(__name__)
@@ -36,14 +35,9 @@ class GraphService:
         cid = claim_id.strip()
 
         # 1. Lookup claim relational details
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM claims WHERE claim_id = ?", (cid,))
-            c_row = cur.fetchone()
-            if not c_row:
-                return None
-            claim_data = dict(c_row)
+        claim_data = db.query_one("SELECT * FROM claims WHERE claim_id = ?", (cid,))
+        if not claim_data:
+            return None
 
         claimant_id = claim_data["claimant_id"]
         provider_id = claim_data["provider_id"]
@@ -82,18 +76,14 @@ class GraphService:
         ]
 
         # 4. Find other claims sharing claimant or provider
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            cur.execute(
-                """
-                SELECT claim_id, fraud_label FROM claims
-                WHERE (claimant_id = ? OR provider_id = ?) AND claim_id != ?
-                LIMIT 10
-                """,
-                (claimant_id, provider_id, cid),
-            )
-            sibling_rows = cur.fetchall()
+        sibling_rows = db.query_all(
+            """
+            SELECT claim_id, fraud_label FROM claims
+            WHERE (claimant_id = ? OR provider_id = ?) AND claim_id != ?
+            LIMIT 10
+            """,
+            (claimant_id, provider_id, cid),
+        )
 
         edges: List[Dict[str, Any]] = [
             {"source": claimant_id, "target": cid, "relationship": "FILED_BY"},
@@ -104,7 +94,7 @@ class GraphService:
 
         for s in sibling_rows:
             s_id = s["claim_id"]
-            s_fraud = int(s["fraud_label"])
+            s_fraud = int(s["fraud_label"] or 0)
             nodes.append({
                 "id": s_id,
                 "label": f"Claim: {s_id}",
@@ -159,16 +149,14 @@ class GraphService:
                 }
 
         # Fallback if arbitrary claimant/provider queried
-        with sqlite3.connect(self.db_path) as conn:
-            cur = conn.cursor()
-            clt_cnt = 1
-            prv_cnt = 1
-            if claimant_id:
-                cur.execute("SELECT COUNT(*) FROM claims WHERE claimant_id = ?", (claimant_id,))
-                clt_cnt = cur.fetchone()[0] or 1
-            if provider_id:
-                cur.execute("SELECT COUNT(*) FROM claims WHERE provider_id = ?", (provider_id,))
-                prv_cnt = cur.fetchone()[0] or 1
+        clt_cnt = 1
+        prv_cnt = 1
+        if claimant_id:
+            c_row = db.query_one("SELECT COUNT(*) as cnt FROM claims WHERE claimant_id = ?", (claimant_id,))
+            clt_cnt = int(c_row["cnt"]) if c_row and c_row.get("cnt") else 1
+        if provider_id:
+            p_row = db.query_one("SELECT COUNT(*) as cnt FROM claims WHERE provider_id = ?", (provider_id,))
+            prv_cnt = int(p_row["cnt"]) if p_row and p_row.get("cnt") else 1
 
         risk = min(1.0, 0.20 * (clt_cnt / 10.0) + 0.20 * (prv_cnt / 25.0))
         return {
