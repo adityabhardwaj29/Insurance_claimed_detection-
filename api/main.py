@@ -47,10 +47,22 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# CORS configuration
+# CORS configuration supporting Vercel frontend, Streamlit, and local development
+allowed_origins = list(settings.CORS_ORIGINS)
+for default_origin in [
+    "https://insurance-claimed-detection.vercel.app",
+    "https://insurance-fraud-analytics.streamlit.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:8501",
+]:
+    if default_origin not in allowed_origins:
+        allowed_origins.append(default_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
