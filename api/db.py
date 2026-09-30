@@ -28,9 +28,27 @@ class DatabaseManager:
 
     def __init__(self):
         self.supabase_url = os.getenv("SUPABASE_URL", "").strip()
-        self.database_url = os.getenv("DATABASE_URL", "").strip()
+        raw_db_url = os.getenv("DATABASE_URL", "").strip()
+        self.database_url = self._sanitize_db_url(raw_db_url)
         self.sqlite_path = Path(os.getenv("DATABASE_PATH", str(SQLITE_PATH)))
         self._is_postgres = bool(self.database_url and ("postgres" in self.database_url or "supabase" in self.database_url))
+
+    @staticmethod
+    def _sanitize_db_url(url: str) -> str:
+        """Ensures special characters in the password are safely URL-encoded for psycopg2."""
+        if not url or "@" not in url or "://" not in url:
+            return url
+        try:
+            from urllib.parse import quote, unquote
+            auth_part, _, host_part = url.rpartition("@")
+            scheme, rest = auth_part.split("://", 1)
+            if ":" in rest:
+                user, password = rest.split(":", 1)
+                enc_pwd = quote(unquote(password), safe="")
+                return f"{scheme}://{user}:{enc_pwd}@{host_part}"
+        except Exception:
+            pass
+        return url
 
     @property
     def is_postgres(self) -> bool:
