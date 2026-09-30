@@ -34,13 +34,33 @@ class Settings:
     )
 
     # CORS
-    CORS_ORIGINS: List[str] = field(
-        default_factory=lambda: [
-            origin.strip()
-            for origin in os.getenv("CORS_ORIGINS", "*").split(",")
-            if origin.strip()
-        ]
-    )
+    @staticmethod
+    def _clean_cors_origins() -> List[str]:
+        raw = os.getenv("CORS_ORIGINS", "*").strip()
+        origins = []
+        if raw and raw != "*":
+            for item in raw.split(","):
+                clean = item.strip().rstrip("/")
+                if not clean:
+                    continue
+                if not clean.startswith("http://") and not clean.startswith("https://"):
+                    origins.append(f"https://{clean}")
+                    origins.append(f"http://{clean}")
+                else:
+                    origins.append(clean)
+        # Always include production and local development origins
+        for d in [
+            "https://insurance-claimed-detection.vercel.app",
+            "https://insurance-fraud-analytics.streamlit.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://localhost:8501",
+        ]:
+            if d not in origins:
+                origins.append(d)
+        return origins
+
+    CORS_ORIGINS: List[str] = field(default_factory=_clean_cors_origins)
 
     # Models & Artifacts
     FRAUD_MODEL_PATH: Path = field(
