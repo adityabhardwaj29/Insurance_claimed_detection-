@@ -64,9 +64,25 @@ class DatabaseManager:
             try:
                 import psycopg2
                 import psycopg2.extras
-                conn = psycopg2.connect(self.database_url, cursor_factory=psycopg2.extras.RealDictCursor)
+                conn = psycopg2.connect(self.database_url, connect_timeout=5, cursor_factory=psycopg2.extras.RealDictCursor)
                 return conn
             except Exception as e:
+                # If direct Supabase fails (e.g. Render IPv4 vs Supabase direct IPv6), auto-fallback to Pooler on port 6543
+                if "db." in self.database_url and ".supabase.co" in self.database_url:
+                    try:
+                        ref = self.database_url.split("db.", 1)[1].split(".supabase.co", 1)[0]
+                        for region in ["ap-south-1", "us-east-1", "eu-central-1", "us-west-1"]:
+                            pooler_url = self.database_url.replace(f"db.{ref}.supabase.co:5432", f"aws-0-{region}.pooler.supabase.com:6543")
+                            pooler_url = pooler_url.replace("://postgres:", f"://postgres.{ref}:")
+                            try:
+                                conn = psycopg2.connect(pooler_url, connect_timeout=5, cursor_factory=psycopg2.extras.RealDictCursor)
+                                self.database_url = pooler_url  # Cache working pooler URL
+                                logger.info("Successfully connected to Supabase via IPv4 Pooler (%s)", region)
+                                return conn
+                            except Exception:
+                                continue
+                    except Exception as pooler_err:
+                        logger.debug("Pooler auto-fallback attempt error: %s", pooler_err)
                 logger.warning("Failed to connect to PostgreSQL (%s), falling back to SQLite: %s", self.database_url, e)
 
         # SQLite connection
