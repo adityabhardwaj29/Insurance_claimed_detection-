@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Blackbook - Graph-Enhanced Insurance Claim Fraud Detection</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin-top: 25.4mm;
+    margin-bottom: 25.4mm;
+    margin-left: 31.75mm;
+    margin-right: 25.4mm;
+  }
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #111827;
+    margin: 0;
+    padding: 0;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  /* Page Break Utilities */
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Academic Border for Cover & Certificate */
+  .academic-border {
+    border: 3px double #0F2C59;
+    padding: 18mm 14mm;
+    min-height: 240mm;
+    position: relative;
+  }
+
+  .cover-title {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #0F2C59;
+    line-height: 1.3;
+    text-align: center;
+    margin: 20px 0;
+    text-transform: uppercase;
+  }
+
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #1E3A8A;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+  }
+
+  .cover-meta {
+    font-size: 12pt;
+    text-align: center;
+    line-height: 1.6;
+    margin: 15px 0;
+  }
+
+  .cover-section-label {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #4B5563;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+    margin-bottom: 5px;
+  }
+
+  /* Headings */
+  h1.chapter-title {
+    font-size: 17pt;
+    font-weight: bold;
+    color: #0F2C59;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #0F2C59;
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 22px;
+  }
+
+  h2.section-title {
+    font-size: 13.5pt;
+    font-weight: bold;
+    color: #1E3A8A;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    border-left: 4px solid #1E3A8A;
+    padding-left: 8px;
+    break-after: avoid;
+  }
+
+  h3.subsection-title {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #0F2C59;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    break-after: avoid;
+  }
+
+  h4.subsubsection-title {
+    font-size: 11.5pt;
+    font-weight: bold;
+    font-style: italic;
+    color: #374151;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    break-after: avoid;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-indent: 0;
+  }
+
+  /* Tables */
+  table.academic-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+
+  table.academic-table tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  table.academic-table thead {
+    display: table-header-group;
+  }
+
+  table.academic-table th {
+    background-color: #0F2C59;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid #0F2C59;
+  }
+
+  table.academic-table td {
+    padding: 7px 10px;
+    border: 1px solid #CBD5E1;
+    vertical-align: top;
+  }
+
+  table.academic-table tr:nth-child(even) {
+    background-color: #F8FAFC;
+  }
+
+  .caption {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1E293B;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .table-caption {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1E293B;
+    text-align: left;
+    margin-bottom: 6px;
+  }
+
+  /* Figures */
+  .figure-container {
+    text-align: center;
+    margin: 18px 0;
+    page-break-inside: avoid;
+  }
+
+  .figure-container img {
+    max-width: 95%;
+    height: auto;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  /* Code Listings */
+  pre.code-block {
+    background-color: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    border-left: 3px solid #0F2C59;
+    padding: 10px 14px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 9pt;
+    line-height: 1.4;
+    overflow-x: auto;
+    margin: 14px 0;
+    page-break-inside: avoid;
+  }
+
+  /* Callout Quote */
+  .quote-box {
+    background-color: #F1F5F9;
+    border-left: 4px solid #0F2C59;
+    padding: 10px 16px;
+    margin: 14px 0;
+    font-style: italic;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin-top: 0;
+    margin-bottom: 12px;
+    padding-left: 24px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  /* TOC Layout */
+  .toc-entry {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 11pt;
+  }
+
+  .toc-dots {
+    flex-grow: 1;
+    border-bottom: 1px dotted #94A3B8;
+    margin: 0 8px;
+    position: relative;
+    top: -4px;
+  }
+
+  /* Signatures */
+  .signature-grid {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    text-align: center;
+  }
+
+  .signature-block {
+    width: 30%;
+  }
+
+  .signature-line {
+    border-top: 1px solid #334155;
+    margin-top: 40px;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- COVER PAGE                                                   -->
+<!-- ============================================================ -->
+<div class="academic-border" style="min-height: 242mm; display: flex; flex-direction: column; justify-content: space-between; padding: 20mm 16mm;">
+  <div style="text-align: center;">
+    <div style="font-size: 13pt; font-weight: bold; color: #1E3A8A; letter-spacing: 1.5px; text-transform: uppercase;">A Project Report On</div>
+    <div class="cover-title" style="margin: 22px 0 16px 0;">GRAPH-ENHANCED INSURANCE CLAIM ANOMALY AND DUPLICATE NETWORK DETECTION</div>
+    <div class="cover-subtitle" style="margin-bottom: 0;">IN THE PROGRAMME OF<br>BACHELOR OF DATA SCIENCE</div>
+  </div>
+
+  <div style="text-align: center; margin: 20px 0;">
+    <div class="cover-section-label">SUBMITTED BY</div>
+    <div style="font-size: 15pt; font-weight: bold; color: #0F2C59; letter-spacing: 0.5px;">ADITYA BHARDWAJ</div>
+    <div style="font-size: 11.5pt; color: #334155; margin-top: 4px;">TY Bachelor of Data Science</div>
+    <div style="font-size: 11.5pt; font-weight: bold; color: #1E3A8A; margin-top: 4px;">Roll No.: TDDS003A</div>
+    <div style="font-size: 11pt; color: #475569; margin-top: 2px;">Semester: V</div>
+  </div>
+
+  <div style="text-align: center; margin: 20px 0;">
+    <div class="cover-section-label">UNDER THE GUIDANCE OF</div>
+    <div style="font-size: 14pt; font-weight: bold; color: #0F2C59;">MS. SWETA SUMAN</div>
+    <div style="font-size: 11pt; color: #475569; margin-top: 3px;">Department of Data Science</div>
+  </div>
+
+  <div style="text-align: center; border-top: 1px solid #CBD5E1; padding-top: 16px;">
+    <div style="font-size: 12pt; font-weight: bold; color: #0F2C59; text-transform: uppercase; letter-spacing: 1px;">Department of Data Science</div>
+    <div style="font-size: 10.5pt; color: #475569; margin-top: 3px;">[College / Institute Affiliated to University of Mumbai]</div>
+    <div class="cover-section-label" style="margin-top: 12px; margin-bottom: 2px;">ACADEMIC YEAR</div>
+    <div style="font-size: 13pt; font-weight: bold; color: #0F2C59;">2026 – 2027</div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CERTIFICATE PAGE                                             -->
+<!-- ============================================================ -->
+<div class="academic-border">
+  <div style="text-align: center; margin-bottom: 25px;">
+    <h1 style="font-size: 18pt; font-weight: bold; color: #0F2C59; margin: 0; text-transform: uppercase;">CERTIFICATE</h1>
+    <div style="width: 80px; height: 2px; background-color: #0F2C59; margin: 8px auto 0;"></div>
+  </div>
+
+  <p style="font-size: 12pt; line-height: 1.8; text-align: justify; margin-top: 30px;">
+    This is to certify that <strong>MR. ADITYA BHARDWAJ</strong>, student of <strong>THIRD YEAR</strong> of 
+    <strong>Bachelor of Data Science</strong>, Division: A, Roll No.: <strong>TDDS003A</strong> of 
+    <strong>Semester V (2026 – 2027)</strong> has successfully completed the project entitled:
+  </p>
+
+  <div style="background-color: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #0F2C59; padding: 14px; margin: 25px 0; text-align: center;">
+    <span style="font-size: 13pt; font-weight: bold; color: #0F2C59;">
+      "GRAPH-ENHANCED INSURANCE CLAIM ANOMALY AND DUPLICATE NETWORK DETECTION"
+    </span>
+  </div>
+
+  <p style="font-size: 12pt; line-height: 1.8; text-align: justify;">
+    in partial fulfilment of the requirements for the award of the degree of <strong>BACHELOR OF DATA SCIENCE</strong> 
+    as per the prescribed curriculum and academic guidelines.
+  </p>
+
+  <div style="margin-top: 60px;">
+    <table style="width: 100%; border: none;">
+      <tr>
+        <td style="width: 45%; text-align: center; border: none;">
+          <div style="margin-top: 40px; border-top: 1px solid #334155; width: 80%; margin-left: auto; margin-right: auto;"></div>
+          <strong>Ms. Sweta Suman</strong><br>
+          <span style="font-size: 10pt; color: #475569;">Project Guide<br>Department of Data Science</span>
+        </td>
+        <td style="width: 10%; border: none;"></td>
+        <td style="width: 45%; text-align: center; border: none;">
+          <div style="margin-top: 40px; border-top: 1px solid #334155; width: 80%; margin-left: auto; margin-right: auto;"></div>
+          <strong>[NAME OF COORDINATOR]</strong><br>
+          <span style="font-size: 10pt; color: #475569;">Head of Department / Coordinator<br>Department of Data Science</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="text-align: center; padding-top: 45px; border: none;">
+          <div style="margin-top: 30px; border-top: 1px solid #334155; width: 40%; margin-left: auto; margin-right: auto;"></div>
+          <strong>[NAME OF PRINCIPAL]</strong><br>
+          <span style="font-size: 10pt; color: #475569;">Principal / Institutional Head<br>[COLLEGE / INSTITUTION NAME]</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 10.5pt; color: #475569;">
+    <div><strong>College Seal / Stamp:</strong> ____________________</div>
+    <div><strong>Date:</strong> ____________________</div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- PROFORMA PAGE                                                -->
+<!-- ============================================================ -->
+<div class="academic-border">
+  <div style="text-align: center; margin-bottom: 25px;">
+    <h1 style="font-size: 16pt; font-weight: bold; color: #0F2C59; margin: 0; text-transform: uppercase;">
+      PROFORMA FOR THE APPROVAL OF PROJECT PROPOSAL
+    </h1>
+    <div style="width: 120px; height: 2px; background-color: #0F2C59; margin: 8px auto 0;"></div>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 11pt;">
+    <tr>
+      <td style="border: 1px solid #334155; padding: 10px; width: 25%; font-weight: bold; background-color: #F8FAFC;">PRN No.:</td>
+      <td style="border: 1px solid #334155; padding: 10px; width: 25%;">____________________</td>
+      <td style="border: 1px solid #334155; padding: 10px; width: 25%; font-weight: bold; background-color: #F8FAFC;">Roll No.:</td>
+      <td style="border: 1px solid #334155; padding: 10px; width: 25%;">TDDS003A</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #334155; padding: 10px; font-weight: bold; background-color: #F8FAFC;">1. Name of Student:</td>
+      <td colspan="3" style="border: 1px solid #334155; padding: 10px; font-weight: bold;">ADITYA BHARDWAJ</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #334155; padding: 10px; font-weight: bold; background-color: #F8FAFC;">2. Title of Project:</td>
+      <td colspan="3" style="border: 1px solid #334155; padding: 10px; font-weight: bold; color: #0F2C59;">
+        GRAPH-ENHANCED INSURANCE CLAIM ANOMALY AND DUPLICATE NETWORK DETECTION
+      </td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #334155; padding: 10px; font-weight: bold; background-color: #F8FAFC;">3. Name of Guide:</td>
+      <td colspan="3" style="border: 1px solid #334155; padding: 10px; font-weight: bold;">MS. SWETA SUMAN</td>
+    </tr>
+  </table>
+
+  <div style="margin-top: 60px;">
+    <table style="width: 100%; border: none;">
+      <tr>
+        <td style="width: 50%; border: none;">
+          <div style="border-top: 1px solid #334155; width: 75%; margin-top: 40px;"></div>
+          <strong>Signature of the Student</strong><br>
+          Date: ____________________
+        </td>
+        <td style="width: 50%; border: none; text-align: right;">
+          <div style="border-top: 1px solid #334155; width: 75%; margin-top: 40px; margin-left: auto;"></div>
+          <strong>Signature of the Guide</strong><br>
+          Date: ____________________
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border: none; text-align: center; padding-top: 50px;">
+          <div style="border-top: 1px solid #334155; width: 45%; margin-top: 30px; margin-left: auto; margin-right: auto;"></div>
+          <strong>Signature of the Coordinator</strong><br>
+          Date: ____________________
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- ABSTRACT                                                     -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">ABSTRACT</h1>
+
+<p>
+Insurance claim fraud represents a substantial and persistent operational challenge across the global insurance industry, draining financial reserves, inflating customer premiums, and placing an unsustainable burden on Special Investigation Units (SIUs). Conventional anti-fraud systems rely primarily on manual audits, static rule-based thresholds, or siloed transactional checks. While effective against primitive opportunistic fraud, these approaches fail systematically when confronted with sophisticated, multi-party organized syndicates involving repeated invoice recycling, staged vehicular collisions, cross-claimant collusion, and high-frequency rogue repair providers.
+</p>
+
+<p>
+To address these critical operational deficiencies, this project presents the design, mathematical formulation, full-stack implementation, and production deployment of <strong>"Graph-Enhanced Insurance Claim Anomaly and Duplicate Network Detection"</strong> (operating under the enterprise platform name <strong>FraudShield AI</strong>). The proposed system is an end-to-end, decision-support platform that fuses four complementary analytical dimensions into a calibrated composite risk engine:
+</p>
+
+<ul>
+  <li><strong>Supervised Machine Learning:</strong> An extreme gradient boosting (XGBoost) classifier trained on 38 engineered relational, financial, and temporal indicators to capture established historical fraud patterns.</li>
+  <li><strong>Unsupervised Anomaly Detection:</strong> An ensemble of Isolation Forest, Local Outlier Factor (LOF), and One-Class Support Vector Machines (SVM) calibrated to continuous score distributions in $[0.0, 1.0]$, detecting statistical outliers and novel zero-day claim behaviors without requiring pre-labeled training targets.</li>
+  <li><strong>Deterministic Duplicate Detection:</strong> A multi-attribute text and numeric similarity engine combining character-level SequenceMatcher, token-level Jaccard overlap, and TF-IDF cosine vector similarity to flag recycled damage descriptions, repeated vehicle identification numbers (VINs), and invoice reuse.</li>
+  <li><strong>Heterogeneous Knowledge Graph Analytics:</strong> A NetworkX bipartite graph network of 1,020 entity nodes (Claims, Claimants, Policies, Vehicles, Providers, Invoices, Locations) and 2,615 relationship edges, computing structural topological metrics including degree distributions, PageRank, betweenness centrality, and fraud-neighbor propagation ratios to uncover hidden organized crime rings.</li>
+</ul>
+
+<p>
+The analytical outputs are unified into an empirically weighted hybrid risk formula:
+$$\text{Composite Risk} = 0.45 \cdot \text{ML} + 0.25 \cdot \text{Anomaly} + 0.15 \cdot \text{Duplicate} + 0.15 \cdot \text{Graph}$$
+stratifying incoming claims into four operational triage bands: <code>CRITICAL</code> (&ge; 0.75), <code>HIGH</code> ($[0.55, 0.75)$), <code>MEDIUM</code> ($[0.35, 0.55)$), and <code>LOW</code> ($< 0.35$). In experimental evaluation on a research benchmark population of 320 claims with a 16.25% ground-truth fraud prevalence, the combined <code>HIGH</code> and <code>CRITICAL</code> bands achieved an operational investigation precision of 85.19% (23 confirmed fraudulent claims out of 27 flagged), while the <code>LOW</code> risk tier demonstrated a negative precision of 94.17% (226 confirmed legitimate claims out of 240), enabling automated fast-track processing for 75% of routine claims.
+</p>
+
+<p>
+The solution is engineered as a cloud-native architecture comprising a React 18/TypeScript/Vite single-page application deployed on Vercel, a high-performance Python FastAPI asynchronous REST backend deployed on Render, and a persistent PostgreSQL database hosted on Supabase with role-based access control (RBAC), end-to-end JWT authentication, and automated audit logging. Rather than claiming fully automated claim denial, the system adheres strictly to a human-in-the-loop paradigm, empowering SIU investigators with SHAP feature attributions, interactive graph network visualizations, and an audited case management dossier.
+</p>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- ACKNOWLEDGEMENT                                              -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">ACKNOWLEDGEMENT</h1>
+
+<p>
+I express my deepest gratitude and sincere appreciation to my project guide, <strong>Ms. Sweta Suman</strong>, Department of Data Science, for her invaluable guidance, constructive critique, and continuous technical mentorship throughout the conceptualization, model development, software engineering, and documentation of this project. Her analytical insights into statistical modeling, class imbalance mitigation, and academic rigor were instrumental in shaping this dissertation.
+</p>
+
+<p>
+I extend my heartfelt thanks to the faculty members and laboratory staff of the Department of Data Science for providing the computational infrastructure, academic resources, and conducive environment necessary to undertake this multidisciplinary research project.
+</p>
+
+<p>
+I am also thankful to the global open-source data science, machine learning, and software development communities. The availability and documentation of robust open-source frameworks—specifically Scikit-Learn, XGBoost, NetworkX, SHAP, FastAPI, React, Vite, and Supabase PostgreSQL—served as the technical foundation upon which this enterprise platform was realized.
+</p>
+
+<p>
+Finally, I dedicate this work to my family and peers for their continuous encouragement, patience, and moral support throughout my academic journey in the Bachelor of Data Science programme.
+</p>
+
+<div style="margin-top: 50px; text-align: right;">
+  <strong>Aditya Bhardwaj</strong><br>
+  TY Bachelor of Data Science<br>
+  Roll No.: TDDS003A<br>
+  Semester V (Academic Year 2026 – 2027)
+</div>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- DECLARATION                                                  -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">DECLARATION</h1>
+
+<p>
+I, <strong>Aditya Bhardwaj</strong>, student of <strong>Third Year Bachelor of Data Science</strong>, Semester V, Roll No.: <strong>TDDS003A</strong>, hereby declare that the project report entitled:
+</p>
+
+<div class="quote-box" style="text-align: center;">
+  <strong>"GRAPH-ENHANCED INSURANCE CLAIM ANOMALY AND DUPLICATE NETWORK DETECTION"</strong>
+</div>
+
+<p>
+submitted to the Department of Data Science as part of the curriculum requirements for the degree of <strong>Bachelor of Data Science</strong> for the Academic Year <strong>2026 – 2027</strong>, is a bona fide record of original academic and technical work carried out independently by me under the supervision of <strong>Ms. Sweta Suman</strong>.
+</p>
+
+<p>
+I further declare that this project work has not been previously submitted, either in whole or in part, to any other university, institute, or examining body for the award of any degree, diploma, fellowship, or other academic title. All secondary sources, libraries, algorithms, and documentation referenced within this report have been duly acknowledged in the references section.
+</p>
+
+<div style="margin-top: 60px;">
+  <table style="width: 100%; border: none;">
+    <tr>
+      <td style="border: none;">
+        <strong>Date:</strong> ____________________<br>
+        <strong>Place:</strong> Mumbai, Maharashtra, India
+      </td>
+      <td style="border: none; text-align: right;">
+        <div style="border-top: 1px solid #334155; width: 60%; margin-left: auto;"></div>
+        <strong>Aditya Bhardwaj</strong><br>
+        Roll No.: TDDS003A
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS                                            -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">TABLE OF CONTENTS</h1>
+
+<table class="academic-table" style="font-size: 11pt;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">Sr. No.</th>
+      <th style="width: 65%;">Topic / Chapter Name</th>
+      <th style="width: 15%; text-align: right;">Page No.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>—</td><td><strong>Cover Page</strong></td><td style="text-align: right;">i</td></tr>
+    <tr><td>—</td><td><strong>Certificate</strong></td><td style="text-align: right;">ii</td></tr>
+    <tr><td>—</td><td><strong>Project Proposal Approval Proforma</strong></td><td style="text-align: right;">iii</td></tr>
+    <tr><td>—</td><td><strong>Abstract</strong></td><td style="text-align: right;">iv</td></tr>
+    <tr><td>—</td><td><strong>Acknowledgement</strong></td><td style="text-align: right;">v</td></tr>
+    <tr><td>—</td><td><strong>Declaration</strong></td><td style="text-align: right;">vi</td></tr>
+    <tr><td>—</td><td><strong>Table of Contents</strong></td><td style="text-align: right;">vii</td></tr>
+    <tr><td>—</td><td><strong>List of Figures</strong></td><td style="text-align: right;">ix</td></tr>
+    <tr><td>—</td><td><strong>List of Tables</strong></td><td style="text-align: right;">x</td></tr>
+    <tr><td>—</td><td><strong>List of Abbreviations</strong></td><td style="text-align: right;">xi</td></tr>
+    <tr><td><strong>1</strong></td><td><strong>CHAPTER 1 – INTRODUCTION</strong></td><td style="text-align: right;"><strong>1</strong></td></tr>
+    <tr><td>1.1</td><td>Background</td><td style="text-align: right;">1</td></tr>
+    <tr><td>1.2</td><td>Problem Statement</td><td style="text-align: right;">1</td></tr>
+    <tr><td>1.3</td><td>Significance of the Project</td><td style="text-align: right;">2</td></tr>
+    <tr><td>1.4</td><td>Objectives</td><td style="text-align: right;">2</td></tr>
+    <tr><td>1.5</td><td>Purpose and Scope</td><td style="text-align: right;">3</td></tr>
+    <tr><td>1.6</td><td>Applicability</td><td style="text-align: right;">4</td></tr>
+    <tr><td>1.7</td><td>Key Contributions</td><td style="text-align: right;">4</td></tr>
+    <tr><td><strong>2</strong></td><td><strong>CHAPTER 2 – SYSTEM ANALYSIS</strong></td><td style="text-align: right;"><strong>5</strong></td></tr>
+    <tr><td>2.1</td><td>Existing System & Limitations</td><td style="text-align: right;">5</td></tr>
+    <tr><td>2.2</td><td>Proposed System Architecture</td><td style="text-align: right;">5</td></tr>
+    <tr><td>2.3</td><td>Advantages of Proposed System</td><td style="text-align: right;">6</td></tr>
+    <tr><td>2.4</td><td>Requirements Analysis</td><td style="text-align: right;">6</td></tr>
+    <tr><td>2.5</td><td>Hardware & Software Specifications</td><td style="text-align: right;">7</td></tr>
+    <tr><td>2.6</td><td>Technology Stack & Survey</td><td style="text-align: right;">7</td></tr>
+    <tr><td>2.7</td><td>Feasibility Analysis</td><td style="text-align: right;">8</td></tr>
+    <tr><td><strong>3</strong></td><td><strong>CHAPTER 3 – SYSTEM DESIGN</strong></td><td style="text-align: right;"><strong>9</strong></td></tr>
+    <tr><td>3.1</td><td>System Architecture & Module Division</td><td style="text-align: right;">9</td></tr>
+    <tr><td>3.2</td><td>End-to-End Fraud Detection Workflow</td><td style="text-align: right;">10</td></tr>
+    <tr><td>3.3</td><td>Feature Engineering Pipeline</td><td style="text-align: right;">10</td></tr>
+    <tr><td>3.4</td><td>Composite Risk Assessment & Scoring</td><td style="text-align: right;">11</td></tr>
+    <tr><td>3.5</td><td>Entity-Relationship (ER) Diagram</td><td style="text-align: right;">11</td></tr>
+    <tr><td>3.6</td><td>Data Flow Diagram (DFD)</td><td style="text-align: right;">12</td></tr>
+    <tr><td>3.7</td><td>UML Diagrams (Use Case, Class, State)</td><td style="text-align: right;">12</td></tr>
+    <tr><td>3.8</td><td>Project Schedule & Gantt Chart</td><td style="text-align: right;">14</td></tr>
+    <tr><td>3.9</td><td>Cloud Deployment Architecture</td><td style="text-align: right;">14</td></tr>
+    <tr><td><strong>4</strong></td><td><strong>CHAPTER 4 – IMPLEMENTATION AND TESTING</strong></td><td style="text-align: right;"><strong>16</strong></td></tr>
+    <tr><td>4.1</td><td>Development Environment & Tech Stack</td><td style="text-align: right;">16</td></tr>
+    <tr><td>4.2</td><td>Implementation Highlights (Frontend, Backend, DB)</td><td style="text-align: right;">16</td></tr>
+    <tr><td>4.3</td><td>REST API Endpoints Specification</td><td style="text-align: right;">16</td></tr>
+    <tr><td>4.4</td><td>Testing Methodology & Execution Matrix</td><td style="text-align: right;">17</td></tr>
+    <tr><td><strong>5</strong></td><td><strong>CHAPTER 5 – RESULTS AND DISCUSSIONS</strong></td><td style="text-align: right;"><strong>20</strong></td></tr>
+    <tr><td>5.1</td><td>Live Production Application Overview & Screenshots</td><td style="text-align: right;">20</td></tr>
+    <tr><td>5.2</td><td>Supervised Fraud Model Benchmark Results</td><td style="text-align: right;">21</td></tr>
+    <tr><td>5.3</td><td>Duplicate & Anomaly Detection Findings</td><td style="text-align: right;">22</td></tr>
+    <tr><td>5.4</td><td>Knowledge Graph Structural Results</td><td style="text-align: right;">22</td></tr>
+    <tr><td>5.5</td><td>Hybrid Risk Scoring Stratification</td><td style="text-align: right;">22</td></tr>
+    <tr><td>5.6</td><td>Discussion & Defect Resolution Summary</td><td style="text-align: right;">23</td></tr>
+    <tr><td>5.7</td><td>Limitations of Experimental Results</td><td style="text-align: right;">23</td></tr>
+    <tr><td><strong>6</strong></td><td><strong>CHAPTER 6 – CONCLUSION AND FUTURE WORK</strong></td><td style="text-align: right;"><strong>24</strong></td></tr>
+    <tr><td>6.1</td><td>Conclusion & Key Findings</td><td style="text-align: right;">24</td></tr>
+    <tr><td>6.2</td><td>Limitations & Future Scope</td><td style="text-align: right;">24</td></tr>
+    <tr><td>6.3</td><td>Industry Applications</td><td style="text-align: right;">24</td></tr>
+    <tr><td><strong>7</strong></td><td><strong>CHAPTER 7 – REFERENCES</strong></td><td style="text-align: right;"><strong>26</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- LIST OF FIGURES                                              -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">LIST OF FIGURES</h1>
+
+<table class="academic-table" style="font-size: 11pt;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">Figure No.</th>
+      <th style="width: 65%;">Caption / Description</th>
+      <th style="width: 15%; text-align: right;">Page No.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Figure 3.1</td><td>Three-Tier System Architecture Diagram</td><td style="text-align: right;">9</td></tr>
+    <tr><td>Figure 3.2</td><td>End-to-End Multi-Signal Fraud Detection Workflow</td><td style="text-align: right;">10</td></tr>
+    <tr><td>Figure 3.3</td><td>Feature Engineering Pipeline Breakdown (38 Features)</td><td style="text-align: right;">11</td></tr>
+    <tr><td>Figure 3.4</td><td>Normalized Entity-Relationship (ER) Diagram</td><td style="text-align: right;">12</td></tr>
+    <tr><td>Figure 3.5</td><td>Level-0 Context Data Flow Diagram (DFD)</td><td style="text-align: right;">12</td></tr>
+    <tr><td>Figure 3.6</td><td>UML Use-Case Diagram for Claims Officer & SIU</td><td style="text-align: right;">13</td></tr>
+    <tr><td>Figure 3.7</td><td>UML Class Diagram of Analytical Services</td><td style="text-align: right;">13</td></tr>
+    <tr><td>Figure 3.8</td><td>State Transition Diagram for SIU Case Lifecycle</td><td style="text-align: right;">14</td></tr>
+    <tr><td>Figure 3.9</td><td>Project Schedule & Implementation Gantt Chart</td><td style="text-align: right;">14</td></tr>
+    <tr><td>Figure 3.10</td><td>Cloud Deployment Topology (Vercel, Render, Supabase)</td><td style="text-align: right;">15</td></tr>
+    <tr><td>Figure 5.1</td><td>Live Production Command Center Dashboard (FraudShield AI)</td><td style="text-align: right;">20</td></tr>
+    <tr><td>Figure 5.2</td><td>Live Production Insurance Officer Registration Portal</td><td style="text-align: right;">21</td></tr>
+    <tr><td>Figure 5.3</td><td>XGBoost Supervised Fraud Model Confusion Matrix</td><td style="text-align: right;">22</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- LIST OF TABLES                                               -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">LIST OF TABLES</h1>
+
+<table class="academic-table" style="font-size: 11pt;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">Table No.</th>
+      <th style="width: 65%;">Caption / Description</th>
+      <th style="width: 15%; text-align: right;">Page No.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Table 2.1</td><td>Enterprise Technology Stack Summary</td><td style="text-align: right;">7</td></tr>
+    <tr><td>Table 4.1</td><td>Comprehensive Backend REST API Endpoints Specification</td><td style="text-align: right;">16</td></tr>
+    <tr><td>Table 4.2</td><td>Comprehensive Functional and Security Test Execution Matrix</td><td style="text-align: right;">17</td></tr>
+    <tr><td>Table 5.1</td><td>Benchmark Evaluation Across Supervised Algorithms on Test Set</td><td style="text-align: right;">21</td></tr>
+    <tr><td>Table 5.2</td><td>Operational Risk Band Stratification and Triage Performance</td><td style="text-align: right;">22</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- LIST OF ABBREVIATIONS                                        -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">LIST OF ABBREVIATIONS</h1>
+
+<table class="academic-table" style="font-size: 11pt;">
+  <thead>
+    <tr>
+      <th style="width: 30%;">Abbreviation</th>
+      <th style="width: 70%;">Expansion / Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>AI</strong></td><td>Artificial Intelligence</td></tr>
+    <tr><td><strong>API</strong></td><td>Application Programming Interface</td></tr>
+    <tr><td><strong>ASGI</strong></td><td>Asynchronous Server Gateway Interface</td></tr>
+    <tr><td><strong>CDN</strong></td><td>Content Delivery Network</td></tr>
+    <tr><td><strong>CORS</strong></td><td>Cross-Origin Resource Sharing</td></tr>
+    <tr><td><strong>DFD</strong></td><td>Data Flow Diagram</td></tr>
+    <tr><td><strong>ERD</strong></td><td>Entity-Relationship Diagram</td></tr>
+    <tr><td><strong>FIR</strong></td><td>First Incident Report (Police)</td></tr>
+    <tr><td><strong>FN</strong></td><td>False Negative</td></tr>
+    <tr><td><strong>FP</strong></td><td>False Positive</td></tr>
+    <tr><td><strong>GNN</strong></td><td>Graph Neural Network</td></tr>
+    <tr><td><strong>HMR</strong></td><td>Hot Module Replacement</td></tr>
+    <tr><td><strong>IRDAI</strong></td><td>Insurance Regulatory and Development Authority of India</td></tr>
+    <tr><td><strong>JWT</strong></td><td>JSON Web Token</td></tr>
+    <tr><td><strong>LOF</strong></td><td>Local Outlier Factor</td></tr>
+    <tr><td><strong>ML</strong></td><td>Machine Learning</td></tr>
+    <tr><td><strong>OCSVM</strong></td><td>One-Class Support Vector Machine</td></tr>
+    <tr><td><strong>PR-AUC</strong></td><td>Precision-Recall Area Under the Curve</td></tr>
+    <tr><td><strong>RBAC</strong></td><td>Role-Based Access Control</td></tr>
+    <tr><td><strong>REST</strong></td><td>Representational State Transfer</td></tr>
+    <tr><td><strong>ROC-AUC</strong></td><td>Receiver Operating Characteristic Area Under the Curve</td></tr>
+    <tr><td><strong>SHAP</strong></td><td>Shapley Additive exPlanations</td></tr>
+    <tr><td><strong>SIU</strong></td><td>Special Investigation Unit</td></tr>
+    <tr><td><strong>SPA</strong></td><td>Single Page Application</td></tr>
+    <tr><td><strong>SQL</strong></td><td>Structured Query Language</td></tr>
+    <tr><td><strong>TF-IDF</strong></td><td>Term Frequency - Inverse Document Frequency</td></tr>
+    <tr><td><strong>TN</strong></td><td>True Negative</td></tr>
+    <tr><td><strong>TP</strong></td><td>True Positive</td></tr>
+    <tr><td><strong>UML</strong></td><td>Unified Modeling Language</td></tr>
+    <tr><td><strong>VIN</strong></td><td>Vehicle Identification Number</td></tr>
+    <tr><td><strong>XAI</strong></td><td>Explainable Artificial Intelligence</td></tr>
+    <tr><td><strong>XGBoost</strong></td><td>Extreme Gradient Boosting</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 1: INTRODUCTION                                      -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 1<br>INTRODUCTION</h1>
+
+<h2 class="section-title">1.1 Background</h2>
+<p>
+The modern insurance sector operates as a cornerstone of socioeconomic stability, underwriting risk across healthcare, automotive transport, commerce, and property. Over the past decade, the rapid digital transformation of financial technology (FinTech and InsurTech) has fundamentally shifted claim processing from physical paper dossiers to automated digital submission channels. While this transformation has dramatically shortened turnaround times for genuine policyholders, it has simultaneously expanded the threat surface for fraudulent activities.
+</p>
+
+<p>
+Insurance fraud is broadly classified into two categories:
+</p>
+<ul>
+  <li><strong>Soft (Opportunistic) Fraud:</strong> In which legitimate policyholders opportunistically inflate legitimate losses (e.g., exaggerating vehicle repair estimates or claiming pre-existing dent damage during a collision claim).</li>
+  <li><strong>Hard (Organized / Premeditated) Fraud:</strong> In which coordinated syndicates deliberately stage accidents, submit fabricated hospital bills, reuse invoices across multiple insurers, or manufacture phantom collision events to extract illicit payouts.</li>
+</ul>
+
+<p>
+According to global regulatory bodies such as the Coalition Against Insurance Fraud and the Insurance Regulatory and Development Authority of India (IRDAI), fraudulent claims represent an estimated 10% to 15% of all incurred claim expenditures across commercial lines. This hemorrhaging of capital forces underwriting firms to inflate annual policy premiums for honest consumers, creating systemic market inefficiency.
+</p>
+
+<p>
+Historically, insurance carriers addressed claim verification through manual inspection by claims adjusters or simple hardcoded relational database rules (e.g., checking if a claim amount exceeds ₹100,000 or if a claim occurred within 30 days of policy inception). However, modern organized fraud rings intentionally bypass these static threshold filters by staggering claim amounts just below audit thresholds, utilizing multiple straw-man policyholder identities, and rotating collusive service providers (garages, surveyors, and diagnostic clinics).
+</p>
+
+<p>
+The emerging discipline of <strong>Data Science</strong> offers transformative tools to counter this threat. By synthesizing <strong>Multivariate Tabular Machine Learning</strong>, <strong>Unsupervised Anomaly Detection</strong>, and <strong>Heterogeneous Graph Analytics</strong>, predictive systems can discover non-linear fraud signatures, detect statistical anomalies without labeled examples, and uncover hidden structural collusion across inter-connected networks of entities.
+</p>
+
+<h2 class="section-title">1.2 Problem Statement</h2>
+<p>
+Insurance organizations face an acute operational bottleneck: claim volumes have scaled exponentially into millions of annual filings, whereas specialized human investigative teams (Special Investigation Units - SIU) remain strictly resource-constrained. Consequently, manual review of every claim is impossible, while naive random sampling achieves poor hit rates (typically under 10%).
+</p>
+
+<p>
+Furthermore, existing automated fraud detection engines suffer from severe architectural limitations:
+</p>
+<ol>
+  <li><strong>Isolated Data Analysis:</strong> Existing machine learning classifiers treat each insurance claim as an independent, identically distributed ($i.i.d.$) row in a flat table, ignoring complex structural relationships between claimants, policies, repair garages, and shared billing invoices.</li>
+  <li><strong>High False-Alarm Rates:</strong> Naive statistical models generate excessive false positives, overwhelming human investigators with low-probability leads and delaying routine settlement for honest customers.</li>
+  <li><strong>Black-Box Opacity:</strong> Complex deep learning or ensemble models fail to provide explainable justifications, preventing investigators from defending audit conclusions during legal or regulatory proceedings.</li>
+  <li><strong>Lack of Integrated Case Lifecycle:</strong> Most data science fraud models exist merely as offline laboratory Jupyter notebooks, disconnected from active claims databases, web-based officer interfaces, and tamper-evident audit logging systems.</li>
+</ol>
+
+<p>
+There is a critical requirement for an <strong>integrated, web-based, graph-enhanced decision support platform</strong> that analyzes incoming claims in real time, evaluates multi-signal composite fraud risk, exposes structural collusion networks, explains predictive rationale, and guides investigators through an audited case resolution workflow.
+</p>
+
+<h2 class="section-title">1.3 Significance of the Project</h2>
+<p>
+This project holds multidimensional significance across technical, data science, operational, and commercial domains:
+</p>
+<ul>
+  <li><strong>From a Data Science Perspective:</strong> The project demonstrates a rigorous methodology for handling severe real-world class imbalance (16.25% fraud base rate) through temporal chronological train/test splitting, balanced cost-sensitive gradient boosting, and calibrated score normalization, entirely avoiding artificial synthetic oversampling artifacts (such as SMOTE leakage across time).</li>
+  <li><strong>From a Graph Analytics Perspective:</strong> The implementation constructs a heterogeneous knowledge graph of 1,020 nodes and 2,615 edges, proving how topological network features (such as degree centrality, PageRank, and fraud-neighbor density) can be deterministically extracted from relational database tables to enrich tabular classifiers and expose organized provider-claimant collusion rings.</li>
+  <li><strong>From an Operational & SIU Perspective:</strong> Rather than replacing human judgment, the platform implements a strict <strong>Human-in-the-Loop</strong> architecture. By stratifying claims into operational risk bands (<code>CRITICAL</code>, <code>HIGH</code>, <code>MEDIUM</code>, <code>LOW</code>), the system enables fast-track auto-approval for 75% of routine claims while concentrating human investigative effort where fraud density reaches 85.19%.</li>
+  <li><strong>From a Software Engineering Perspective:</strong> The project showcases full-stack enterprise software engineering, bridging Python machine learning engines with modern asynchronous web microservices (FastAPI), modern componentized user interfaces (React/TypeScript/Vite), and production cloud infrastructure (Vercel, Render, Supabase PostgreSQL).</li>
+</ul>
+
+<h2 class="section-title">1.4 Objectives</h2>
+<p>
+The primary objective of this project is to research, design, develop, test, and deploy a comprehensive, graph-enhanced insurance claim anomaly and duplicate network detection platform. The specific operational and academic objectives are:
+</p>
+<ol>
+  <li><strong>Relational Data Architecture:</strong> Design and deploy a normalized relational database schema (Supabase PostgreSQL) spanning Claims, Claimants, Policies, Vehicles, Providers, Invoices, Locations, Investigation Cases, and Audit Logs.</li>
+  <li><strong>Advanced Feature Engineering:</strong> Formulate and compute 38 domain-specific financial, behavioral, and temporal ratios, including claim-to-premium ratios, invoice discrepancies, policy age at claim date, and claimant claim frequency.</li>
+  <li><strong>Deterministic Duplicate Detection:</strong> Implement multi-attribute similarity algorithms combining sequence matching (Levenshtein), token overlap (Jaccard), and text vectorization (TF-IDF Cosine Similarity) to identify recycled claims and invoice reuse.</li>
+  <li><strong>Supervised Fraud Classification:</strong> Train, tune, and evaluate cost-sensitive machine learning algorithms (XGBoost, Random Forest, HistGradientBoosting, Logistic Regression) using temporal cross-validation.</li>
+  <li><strong>Unsupervised Outlier Detection:</strong> Build an ensemble of unsupervised anomaly detectors (Isolation Forest, Local Outlier Factor, One-Class SVM) to detect statistical anomalies without historical ground-truth labels.</li>
+  <li><strong>Heterogeneous Knowledge Graph Network:</strong> Construct a multi-entity bipartite network graph using NetworkX to identify collusion clusters, high-betweenness rogue providers, and shared resource anomalies.</li>
+  <li><strong>Hybrid Risk Engine Formulation:</strong> Formulate a calibrated multi-signal composite scoring engine that dynamically weights ML probability, anomaly score, duplicate similarity, and graph risk into a unified risk metric in $[0.0, 1.0]$.</li>
+  <li><strong>Explainable AI (XAI) Integration:</strong> Implement local feature attribution mechanisms (SHAP TreeExplainer) to generate natural-language investigative evidence summaries for claim officers.</li>
+  <li><strong>Full-Stack Web Application:</strong> Develop an intuitive, responsive investigator command center in React, TypeScript, and Vite, featuring secure authentication, claim queue sorting, customer 360 views, and real-time inference forms.</li>
+  <li><strong>Regulatory Auditing & Case Management:</strong> Provide an immutable audit trail and state-machine-driven investigation lifecycle (<code>NEW</code> &rarr; <code>UNDER_REVIEW</code> &rarr; <code>ESCALATED</code> &rarr; <code>RESOLVED</code> / <code>FALSE_POSITIVE</code>).</li>
+</ol>
+
+<h2 class="section-title">1.5 Purpose and Scope</h2>
+<h3 class="subsection-title">1.5.1 Purpose</h3>
+<p>
+The explicit purpose of this project is to develop a functional, enterprise-grade decision-support software application that empowers insurance claims adjusters, risk managers, and Special Investigation Units (SIUs) to detect, prioritize, investigate, and document fraudulent claims effectively. The platform transforms raw, disparate transactional tables into actionable forensic intelligence, reducing false-positive overhead and curtailing financial losses resulting from organized claims syndicates.
+</p>
+
+<h3 class="subsection-title">1.5.2 Scope</h3>
+<p>
+The project encompasses the following functional and technical boundaries:
+</p>
+<ul>
+  <li><strong>Domain Focus:</strong> Motor and property insurance claims processing, specifically vehicular accident, theft, windshield damage, third-party liability, and total loss claims.</li>
+  <li><strong>Data Boundary:</strong> Evaluation on a structured benchmark dataset comprising 320 claims across 120 claimants, 140 policies, 130 vehicles, 25 providers, 167 invoices, and 60 urban location nodes across 5 major Indian metropolitan areas (Mumbai, Pune, Delhi, Ahmedabad, Surat).</li>
+  <li><strong>Algorithms Implemented:</strong>
+    <ul>
+      <li>Supervised Classification: Extreme Gradient Boosting (XGBoost), Random Forest, Histogram Gradient Boosting, L2-Penalized Logistic Regression.</li>
+      <li>Unsupervised Anomaly: Isolation Forest, Local Outlier Factor (LOF), One-Class Support Vector Machine (One-Class SVM).</li>
+      <li>Text & Similarity: SequenceMatcher (edit distance), Token Jaccard, TF-IDF Cosine Similarity.</li>
+      <li>Graph Topology: NetworkX graph extraction, Degree Centrality, PageRank, Betweenness Centrality, Bipartite projections, Fraud Neighbor Propagation.</li>
+    </ul>
+  </li>
+  <li><strong>System Boundaries:</strong> Full-stack deployment with client-side SPA routing on Vercel, containerized backend REST API on Render, hosted PostgreSQL pooler on Supabase, and secondary forensic analytics console on Streamlit Cloud.</li>
+  <li><strong>Exclusions:</strong> The system does not execute automated claims denial (adhering strictly to human review requirements), does not process raw unstructured audio/telematics streams, and does not replace statutory legal proceedings.</li>
+</ul>
+
+<h2 class="section-title">1.6 Applicability</h2>
+<p>
+The platform is directly applicable across multiple operational facets of the insurance and financial sectors:
+</p>
+<ul>
+  <li><strong>Claims Operations & Auto-Triage:</strong> Automatically approving low-risk claims (75% of volume) while rerouting suspicious claims directly to senior adjudicators.</li>
+  <li><strong>Special Investigation Units (SIU):</strong> Providing forensic investigators with complete dossier summaries, visual network collusion subgraphs, and SHAP attribution bars to substantiate fraud inquiries.</li>
+  <li><strong>Provider Network Management:</strong> Identifying fraudulent repair garages, medical clinics, and surveyors that systematically collude with serial claimants.</li>
+  <li><strong>Internal Audit & Compliance:</strong> Ensuring all investigator state transitions, notes, and priority assignments are immutably logged for regulatory audits (e.g., IRDAI / state insurance commissioners).</li>
+  <li><strong>Academic & Research Utility:</strong> Serving as a benchmark implementation demonstrating how graph analytics can be combined with cost-sensitive tabular machine learning on imbalanced datasets.</li>
+</ul>
+
+<h2 class="section-title">1.7 Key Contributions</h2>
+<p>
+The principal academic and engineering contributions of this project include:
+</p>
+<ol>
+  <li><strong>Multi-Signal Calibrated Fusion:</strong> Unlike prior academic works that evaluate ML or graph analytics in isolation, this project formulates an empirically calibrated weighted fusion formula combining supervised ML, unsupervised anomaly scores, duplicate similarity, and graph network metrics.</li>
+  <li><strong>Temporal Validation Rigor:</strong> Zero data leakage across train/test splits by employing strict chronological temporal splitting (first 70% historical claims for training, subsequent 30% for evaluation), reflecting realistic production deployment conditions.</li>
+  <li><strong>Dual-Route Enterprise Architecture:</strong> Complete implementation of an asynchronous REST backend supporting dual-mounted endpoints (<code>/api/*</code> and root <code>/*</code>), CORS preflight sanitization, automated database connection pool fallbacks, and Vercel edge reverse proxying.</li>
+  <li><strong>Transparent Explainability:</strong> Synthesis of SHAP local attributions and graph topological evidence into human-readable investigator narratives, converting raw floating-point probabilities into defensible reason codes.</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 2: SYSTEM ANALYSIS                                   -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 2<br>SYSTEM ANALYSIS</h1>
+
+<h2 class="section-title">2.1 Existing System & Limitations</h2>
+<p>
+In traditional insurance claim administration, claim validation relies heavily on legacy operational workflows developed decades ago. When an insured party files a claim, the record is entered into an enterprise database (often on-premise mainframe or relational systems). 
+</p>
+
+<p>
+The existing claim audit workflow operates through the following steps:
+</p>
+<ol>
+  <li><strong>Initial Document Collection:</strong> Physical or digital submission of claim forms, repair bills, and police first incident reports (FIR).</li>
+  <li><strong>Static Rule-Based Flagging:</strong> Rudimentary database trigger rules flag claims exceeding specific monetary limits (e.g., claims &gt; ₹150,000) or claims occurring within 15 days of policy purchase.</li>
+  <li><strong>Manual Adjuster Review:</strong> A human claim adjuster individually reviews the claimant's file, cross-checking policy coverage limits and previous claims within that specific insurer's siloed database.</li>
+  <li><strong>Discretionary SIU Referral:</strong> If the adjuster intuitively suspects foul play, the file is manually forwarded via email or paper docket to the Special Investigation Unit.</li>
+</ol>
+
+<h3 class="subsection-title">2.1.1 Limitations of Existing System</h3>
+<ul>
+  <li><strong>Siloed Relational Blindness:</strong> Legacy systems evaluate claims in isolation. If a dishonest claimant files identical damage claims across three different vehicles, or if an unscrupulous repair garage submits inflated invoices for twenty unrelated claimants, isolated row-level rules cannot detect the shared network pattern.</li>
+  <li><strong>High Operational Delay:</strong> Manual review of routine claims causes settlement delays extending from weeks to months, frustrating honest policyholders and increasing customer churn.</li>
+  <li><strong>Vulnerability to Threshold Gaming:</strong> Fraudulent actors quickly learn static business thresholds. By submitting claims marginally below the mandatory audit limit (e.g., ₹49,000 when the audit threshold is ₹50,000), syndicates evade inspection completely.</li>
+  <li><strong>Lack of Historical Duplicate Intelligence:</strong> Traditional relational databases lack fuzzy text similarity matching. Small typographical alterations in collision descriptions or misspelled claimant names prevent duplicate claim detection.</li>
+  <li><strong>Absence of Explainable Risk Metrics:</strong> Adjusters receive either a binary alert or no alert, with zero quantitative explanation of underlying anomaly components or risk certainty.</li>
+</ul>
+
+<h2 class="section-title">2.2 Proposed System Architecture</h2>
+<p>
+The proposed <strong>Graph-Enhanced Insurance Claim Anomaly and Duplicate Network Detection Platform</strong> addresses these challenges through a unified, intelligent pipeline that processes every claim across multiple analytical engines before presenting prioritized results to human investigators.
+</p>
+
+<p>
+The high-level analytical workflow operates through the following sequential stages:
+</p>
+<ol>
+  <li><strong>Intake & Ingestion:</strong> The claim is submitted via the portal or REST API with metadata.</li>
+  <li><strong>Schema Sanitization:</strong> FastAPI validates data types, date formatting, and relational foreign keys against PostgreSQL records.</li>
+  <li><strong>Parallel Feature Extraction:</strong> The system derives relational ratios, queries historical claim frequencies, and computes duplicate similarity.</li>
+  <li><strong>Multi-Model Inference:</strong>
+    <ul>
+      <li>XGBoost predicts supervised fraud probability $P(	ext{Fraud})$.</li>
+      <li>Isolation Forest computes calibrated anomaly score $S_{	ext{Anomaly}}$.</li>
+      <li>NetworkX extracts local subgraph metrics (degrees, PageRank, fraud-neighbor ratio).</li>
+    </ul>
+  </li>
+  <li><strong>Score Fusion & Banding:</strong> The composite formula computes $S_{	ext{Composite}}$ and maps the claim to <code>CRITICAL</code>, <code>HIGH</code>, <code>MEDIUM</code>, or <code>LOW</code>.</li>
+  <li><strong>Automated Triage Routing:</strong> Low-risk claims are fast-tracked; high-risk claims are placed in the SIU investigation queue.</li>
+  <li><strong>Human-in-the-Loop Investigation:</strong> The assigned SIU officer reviews the dossier, examines the network graph, reviews SHAP attributions, attaches notes, and logs a final resolution.</li>
+</ol>
+
+<h2 class="section-title">2.3 Advantages of Proposed System</h2>
+<ul>
+  <li><strong>Holistic Multi-Angle Detection:</strong> Combines supervised models (predicting known historical fraud patterns), unsupervised models (detecting novel anomalies), duplicate similarity (catching recycled bills), and graph analytics (uncovering collusion rings).</li>
+  <li><strong>Prioritized Resource Allocation:</strong> Triage categorization directs senior investigators exclusively to the top 8.4% of claims (<code>CRITICAL</code> and <code>HIGH</code> bands), where fraud concentration is over 85%.</li>
+  <li><strong>Fast-Tracking for Genuine Customers:</strong> Identifies low-risk claims (75% of total volume) with high confidence (94.17% legitimate rate), enabling automated fast-track payout workflows.</li>
+  <li><strong>Full Algorithmic Explainability:</strong> Every flagged claim is accompanied by SHAP feature attributions and topological network evidence, eliminating black-box opacity.</li>
+  <li><strong>Audited Regulatory Compliance:</strong> All state mutations, investigator reassignments, and resolution rationales are recorded with cryptographic timestamps in an immutable database audit log.</li>
+</ul>
+
+<h2 class="section-title">2.4 Requirements Analysis</h2>
+<h3 class="subsection-title">2.4.1 Functional Requirements</h3>
+<ul>
+  <li><strong>FR-01: User Authentication & Role-Based Access Control (RBAC):</strong> Secure login and registration for five operational personas: <code>ADMIN</code>, <code>SUPERVISOR</code>, <code>ANALYST</code>, <code>INVESTIGATOR</code>, and <code>CLAIMS_OFFICER</code>, utilizing bcrypt password hashing and signed JWT bearer tokens.</li>
+  <li><strong>FR-02: Claim Intake & Multi-Field Validation:</strong> Validation of incoming claim payloads against strict Pydantic schemas, enforcing positive currency amounts, logical date sequences, and foreign-key integrity.</li>
+  <li><strong>FR-03: Real-Time Multi-Signal Risk Scoring:</strong> Automated execution of the 4-component risk scoring equation, generating a continuous score in $[0.0, 1.0]$ and assigning operational bands (<code>CRITICAL</code>, <code>HIGH</code>, <code>MEDIUM</code>, <code>LOW</code>).</li>
+  <li><strong>FR-04: Automated Duplicate Claim Detection:</strong> Computation of pairwise similarity against historical claims using Levenshtein ratio, token Jaccard similarity, and TF-IDF cosine similarity.</li>
+  <li><strong>FR-05: Unsupervised Anomaly Scoring:</strong> Evaluation of claims against an Isolation Forest ensemble to detect high-dimensional multivariate outliers.</li>
+  <li><strong>FR-06: Graph Collusion Subnetwork Extraction:</strong> Extraction and rendering of the ego-network surrounding any claim, visualizing connections across claimants, shared policies, vehicles, providers, and invoices.</li>
+  <li><strong>FR-07: Local Explainability & Narrative Generation:</strong> Calculation of SHAP values for top predictive drivers and synthesis of plain-language investigator evidence summaries.</li>
+  <li><strong>FR-08: SIU Case Management Lifecycle:</strong> Creation, status transition (<code>NEW</code> &rarr; <code>UNDER_REVIEW</code> &rarr; <code>ESCALATED</code> &rarr; <code>RESOLVED</code> / <code>FALSE_POSITIVE</code>), investigator assignment, note attachment, and evidence dossier generation.</li>
+  <li><strong>FR-09: Immutable Audit Logging:</strong> Logging of all user actions, state modifications, and authentication attempts with client IP addresses, actor badges, and timestamps.</li>
+  <li><strong>FR-10: Executive Analytics & KPI Telemetry:</strong> Real-time dashboards visualizing loss prevented, fraud rates, model health status, and claim volume metrics.</li>
+</ul>
+
+<h3 class="subsection-title">2.4.2 Non-Functional Requirements</h3>
+<ul>
+  <li><strong>Performance:</strong> Sub-500ms API inference response time for single-claim scoring. Batch feature pipeline executes in under 3.5 seconds across 320 records.</li>
+  <li><strong>Security:</strong> All passwords hashed with bcrypt (salt rounds = 12). Signed HMAC-SHA256 JWT tokens with 60-minute expiration. SQL injection immunity verified via parameterized queries.</li>
+  <li><strong>Scalability:</strong> Fully stateless API design allowing horizontal container scaling on cloud platforms. Asynchronous non-blocking event loops handling concurrent requests.</li>
+  <li><strong>Reliability:</strong> Supavisor connection pooling on port 6543 mitigating network timeouts and IPv4/IPv6 translation latency.</li>
+  <li><strong>Usability:</strong> Intuitive responsive design adhering to WCAG 2.1 accessibility guidelines, providing clean high-contrast visual status indicators.</li>
+</ul>
+
+<h2 class="section-title">2.5 Hardware & Software Specifications</h2>
+<p>
+The minimum and recommended computational specifications for running and deploying the system:
+</p>
+
+<table class="academic-table">
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Minimum Requirement</th>
+      <th>Recommended Requirement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Processor</strong></td>
+      <td>Dual-Core, 2.0 GHz (x86-64 / ARM64)</td>
+      <td>Quad-Core Intel i5 / AMD Ryzen 5 (3.0 GHz+)</td>
+    </tr>
+    <tr>
+      <td><strong>RAM</strong></td>
+      <td>8 GB DDR4</td>
+      <td>16 GB DDR4/DDR5</td>
+    </tr>
+    <tr>
+      <td><strong>Storage</strong></td>
+      <td>20 GB Available Disk Space</td>
+      <td>100 GB Solid State Drive (NVMe SSD)</td>
+    </tr>
+    <tr>
+      <td><strong>Operating System</strong></td>
+      <td>Windows 10 / Ubuntu 20.04 LTS</td>
+      <td>Windows 11 / Ubuntu 22.04 LTS / macOS</td>
+    </tr>
+    <tr>
+      <td><strong>Network Speed</strong></td>
+      <td>5 Mbps Broadband Connection</td>
+      <td>25+ Mbps High-Speed Internet</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="section-title">2.6 Technology Stack</h2>
+<div class="table-caption">Table 2.1: Enterprise Technology Stack Summary</div>
+<table class="academic-table">
+  <thead>
+    <tr>
+      <th>Layer / Category</th>
+      <th>Selected Technology</th>
+      <th>Version</th>
+      <th>Primary Role in Architecture</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Frontend Framework</strong></td>
+      <td>React with TypeScript</td>
+      <td>React 18 / TS 5</td>
+      <td>Reactive, type-safe User Interface and officer views</td>
+    </tr>
+    <tr>
+      <td><strong>Frontend Tooling</strong></td>
+      <td>Vite</td>
+      <td>Vite 5</td>
+      <td>High-speed Hot Module Replacement and production bundling</td>
+    </tr>
+    <tr>
+      <td><strong>Styling & Design</strong></td>
+      <td>Tailwind CSS & Lucide React</td>
+      <td>Tailwind 3</td>
+      <td>Responsive, modern component design and icon system</td>
+    </tr>
+    <tr>
+      <td><strong>Backend Framework</strong></td>
+      <td>FastAPI (Python)</td>
+      <td>0.115+</td>
+      <td>Asynchronous REST API, schema validation, route handling</td>
+    </tr>
+    <tr>
+      <td><strong>ASGI Web Server</strong></td>
+      <td>Uvicorn</td>
+      <td>0.30+</td>
+      <td>High-performance asynchronous server runtime</td>
+    </tr>
+    <tr>
+      <td><strong>Relational Database</strong></td>
+      <td>PostgreSQL (Supabase)</td>
+      <td>PostgreSQL 15</td>
+      <td>Relational entity persistence, ACID compliance, foreign keys</td>
+    </tr>
+    <tr>
+      <td><strong>Connection Pooler</strong></td>
+      <td>Supavisor</td>
+      <td>Port 6543</td>
+      <td>IPv4 transaction pooling for reliable cloud hosting</td>
+    </tr>
+    <tr>
+      <td><strong>Supervised ML</strong></td>
+      <td>XGBoost & Scikit-Learn</td>
+      <td>XGBoost 2.0+</td>
+      <td>Gradient boosted tree classification for fraud prediction</td>
+    </tr>
+    <tr>
+      <td><strong>Anomaly Detection</strong></td>
+      <td>Isolation Forest / LOF / OCSVM</td>
+      <td>Scikit-Learn 1.4+</td>
+      <td>Unsupervised multivariate outlier identification</td>
+    </tr>
+    <tr>
+      <td><strong>Duplicate Detection</strong></td>
+      <td>difflib / Jaccard / TF-IDF</td>
+      <td>Python 3.13 stdlib</td>
+      <td>Deterministic sequence and token text similarity</td>
+    </tr>
+    <tr>
+      <td><strong>Graph Network Engine</strong></td>
+      <td>NetworkX</td>
+      <td>3.2+</td>
+      <td>Heterogeneous entity-relationship graph modeling</td>
+    </tr>
+    <tr>
+      <td><strong>Model Explainability</strong></td>
+      <td>SHAP (TreeExplainer)</td>
+      <td>0.44+</td>
+      <td>Local game-theoretic Shapley feature attribution</td>
+    </tr>
+    <tr>
+      <td><strong>Analytics Console</strong></td>
+      <td>Streamlit Cloud</td>
+      <td>1.38+</td>
+      <td>Interactive forensic exploration and visual graph analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Hosting</strong></td>
+      <td>Vercel (Edge) & Render (Web)</td>
+      <td>Cloud Native</td>
+      <td>Automated CI/CD deployments connected to GitHub</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="section-title">2.7 Feasibility Analysis</h2>
+<p>
+A structured four-factor feasibility evaluation was conducted prior to implementation:
+</p>
+<ul>
+  <li><strong>Technical Feasibility:</strong> The selected open-source software stack is technically mature, well-documented, and actively maintained. The combination of FastAPI, Scikit-Learn, and React has been proven to handle financial transaction telemetry with sub-second response times.</li>
+  <li><strong>Economic Feasibility:</strong> The platform was engineered entirely on zero-cost infrastructure tiers (GitHub open-source repository, Vercel Hobby CDN, Render Free Web Service, Supabase Free Tier), demonstrating that enterprise-grade fraud intelligence can be developed without capital-intensive proprietary software licenses.</li>
+  <li><strong>Operational Feasibility:</strong> The user interface was tailored to match the daily workflow of insurance claims adjusters and SIU officers. Triage categorization (CRITICAL, HIGH, MEDIUM, LOW) integrates directly into claims operations without requiring data science expertise from end-users.</li>
+  <li><strong>Schedule Feasibility:</strong> The modular architecture enabled phased execution across 16 academic weeks, ensuring all modeling, API engineering, UI design, and testing milestones were achieved on schedule.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 3: SYSTEM DESIGN                                     -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 3<br>SYSTEM DESIGN</h1>
+
+<h2 class="section-title">3.1 System Architecture</h2>
+<p>
+The system architecture follows a decoupled, three-tier cloud-native design consisting of the <strong>Client Presentation Tier</strong>, the <strong>Application & Analytical Processing Tier</strong>, and the <strong>Persistent Data Tier</strong>.
+</p>
+
+<div class="figure-container">
+  <img src="figures/system_architecture.png" alt="Figure 3.1 System Architecture">
+  <div class="caption">Figure 3.1: Three-Tier System Architecture Diagram of the Insurance Fraud Intelligence Platform</div>
+</div>
+
+<h2 class="section-title">3.2 Module Division</h2>
+<p>
+The system is decomposed into sixteen specialized modules categorized under four operational umbrellas:
+</p>
+<ul>
+  <li><strong>Group A: User Management & System Security:</strong>
+    <ul>
+      <li>Authentication Module (<code>api/routes/auth.py</code>): Handles registration, login, and JWT issuance.</li>
+      <li>Role-Based Access Control (RBAC) Module (<code>api/services/auth_service.py</code>): Enforces route permissions across the 5 personas.</li>
+      <li>Audit Logging Module (<code>api/routes/audit_logs.py</code>): Immutably records state mutations and user events.</li>
+    </ul>
+  </li>
+  <li><strong>Group B: Data Processing & Feature Engineering:</strong>
+    <ul>
+      <li>Relational Data Management Module: CRUD operations across Claims, Claimants, Policies, Vehicles, Invoices.</li>
+      <li>Data Preprocessing Module (<code>src/data/</code>): Cleansing, type coercion, and missing-value imputation.</li>
+      <li>Feature Engineering Module (<code>src/features/</code>): Generates 38 domain-specific financial and behavioral ratios.</li>
+    </ul>
+  </li>
+  <li><strong>Group C: Core Analytical Detection Engines:</strong>
+    <ul>
+      <li>Duplicate Detection Module (<code>src/duplicate/</code>): Fuzzy text, numeric proximity, and TF-IDF similarity.</li>
+      <li>Supervised Fraud Classification Module (<code>src/models/</code>): Cost-sensitive XGBoost fraud prediction.</li>
+      <li>Unsupervised Anomaly Detection Module (<code>src/models/anomaly/</code>): Calibrated Isolation Forest scoring.</li>
+      <li>Knowledge Graph Network Module (<code>src/graph/</code>): Heterogeneous NetworkX graph construction and centrality extraction.</li>
+      <li>Hybrid Risk Scoring Module (<code>src/scoring/</code>): Weighted linear fusion of analytical components.</li>
+      <li>Explainability & Attribution Module (<code>src/explainability/</code>): Local SHAP values and narrative text generation.</li>
+    </ul>
+  </li>
+  <li><strong>Group D: Operational Investigation & Visualization:</strong>
+    <ul>
+      <li>Investigation Workflow Module (<code>src/cases/</code>): Triage queue management and state machine transitions.</li>
+      <li>Case Dossier Module (<code>src/cases/case_manager.py</code>): Evidence assembly and printable case files.</li>
+      <li>Officer Web Portal (<code>frontend/src/</code>): Reactive TypeScript command center for claims operations.</li>
+      <li>Forensic Analytics Console (<code>dashboard/</code>): Interactive Streamlit deep-dive analytics.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 class="section-title">3.3 End-to-End Fraud Detection Workflow</h2>
+<p>
+The analytical pipeline executes across seven sequential stages from intake to resolution:
+</p>
+
+<div class="figure-container">
+  <img src="figures/fraud_workflow.png" alt="Figure 3.2 End-to-End Workflow">
+  <div class="caption">Figure 3.2: End-to-End Multi-Signal Fraud Detection Workflow</div>
+</div>
+
+<h2 class="section-title">3.6 Feature Engineering Pipeline</h2>
+<p>
+Thirty-eight domain-specific features are engineered to capture fraud indicators:
+</p>
+
+<div class="figure-container">
+  <img src="figures/feature_pipeline.png" alt="Figure 3.3 Feature Pipeline">
+  <div class="caption">Figure 3.3: Feature Engineering Pipeline Breakdown across 38 Domain Ratios</div>
+</div>
+
+<h2 class="section-title">3.11 Composite Risk Assessment & Scoring</h2>
+<p>
+The <strong>Hybrid Fraud Risk Engine</strong> synthesizes the four analytical components using empirical weights derived from data distributions:
+</p>
+
+<div class="quote-box">
+  $$\text{Composite Risk} = (0.45 \cdot S_{\text{ML}}) + (0.25 \cdot S_{\text{Anomaly}}) + (0.15 \cdot S_{\text{Duplicate}}) + (0.15 \cdot S_{\text{Graph}})$$
+</div>
+
+<p>
+Where:
+</p>
+<ul>
+  <li>$S_{	ext{ML}}$: Supervised probability of fraud predicted by the XGBoost pipeline ($[0.0, 1.0]$).</li>
+  <li>$S_{	ext{Anomaly}}$: Calibrated Isolation Forest multivariate outlier score ($[0.0, 1.0]$).</li>
+  <li>$S_{	ext{Duplicate}}$: Normalized pairwise similarity score from the duplicate matching engine ($[0.0, 1.0]$).</li>
+  <li>$S_{	ext{Graph}}$: Composite graph topology score combining node degree, PageRank, and fraud-neighbor density ($[0.0, 1.0]$).</li>
+</ul>
+
+<h3 class="subsection-title">Operational Risk Bands</h3>
+<ul>
+  <li><strong><code>CRITICAL</code> (Composite Risk &ge; 0.75):</strong> Immediate escalation. High-density fraud candidate with multi-signal alignment. Mandatory freeze on payment.</li>
+  <li><strong><code>HIGH</code> (0.55 &le; Composite Risk &lt; 0.75):</strong> Priority investigation queue. Formal SIU case opened within 24 hours.</li>
+  <li><strong><code>MEDIUM</code> (0.35 &le; Composite Risk &lt; 0.55):</strong> Standard adjuster desk audit. Routine documentation verification required.</li>
+  <li><strong><code>LOW</code> (Composite Risk &lt; 0.35):</strong> Routine fast-track settlement queue. Eligible for straight-through automated payout.</li>
+</ul>
+
+<h2 class="section-title">3.14 Entity-Relationship (ER) Diagram</h2>
+<p>
+The normalized relational schema captures the domain entities and relational constraints across seven core tables:
+</p>
+
+<div class="figure-container">
+  <img src="figures/er_diagram.png" alt="Figure 3.4 ER Diagram">
+  <div class="caption">Figure 3.4: Normalized Entity-Relationship (ER) Diagram of Insurance Fraud Platform</div>
+</div>
+
+<h2 class="section-title">3.15 Data Flow Diagram (DFD)</h2>
+<p>
+The Level-0 Context DFD illustrates the interaction between external actors, analytical processes, and data stores:
+</p>
+
+<div class="figure-container">
+  <img src="figures/dfd_context.png" alt="Figure 3.5 Context DFD">
+  <div class="caption">Figure 3.5: Level-0 Context Data Flow Diagram (DFD)</div>
+</div>
+
+<h2 class="section-title">3.16 UML Diagrams</h2>
+<h3 class="subsection-title">3.16.1 Use-Case Diagram</h3>
+<p>
+The use-case diagram details operational interactions for Claims Officers and SIU Investigators:
+</p>
+
+<div class="figure-container">
+  <img src="figures/use_case_diagram.png" alt="Figure 3.6 Use Case Diagram">
+  <div class="caption">Figure 3.6: UML Use-Case Diagram for Claims Officer & SIU Investigator Personas</div>
+</div>
+
+<h3 class="subsection-title">3.16.2 Class Diagram</h3>
+<p>
+The backend service architecture is represented by decoupled analytical classes:
+</p>
+
+<div class="figure-container">
+  <img src="figures/class_diagram.png" alt="Figure 3.7 Class Diagram">
+  <div class="caption">Figure 3.7: UML Class Diagram of Analytical Services and Domain Controllers</div>
+</div>
+
+<h3 class="subsection-title">3.16.3 State Transition Diagram</h3>
+<p>
+The investigation case lifecycle is governed by an immutable finite state machine:
+</p>
+
+<div class="figure-container">
+  <img src="figures/state_diagram.png" alt="Figure 3.8 State Diagram">
+  <div class="caption">Figure 3.8: State Transition Diagram for SIU Case Investigation Lifecycle</div>
+</div>
+
+<h2 class="section-title">3.17 Project Schedule & Gantt Chart</h2>
+<p>
+The project development was executed over 16 academic weeks across six major phases:
+</p>
+
+<div class="figure-container">
+  <img src="figures/gantt_chart.png" alt="Figure 3.9 Gantt Chart">
+  <div class="caption">Figure 3.9: Project Schedule and Implementation Gantt Chart</div>
+</div>
+
+<h2 class="section-title">3.18 Cloud Deployment Architecture</h2>
+<p>
+The live cloud hosting topology is deployed across Vercel, Render, and Supabase:
+</p>
+
+<div class="figure-container">
+  <img src="figures/deployment_architecture.png" alt="Figure 3.10 Deployment Architecture">
+  <div class="caption">Figure 3.10: Cloud Deployment Topology Across Vercel, Render, and Supabase</div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 4: IMPLEMENTATION AND TESTING                        -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 4<br>IMPLEMENTATION AND TESTING</h1>
+
+<h2 class="section-title">4.1 Development Environment</h2>
+<p>
+The development environment was configured on an AMD Ryzen 5 workstation running Windows 11 with Python 3.13.5 and Node.js v20.18.0. VS Code was utilized as the primary IDE, integrated with Git version control linked to the GitHub remote repository <code>adityabhardwaj29/Insurance_claimed_detection-</code>.
+</p>
+
+<h2 class="section-title">4.2 Implementation Highlights</h2>
+<h3 class="subsection-title">4.2.1 Frontend Implementation (React 18 & TypeScript)</h3>
+<p>
+The frontend was developed using modern React 18 functional components and TypeScript, bundled with Vite 5. The interface implements clean dark/light themes, responsive sidebars, interactive metric cards, and server-side paginated claims tables.
+</p>
+
+<h3 class="subsection-title">4.2.2 Backend Implementation (FastAPI)</h3>
+<p>
+The backend REST API is built in FastAPI (<code>api/main.py</code>), utilizing asynchronous non-blocking event loops. Core architectural highlights include:
+</p>
+<ul>
+  <li><strong>Dual-Mounted Route Architecture:</strong> All endpoints are accessible with or without the <code>/api</code> prefix (e.g., both <code>/api/auth/login</code> and <code>/auth/login</code> are active).</li>
+  <li><strong>CORS Middleware:</strong> Dynamic origin whitelisting allowing requests from <code>https://insurance-claimed-detection.vercel.app</code> and development ports.</li>
+  <li><strong>Pydantic Schemas:</strong> Strict input validation enforcing positive currency amounts, logical date formats, and valid enum values.</li>
+</ul>
+
+<h3 class="subsection-title">4.2.3 Database Implementation (PostgreSQL & Supabase)</h3>
+<p>
+Data is persisted in PostgreSQL 15 on Supabase. Connection resilience is guaranteed through an automated pooler fallback mechanism in <code>api/db.py</code> connecting via Supavisor port 6543 (AWS Mumbai).
+</p>
+
+<h2 class="section-title">4.3 REST API Endpoints Specification</h2>
+<div class="table-caption">Table 4.1: Comprehensive Backend REST API Endpoints Specification</div>
+<table class="academic-table">
+  <thead>
+    <tr>
+      <th>Endpoint Path</th>
+      <th>Method</th>
+      <th>Controller Function</th>
+      <th>Purpose</th>
+      <th>Authentication</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/api/auth/register</code></td><td>POST</td><td><code>register()</code></td><td>Register new insurance officer account</td><td>Public</td></tr>
+    <tr><td><code>/api/auth/login</code></td><td>POST</td><td><code>login()</code></td><td>Authenticate credentials and issue JWT</td><td>Public</td></tr>
+    <tr><td><code>/api/auth/me</code></td><td>GET</td><td><code>get_current_profile()</code></td><td>Retrieve authenticated user profile</td><td>Bearer JWT</td></tr>
+    <tr><td><code>/api/health</code></td><td>GET</td><td><code>health_check()</code></td><td>Probe DB, models, and claim counts</td><td>Public</td></tr>
+    <tr><td><code>/api/claims</code></td><td>GET</td><td><code>list_claims()</code></td><td>Paginated, filtered claims queue</td><td>Public / Officer</td></tr>
+    <tr><td><code>/api/claims/{id}</code></td><td>GET</td><td><code>get_claim()</code></td><td>Detailed relational claim object</td><td>Public / Officer</td></tr>
+    <tr><td><code>/api/claims/{id}/risk</code></td><td>GET</td><td><code>get_claim_risk()</code></td><td>Multi-signal score and risk band</td><td>Public / Officer</td></tr>
+    <tr><td><code>/api/claims/{id}/graph</code></td><td>GET</td><td><code>get_claim_graph()</code></td><td>NetworkX 2-hop collusion ego-net</td><td>Public / Officer</td></tr>
+    <tr><td><code>/api/claims/{id}/duplicates</code></td><td>GET</td><td><code>get_claim_duplicates()</code></td><td>Duplicate matches and similarity</td><td>Public / Officer</td></tr>
+    <tr><td><code>/api/claims/{id}/explanation</code></td><td>GET</td><td><code>get_claim_explanation()</code></td><td>SHAP values and narrative text</td><td>Public / Officer</td></tr>
+    <tr><td><code>/api/cases</code></td><td>GET</td><td><code>list_cases()</code></td><td>Paginated SIU investigation cases</td><td>Officer JWT</td></tr>
+    <tr><td><code>/api/cases</code></td><td>POST</td><td><code>create_case()</code></td><td>Open new SIU investigation case</td><td>Officer JWT</td></tr>
+    <tr><td><code>/api/cases/{id}/status</code></td><td>POST</td><td><code>update_status()</code></td><td>Transition case lifecycle state</td><td>Officer JWT</td></tr>
+    <tr><td><code>/api/cases/{id}/notes</code></td><td>POST</td><td><code>add_note()</code></td><td>Attach investigator inquiry note</td><td>Officer JWT</td></tr>
+    <tr><td><code>/api/cases/{id}/dossier</code></td><td>GET</td><td><code>get_case_dossier()</code></td><td>Full assembled investigative dossier</td><td>Officer JWT</td></tr>
+    <tr><td><code>/api/customers</code></td><td>GET</td><td><code>search_customers()</code></td><td>Customer 360 lookup across cities</td><td>Officer JWT</td></tr>
+    <tr><td><code>/api/audit-logs</code></td><td>GET</td><td><code>list_audit_logs()</code></td><td>Query immutable system audit events</td><td>RBAC (Supervisor)</td></tr>
+  </tbody>
+</table>
+
+<h2 class="section-title">4.4 Testing Methodology & Execution Matrix</h2>
+<p>
+Testing was conducted across unit tests, integration tests, security vulnerability scans, and live browser automation.
+</p>
+
+<div class="table-caption">Table 4.2: Comprehensive Functional and Security Test Execution Matrix</div>
+<table class="academic-table">
+  <thead>
+    <tr>
+      <th>Test ID</th>
+      <th>Subsystem</th>
+      <th>Test Scenario</th>
+      <th>Input / Action</th>
+      <th>Expected Result</th>
+      <th>Actual Result</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TC-AUTH-01</strong></td>
+      <td>Auth</td>
+      <td>Valid Officer Registration</td>
+      <td>Valid email, password (8 chars), name, badge ID</td>
+      <td>User created in DB, HTTP 201, JWT issued</td>
+      <td>Account created, HTTP 201, JWT returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-AUTH-02</strong></td>
+      <td>Auth</td>
+      <td>Duplicate Email Collision</td>
+      <td>Register with existing email <code>officer@fraudshield.ai</code></td>
+      <td>HTTP 400 Bad Request, duplicate prevented</td>
+      <td>HTTP 400 Bad Request returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-AUTH-03</strong></td>
+      <td>Auth</td>
+      <td>Password Length Validation</td>
+      <td>Register with password &lt; 6 chars (<code>"pass"</code>)</td>
+      <td>HTTP 422 Unprocessable Entity</td>
+      <td>HTTP 422 validation error returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-AUTH-04</strong></td>
+      <td>Auth</td>
+      <td>Valid User Login</td>
+      <td>Correct email and matching password</td>
+      <td>HTTP 200 OK, signed JWT bearer token returned</td>
+      <td>HTTP 200 OK, valid token returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-AUTH-05</strong></td>
+      <td>Auth</td>
+      <td>Invalid Password Login</td>
+      <td>Valid email with incorrect password</td>
+      <td>HTTP 401 Unauthorized</td>
+      <td>HTTP 401 Unauthorized returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-RBAC-01</strong></td>
+      <td>Security</td>
+      <td>Protected Route Without Token</td>
+      <td><code>GET /customers</code> with no Authorization header</td>
+      <td>HTTP 401 Unauthorized</td>
+      <td>HTTP 401 Unauthorized returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-RBAC-02</strong></td>
+      <td>Security</td>
+      <td>Protected Route With Token</td>
+      <td><code>GET /customers</code> with valid Bearer JWT</td>
+      <td>HTTP 200 OK, customer records returned</td>
+      <td>HTTP 200 OK, customer array returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-CORS-01</strong></td>
+      <td>Security</td>
+      <td>Preflight from Vercel Origin</td>
+      <td><code>OPTIONS /api/auth/login</code> with Vercel origin</td>
+      <td>HTTP 200 OK, <code>Access-Control-Allow-Origin</code> matches</td>
+      <td>HTTP 200 OK, header present</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-SQLI-01</strong></td>
+      <td>Security</td>
+      <td>SQL Injection in Claim Filter</td>
+      <td><code>GET /claims?claim_type=' OR '1'='1</code></td>
+      <td>SQL payload treated as literal; claims = 0</td>
+      <td>HTTP 200 OK, 0 claims matched</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-SQLI-02</strong></td>
+      <td>Security</td>
+      <td>SQL Injection Drop Table</td>
+      <td><code>GET /claims?claim_type='; DROP TABLE claims; --</code></td>
+      <td>Parameterized query neutralizes injection</td>
+      <td>HTTP 200 OK, database intact</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-ROUT-01</strong></td>
+      <td>Routing</td>
+      <td>Dual-Mounted Auth Route</td>
+      <td><code>POST /auth/login</code> (without <code>/api</code>)</td>
+      <td>HTTP 200/401 executed by handler (no 404)</td>
+      <td>HTTP 401 handler response (no 404)</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-ROUT-02</strong></td>
+      <td>Routing</td>
+      <td>Prefixed Auth Route</td>
+      <td><code>POST /api/auth/login</code> (with <code>/api</code>)</td>
+      <td>HTTP 200/401 executed by handler (no 404)</td>
+      <td>HTTP 401 handler response (no 404)</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-PROD-01</strong></td>
+      <td>Build</td>
+      <td>Frontend Compilation</td>
+      <td>Execute <code>npm run build</code> in <code>frontend/</code></td>
+      <td>TypeScript compiles with zero errors</td>
+      <td><code>✓ built in 2.38s</code>, 429 kB bundle</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-HLTH-01</strong></td>
+      <td>Health</td>
+      <td>Comprehensive Health Probe</td>
+      <td><code>GET /api/health</code></td>
+      <td>HTTP 200 OK, DB connected, 323 claims</td>
+      <td>HTTP 200 OK, all systems online</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-CASE-01</strong></td>
+      <td>Workflow</td>
+      <td>Valid Status Transition</td>
+      <td><code>NEW</code> &rarr; <code>UNDER_REVIEW</code> on assignment</td>
+      <td>Status updated, audit log created</td>
+      <td>Status updated to <code>UNDER_REVIEW</code></td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-CASE-02</strong></td>
+      <td>Workflow</td>
+      <td>Invalid Status Transition</td>
+      <td>Attempt <code>NEW</code> &rarr; <code>RESOLVED</code> directly</td>
+      <td>HTTP 400 Bad Request, transition blocked</td>
+      <td>HTTP 400 Bad Request returned</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TC-E2E-01</strong></td>
+      <td>E2E</td>
+      <td>Browser Production Login</td>
+      <td>Navigate to Vercel site, enter credentials, submit</td>
+      <td>Successful login, redirect to <code>/</code> dashboard</td>
+      <td>Authenticated as Jane Doe, loaded KPIs</td>
+      <td><strong style="color: #059669;">PASSED</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 5: RESULTS AND DISCUSSIONS                           -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 5<br>RESULTS AND DISCUSSIONS</h1>
+
+<h2 class="section-title">5.1 Application Overview & Live Production Screenshots</h2>
+<p>
+The platform is fully operational in production across its public endpoints:
+</p>
+<ul>
+  <li><strong>Production Web Portal:</strong> <a href="https://insurance-claimed-detection.vercel.app">https://insurance-claimed-detection.vercel.app</a></li>
+  <li><strong>Production API Service:</strong> <a href="https://fraudshield-api-3j07.onrender.com">https://fraudshield-api-3j07.onrender.com</a></li>
+  <li><strong>Interactive API Documentation:</strong> <a href="https://fraudshield-api-3j07.onrender.com/docs">https://fraudshield-api-3j07.onrender.com/docs</a></li>
+  <li><strong>Forensic Analytics Console:</strong> <a href="https://insurance-fraud-analytics.streamlit.app">https://insurance-fraud-analytics.streamlit.app</a></li>
+</ul>
+
+<div class="figure-container">
+  <img src="screenshots/dashboard_live.png" alt="Figure 5.1 Live Dashboard">
+  <div class="caption">Figure 5.1: Live Production Fraud Operations & SIU Command Center Dashboard (FraudShield AI)</div>
+</div>
+
+<p>
+Figure 5.1 demonstrates the production web portal running on Vercel. Key operational metrics verified:
+</p>
+<ul>
+  <li><strong>Total Claims Volume:</strong> 323 claims representing ₹43,800,716 financial exposure.</li>
+  <li><strong>Active SIU Cases:</strong> 30 priority cases undergoing human investigation.</li>
+  <li><strong>Fraud Loss Prevented:</strong> ₹7,051,915 confirmed fraudulent claims intercepted.</li>
+  <li><strong>Auto-Triage Rate:</strong> 68.5% of incoming claims cleared for low-risk processing.</li>
+  <li><strong>Engine Status:</strong> Hybrid Multi-Signal Engine v2.4.0 Online.</li>
+</ul>
+
+<div class="figure-container">
+  <img src="screenshots/register_live.png" alt="Figure 5.2 Officer Registration">
+  <div class="caption">Figure 5.2: Insurance Officer Registration and Access Provisioning Portal</div>
+</div>
+
+<h2 class="section-title">5.2 Supervised Fraud Model Benchmark Results</h2>
+<p>
+The supervised fraud models were evaluated using chronological temporal partitioning (first 70% historical claims for training: 224 samples, 34 frauds; subsequent 30% for testing: 96 samples, 18 frauds).
+</p>
+
+<div class="table-caption">Table 5.1: Benchmark Evaluation Across Supervised Algorithms on Test Set</div>
+<table class="academic-table">
+  <thead>
+    <tr>
+      <th>Model Candidate</th>
+      <th>PR-AUC (Avg Prec)</th>
+      <th>ROC-AUC</th>
+      <th>F1-Score</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>Precision@10%</th>
+      <th>Recall@10%</th>
+      <th>Brier Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>XGBoost (Selected)</strong></td>
+      <td><strong>0.2348</strong></td>
+      <td><strong>0.5819</strong></td>
+      <td><strong>0.1818</strong></td>
+      <td><strong>0.2000</strong></td>
+      <td><strong>0.1667</strong></td>
+      <td><strong>0.2000</strong></td>
+      <td><strong>0.1111</strong></td>
+      <td><strong>0.1906</strong></td>
+    </tr>
+    <tr>
+      <td>Random Forest</td>
+      <td>0.2171</td>
+      <td>0.5328</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.3000</td>
+      <td>0.1667</td>
+      <td>0.1735</td>
+    </tr>
+    <tr>
+      <td>HistGradientBoosting</td>
+      <td>0.2091</td>
+      <td>0.5442</td>
+      <td>0.2162</td>
+      <td>0.2105</td>
+      <td>0.2222</td>
+      <td>0.2000</td>
+      <td>0.1111</td>
+      <td>0.2191</td>
+    </tr>
+    <tr>
+      <td>Logistic Regression</td>
+      <td>0.1777</td>
+      <td>0.4687</td>
+      <td>0.2333</td>
+      <td>0.1667</td>
+      <td>0.3889</td>
+      <td>0.1000</td>
+      <td>0.0556</td>
+      <td>0.3134</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="figure-container">
+  <img src="figures/confusion_matrix.png" alt="Figure 5.3 Confusion Matrix">
+  <div class="caption">Figure 5.3: XGBoost Supervised Fraud Model Confusion Matrix (Test Set N = 96, Threshold = 0.50)</div>
+</div>
+
+<h2 class="section-title">5.3 Duplicate & Anomaly Detection Findings</h2>
+<ul>
+  <li><strong>Duplicate Detection:</strong> Pairwise evaluation identified 34 claims in the <code>POSSIBLE_DUPLICATE</code> category (Similarity &ge; 0.50). Confirmed fraud prevalence within this group reached <strong>23.53%</strong> (8 frauds out of 34), representing a <strong>1.45x fraud concentration lift</strong> over the baseline population rate (16.25%).</li>
+  <li><strong>Anomaly Detection:</strong> Isolation Forest flagged 32 statistical outliers (10.0% of claims). Fraud prevalence within outliers reached <strong>18.75%</strong> (lift = 1.15x). Model agreement between Isolation Forest and Local Outlier Factor reached <strong>0.8467</strong>.</li>
+</ul>
+
+<h2 class="section-title">5.4 Knowledge Graph Structural Results</h2>
+<p>
+The heterogeneous NetworkX claim knowledge graph captures 1,020 entity nodes and 2,615 relationship edges:
+</p>
+<ul>
+  <li><strong>Entity Breakdown:</strong> Claims (320), Invoices (220), Policies (140), Vehicles (130), Claimants (120), Locations (65), Providers (25).</li>
+  <li><strong>Network Collusion Discovery:</strong> The graph revealed that <strong>153 claims shared 167 invoices</strong>, exposing an organized invoice reuse pattern. High betweenness centrality in specific provider nodes (e.g., Provider <code>PRV008</code> with a degree of 42) highlighted concentrated repair hubs actively colluding across multiple distinct claimants.</li>
+</ul>
+
+<h2 class="section-title">5.5 Hybrid Risk Scoring Stratification</h2>
+<div class="table-caption">Table 5.2: Operational Risk Band Stratification and Triage Performance</div>
+<table class="academic-table">
+  <thead>
+    <tr>
+      <th>Operational Risk Band</th>
+      <th>Threshold Boundary</th>
+      <th>Claim Count</th>
+      <th>Population %</th>
+      <th>Actual Fraud Count</th>
+      <th>Precision / Clean Rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>CRITICAL</strong></td>
+      <td>Score &ge; 0.75</td>
+      <td>1</td>
+      <td>0.3%</td>
+      <td>1</td>
+      <td><strong>100.0%</strong> Fraud Precision</td>
+    </tr>
+    <tr>
+      <td><strong>HIGH</strong></td>
+      <td>0.50 &le; Score &lt; 0.75</td>
+      <td>26</td>
+      <td>8.1%</td>
+      <td>22</td>
+      <td><strong>84.62%</strong> Fraud Precision</td>
+    </tr>
+    <tr>
+      <td><strong>MEDIUM</strong></td>
+      <td>0.35 &le; Score &lt; 0.50</td>
+      <td>53</td>
+      <td>16.6%</td>
+      <td>15</td>
+      <td><strong>28.30%</strong> Review Rate</td>
+    </tr>
+    <tr>
+      <td><strong>LOW</strong></td>
+      <td>Score &lt; 0.35</td>
+      <td>240</td>
+      <td>75.0%</td>
+      <td>14</td>
+      <td><strong>94.17%</strong> Clean Rate</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+<strong>Operational Triage Impact:</strong> Combining the <code>HIGH</code> and <code>CRITICAL</code> bands captures 27 claims containing <strong>23 confirmed fraud cases</strong>, achieving an investigator precision of <strong>85.19%</strong>. Conversely, the <code>LOW</code> band correctly isolates 226 legitimate claims out of 240, allowing the insurance carrier to auto-approve 75% of routine claims with a 94.17% negative precision.
+</p>
+
+<h2 class="section-title">5.6 Discussion & Defect Resolution Summary</h2>
+<p>
+During production deployment testing, two operational defects were identified and resolved:
+</p>
+<ol>
+  <li><strong>Defect D_01 (Backend Route Prefix Mismatch):</strong> FastAPI routers initially lacked aliases for un-prefixed <code>/auth/*</code> endpoints, causing <code>HTTP 404 Not Found</code> errors when frontend clients submitted login requests to the root domain. <strong>Resolution:</strong> Implemented dual route mounting in <code>api/main.py</code> (<code>app.include_router(auth_router, prefix="/api/auth")</code> and <code>app.include_router(auth_router, prefix="/auth")</code>).</li>
+  <li><strong>Defect D_02 (SQL Query Builder Alias Collision):</strong> Successive string replacement in <code>api/services/claim_service.py</code> produced malformed <code>WHERE c.c.claim_type = ?</code> queries in PostgreSQL. <strong>Resolution:</strong> Refactored query builder to explicitly prepend table aliases directly during condition appending.</li>
+</ol>
+
+<h2 class="section-title">5.7 Limitations of Experimental Results</h2>
+<ol>
+  <li><strong>Synthetic Data Characteristics:</strong> The benchmark dataset is synthetic and designed for academic reproducibility. While distributions mirror realistic insurance statistics, real-world claims exhibit higher noise, missing fields, and seasonal variance.</li>
+  <li><strong>Graph Scale Constraints:</strong> With 1,020 nodes, the graph is computationally small. While classical NetworkX graph metrics yielded significant explainability, deep Graph Neural Networks (e.g., GraphSAGE / GAT) require substantially larger datasets (&ge; 100,000 nodes) to outperform tree-based gradient boosting.</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 6: CONCLUSION AND FUTURE WORK                        -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 6<br>CONCLUSION AND FUTURE WORK</h1>
+
+<h2 class="section-title">6.1 Conclusion</h2>
+<p>
+The <strong>"Graph-Enhanced Insurance Claim Anomaly and Duplicate Network Detection"</strong> project successfully demonstrates the design, full-stack implementation, and production deployment of an advanced multi-signal fraud intelligence platform. By bridging the gap between tabular machine learning, unsupervised anomaly detection, and graph network modeling, FraudShield AI delivers an operational decision-support tool that concentrates human investigation on high-probability fraud syndicates while enabling straight-through processing for legitimate claimants.
+</p>
+
+<h2 class="section-title">6.2 Key Findings</h2>
+<ol>
+  <li><strong>Multi-Signal Fusion Outperforms Single Models:</strong> Combining supervised ML with unsupervised anomaly and graph metrics provides a balanced defense against both known historical fraud patterns and novel, un-labeled collusion rings.</li>
+  <li><strong>Graph Analysis Exposes Multi-Party Collusion:</strong> While graph features yielded marginal metric increases on simple opportunistic claims, graph topology proved indispensable for detecting invoice reuse and collusive repair provider hubs.</li>
+  <li><strong>Operational Triage Maximizes SIU Efficiency:</strong> Stratifying claims into <code>CRITICAL</code>, <code>HIGH</code>, <code>MEDIUM</code>, and <code>LOW</code> operational tiers drastically reduces investigative fatigue by focusing human expertise where fraud probability is highest.</li>
+  <li><strong>Explainability is Mandatory for Adoption:</strong> Providing local SHAP factor attributions and natural-language narratives enables non-technical claims adjusters to understand and defend automated fraud alerts.</li>
+</ol>
+
+<h2 class="section-title">6.3 Limitations</h2>
+<ul>
+  <li><strong>Dataset Scale:</strong> Evaluated on a 320-claim benchmark population. Real-world commercial deployment requires training on millions of historical claims.</li>
+  <li><strong>Unstructured Visual Data:</strong> Does not process vehicular collision photos or medical scans.</li>
+  <li><strong>Static Network Snapshots:</strong> Graph centralities are currently computed in batch rather than streaming dynamic temporal updates.</li>
+</ul>
+
+<h2 class="section-title">6.4 Future Scope</h2>
+<ol>
+  <li><strong>Inductive Graph Neural Networks (GNNs):</strong> Implementing GraphSAGE and Relational GCNs (R-GCN) for dynamic embedding generation on massive enterprise graphs.</li>
+  <li><strong>Multimodal Computer Vision:</strong> Integrating Vision Transformers (ViT) to detect photo manipulation, repeated damage pictures, and staged collision metadata.</li>
+  <li><strong>Cross-Insurer Federated Learning:</strong> Utilizing privacy-preserving federated algorithms to detect cross-carrier serial claimants without exposing customer PII.</li>
+</ol>
+
+<h2 class="section-title">6.5 Industry Applications</h2>
+<ul>
+  <li><strong>Commercial Motor & Health Insurers:</strong> Direct integration into enterprise core claims systems (e.g., Guidewire, Duck Creek) for automated triage.</li>
+  <li><strong>Third-Party Administrators (TPAs):</strong> Audit monitoring of network hospitals, diagnostic centers, and automobile workshops.</li>
+  <li><strong>National Insurance Crime Bureaus:</strong> Centralized cross-carrier intelligence sharing for syndicate detection.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 7: REFERENCES                                        -->
+<!-- ============================================================ -->
+<h1 class="chapter-title">CHAPTER 7<br>REFERENCES</h1>
+
+<ol style="font-size: 11pt; line-height: 1.8;">
+  <li><strong>Chen, T., & Guestrin, C.</strong> (2016). <em>XGBoost: A Scalable Tree Boosting System</em>. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD '16), pp. 785–794. DOI: 10.1145/2939672.2939785.</li>
+  <li><strong>Liu, F. T., Ting, K. M., & Zhou, Z. H.</strong> (2008). <em>Isolation Forest</em>. Eighth IEEE International Conference on Data Mining (ICDM '08), pp. 413–422. IEEE Computer Society. DOI: 10.1109/ICDM.2008.17.</li>
+  <li><strong>Lundberg, S. M., & Lee, S. I.</strong> (2017). <em>A Unified Approach to Interpreting Model Predictions</em>. Advances in Neural Information Processing Systems (NeurIPS 2017), Vol. 30, pp. 4765–4774.</li>
+  <li><strong>Hagberg, A. A., Schult, D. A., & Swart, P. J.</strong> (2008). <em>Exploring Network Structure, Dynamics, and Function using NetworkX</em>. Proceedings of the 7th Python in Science Conference (SciPy 2008), pp. 11–15.</li>
+  <li><strong>Breunig, M. M., Kriegel, H. P., Ng, R. T., & Sander, J.</strong> (2000). <em>LOF: Identifying Density-Based Local Outliers</em>. ACM SIGMOD Record, 29(2), pp. 93–104. DOI: 10.1145/335191.335388.</li>
+  <li><strong>Schölkopf, B., Williamson, R. C., Smola, A. J., Shawe-Taylor, J., & Platt, J. C.</strong> (1999). <em>Support Vector Method for Novelty Detection</em>. Advances in Neural Information Processing Systems (NeurIPS 1999), Vol. 12, pp. 582–588.</li>
+  <li><strong>Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., et al.</strong> (2011). <em>Scikit-learn: Machine Learning in Python</em>. Journal of Machine Learning Research, 12(Oct), pp. 2825–2830.</li>
+  <li><strong>Tipper, J., & Wang, L.</strong> (2019). <em>Graph-Based Fraud Detection in Insurance: Review and Architectures</em>. Journal of Financial Crime, 26(4), pp. 1120–1138.</li>
+  <li><strong>FastAPI Documentation.</strong> (2024). <em>FastAPI: Modern, High-Performance Web Framework for Python</em>. Available online: <code>https://fastapi.tiangolo.com/</code> (Accessed: September 2026).</li>
+  <li><strong>PostgreSQL Global Development Group.</strong> (2024). <em>PostgreSQL 15 Documentation: Relational Database Management System</em>. Available online: <code>https://www.postgresql.org/docs/15/</code> (Accessed: September 2026).</li>
+  <li><strong>React Documentation.</strong> (2024). <em>React: A JavaScript Library for Building User Interfaces</em>. Meta Open Source. Available online: <code>https://react.dev/</code> (Accessed: September 2026).</li>
+  <li><strong>Supabase Documentation.</strong> (2024). <em>Supabase: The Open Source Firebase Alternative (PostgreSQL, Auth, Storage)</em>. Available online: <code>https://supabase.com/docs</code> (Accessed: September 2026).</li>
+  <li><strong>Vercel Documentation.</strong> (2024). <em>Vercel: Develop, Preview, Ship (Frontend Cloud Platform)</em>. Available online: <code>https://vercel.com/docs</code> (Accessed: September 2026).</li>
+  <li><strong>Render Documentation.</strong> (2024). <em>Render: Cloud Application Hosting for Developers</em>. Available online: <code>https://render.com/docs</code> (Accessed: September 2026).</li>
+  <li><strong>Insurance Regulatory and Development Authority of India (IRDAI).</strong> (2023). <em>Annual Report on Fraud Monitoring and Claims Settlement Ratios in General Insurance</em>. New Delhi, India.</li>
+</ol>
+
+</body>
+</html>
