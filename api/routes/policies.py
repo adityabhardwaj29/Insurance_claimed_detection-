@@ -14,7 +14,7 @@ from api.schemas.policy_schema import PolicyCreate, PolicyVerifyRequest, PolicyV
 from api.services.auth_service import get_current_user, require_role
 from api.services.policy_service import PolicyService
 
-router = APIRouter(prefix="/api/policies", tags=["policies"])
+router = APIRouter(prefix="/policies", tags=["policies"])
 
 
 @router.get("", response_model=List[Dict[str, Any]])

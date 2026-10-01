@@ -13,7 +13,7 @@ from api.schemas.auth_schema import UserProfileResponse
 from api.services.auth_service import get_current_user
 from api.services.document_service import DocumentService
 
-router = APIRouter(prefix="/api/documents", tags=["documents"])
+router = APIRouter(prefix="/documents", tags=["documents"])
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)

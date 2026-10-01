@@ -13,7 +13,7 @@ from api.db import db
 from api.schemas.auth_schema import UserProfileResponse
 from api.services.auth_service import get_current_user, require_role
 
-router = APIRouter(prefix="/api/audit-logs", tags=["audit-logs"])
+router = APIRouter(prefix="/audit-logs", tags=["audit-logs"])
 
 
 @router.get("", response_model=List[Dict[str, Any]])

@@ -54,30 +54,29 @@ class ClaimService:
         params: List[Any] = []
 
         if status:
-            where_clauses.append("status = ?")
+            where_clauses.append("c.status = ?")
             params.append(status)
         if claim_type:
-            where_clauses.append("claim_type = ?")
+            where_clauses.append("c.claim_type = ?")
             params.append(claim_type)
         if fraud_label is not None:
-            where_clauses.append("fraud_label = ?")
+            where_clauses.append("c.fraud_label = ?")
             params.append(int(fraud_label))
         if min_amount is not None:
-            where_clauses.append("claim_amount >= ?")
+            where_clauses.append("c.claim_amount >= ?")
             params.append(float(min_amount))
         if max_amount is not None:
-            where_clauses.append("claim_amount <= ?")
+            where_clauses.append("c.claim_amount <= ?")
             params.append(float(max_amount))
 
         where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
 
         # Count query
-        count_query = f"SELECT COUNT(*) as cnt FROM claims{where_sql}"
+        count_query = f"SELECT COUNT(*) as cnt FROM claims c{where_sql}"
         cnt_row = db.query_one(count_query, params)
         total = int(cnt_row["cnt"]) if cnt_row and cnt_row.get("cnt") is not None else 0
 
         # Enriched data query with claimant name, phone, email, policy and risk band
-        where_sql_c = where_sql.replace("WHERE ", "WHERE c.").replace("status", "c.status").replace("claim_type", "c.claim_type").replace("fraud_label", "c.fraud_label").replace("claim_amount", "c.claim_amount") if where_sql else ""
         data_query = f"""
             SELECT 
                 c.claim_id, c.claimant_id, c.policy_id, c.provider_id, c.vehicle_id, c.invoice_id,
@@ -92,7 +91,7 @@ class ClaimService:
             LEFT JOIN claimants cl ON c.claimant_id = cl.claimant_id
             LEFT JOIN policies p ON c.policy_id = p.policy_id
             LEFT JOIN risk_scores rs ON c.claim_id = rs.claim_id
-            {where_sql_c}
+            {where_sql}
             ORDER BY c.{order_col} {direction} LIMIT ? OFFSET ?
         """
         items = db.query_all(data_query, params + [int(limit), int(offset)])

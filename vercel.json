@@ -7,6 +7,10 @@
       "destination": "https://fraudshield-api-3j07.onrender.com/api/:path*"
     },
     {
+      "source": "/auth/:path*",
+      "destination": "https://fraudshield-api-3j07.onrender.com/auth/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

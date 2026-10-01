@@ -15,7 +15,7 @@ from api.services.graph_service import GraphService
 from api.services.document_service import DocumentService
 from api.db import db
 
-router = APIRouter(prefix="/api/reports", tags=["reports"])
+router = APIRouter(prefix="/reports", tags=["reports"])
 claim_service = ClaimService()
 graph_service = GraphService()
 

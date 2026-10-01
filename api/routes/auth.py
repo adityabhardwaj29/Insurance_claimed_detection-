@@ -16,7 +16,7 @@ from api.schemas.auth_schema import (
 )
 from api.services.auth_service import AuthService, get_current_user
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 
 @router.post("/login", response_model=TokenResponse)

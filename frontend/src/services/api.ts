@@ -9,8 +9,15 @@ import {
   User,
   UserRole
 } from '../types';
+const getApiBase = (): string => {
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+  if (!envUrl) {
+    return 'https://fraudshield-api-3j07.onrender.com/api';
+  }
+  return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+};
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://fraudshield-api-3j07.onrender.com/api').replace(/\/+$/, '');
+const API_BASE = getApiBase();
 
 class ApiClient {
   private token: string | null = null;

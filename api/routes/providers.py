@@ -13,7 +13,7 @@ from api.db import db
 from api.schemas.auth_schema import UserProfileResponse
 from api.services.auth_service import get_current_user
 
-router = APIRouter(prefix="/api/providers", tags=["providers"])
+router = APIRouter(prefix="/providers", tags=["providers"])
 
 
 @router.get("", response_model=List[Dict[str, Any]])

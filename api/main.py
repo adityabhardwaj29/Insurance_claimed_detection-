@@ -111,7 +111,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Register domain routers (supporting both /api/* and legacy routes)
+# Register domain routers (supporting both /api/* and root routes)
 app.include_router(claims_router)
 app.include_router(claims_router, prefix="/api")
 app.include_router(cases_router)
@@ -121,13 +121,23 @@ app.include_router(analytics_router, prefix="/api")
 app.include_router(predictions_router)
 app.include_router(predictions_router, prefix="/api")
 
-app.include_router(auth_router)
+# Auth router: explicitly available at both /api/auth and /auth
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(auth_router, prefix="/auth")
+
+# Core domain routers: available at both /<path> and /api/<path>
 app.include_router(customers_router)
+app.include_router(customers_router, prefix="/api")
 app.include_router(policies_router)
+app.include_router(policies_router, prefix="/api")
 app.include_router(providers_router)
+app.include_router(providers_router, prefix="/api")
 app.include_router(documents_router)
+app.include_router(documents_router, prefix="/api")
 app.include_router(reports_router)
+app.include_router(reports_router, prefix="/api")
 app.include_router(audit_logs_router)
+app.include_router(audit_logs_router, prefix="/api")
 app.include_router(health_router)
 
 

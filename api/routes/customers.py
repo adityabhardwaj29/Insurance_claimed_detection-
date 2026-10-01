@@ -14,7 +14,7 @@ from api.schemas.customer_schema import Customer360Response, CustomerCreate, Cus
 from api.services.auth_service import get_current_user, require_role
 from api.services.customer_service import CustomerService
 
-router = APIRouter(prefix="/api/customers", tags=["customers"])
+router = APIRouter(prefix="/customers", tags=["customers"])
 
 
 @router.get("", response_model=List[CustomerResponse])
