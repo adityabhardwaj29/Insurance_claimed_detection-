@@ -110,11 +110,15 @@ class AuthService:
     @staticmethod
     def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
         norm_email = email.lower().strip()
-        # 1. Check in database users table
+        # 1. Check in-memory fast registry first (demo officers & cached users)
+        if norm_email in DEMO_USERS:
+            return DEMO_USERS[norm_email]
+
+        # 2. Check in database users table
         try:
             row = db.query_one("SELECT * FROM users WHERE lower(email) = ?", (norm_email,))
             if row:
-                return {
+                user_obj = {
                     "id": str(row.get("id")),
                     "email": row.get("email"),
                     "full_name": row.get("full_name"),
@@ -124,12 +128,10 @@ class AuthService:
                     "password_hash": row.get("password_hash"),
                     "is_active": bool(row.get("is_active", 1)),
                 }
+                DEMO_USERS[norm_email] = user_obj  # Cache in memory for subsequent fast lookups
+                return user_obj
         except Exception as e:
             logger.debug("Users query failed: %s", e)
-
-        # 2. Check in DEMO_USERS memory cache
-        if norm_email in DEMO_USERS:
-            return DEMO_USERS[norm_email]
 
         return None
 

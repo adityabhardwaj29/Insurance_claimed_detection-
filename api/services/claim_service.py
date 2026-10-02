@@ -26,6 +26,9 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 class ClaimService:
     """Handles claim entity lookups and analytical views."""
 
+    _dashboard_cache: Dict[str, Any] = {}
+    _dashboard_cache_time: float = 0.0
+
     def __init__(self, db_path: Optional[Path] = None):
         self.db_path = db_path or settings.DATABASE_PATH
 
@@ -37,18 +40,19 @@ class ClaimService:
         min_amount: Optional[float] = None,
         max_amount: Optional[float] = None,
         sort_by: str = "claim_id",
-        sort_order: str = "asc",
+        sort_order: str = "desc",
         limit: int = 50,
         offset: int = 0,
     ) -> Tuple[List[Dict[str, Any]], int]:
         """
         Lists claims with dynamic filtering, sorting, and pagination.
+        Defaults to newest claims first (descending).
         """
         valid_sort_cols = {
             "claim_id", "claim_amount", "claim_date", "status", "claim_type", "fraud_label"
         }
         order_col = sort_by if sort_by in valid_sort_cols else "claim_id"
-        direction = "DESC" if sort_order.lower() == "desc" else "ASC"
+        direction = "DESC" if sort_order.lower() != "asc" else "ASC"
 
         where_clauses: List[str] = []
         params: List[Any] = []
@@ -281,7 +285,13 @@ class ClaimService:
     def get_dashboard_summary(self) -> Dict[str, Any]:
         """
         Calculates high-level business & fraud metrics from database and risk scores.
+        Cached for 15 seconds to ensure sub-millisecond dashboard navigation.
         """
+        import time as _time
+        now = _time.time()
+        if now - ClaimService._dashboard_cache_time < 15.0 and ClaimService._dashboard_cache:
+            return ClaimService._dashboard_cache
+
         c_row = db.query_one("SELECT COUNT(*) as total_claims, SUM(claim_amount) as total_amount, SUM(CASE WHEN fraud_label=1 THEN 1 ELSE 0 END) as fraud_count FROM claims")
         total_claims = int(c_row["total_claims"]) if c_row and c_row.get("total_claims") else 0
         total_amount = float(c_row["total_amount"] or 0.0) if c_row and c_row.get("total_amount") else 0.0
@@ -308,7 +318,7 @@ class ClaimService:
             except Exception as e:
                 logger.warning("Could not compute risk summary: %s", e)
 
-        return {
+        res = {
             "total_claims": total_claims,
             "total_claim_amount": round(total_amount, 2),
             "fraud_claims_count": fraud_count,
@@ -319,9 +329,13 @@ class ClaimService:
             "average_risk_score": avg_risk,
             "high_risk_claims_count": high_risk_count,
         }
+        ClaimService._dashboard_cache = res
+        ClaimService._dashboard_cache_time = now
+        return res
 
     def create_claim(self, data: Dict[str, Any], actor: str = "system") -> Dict[str, Any]:
         """Creates a new claim with auto-generated ID, claimant resolution/creation with phone and email, invoice creation if needed, and audit logging."""
+        ClaimService._dashboard_cache_time = 0.0
         # Determine next CLM ID
         row = db.query_one("SELECT claim_id FROM claims ORDER BY claim_id DESC LIMIT 1")
         next_num = 324
@@ -449,10 +463,14 @@ class ClaimService:
             VALUES (?, 'CLAIM_CREATED', ?, 'None', 'Open', ?, ?)
         """, (case_id, actor, f"Created claim for {claimant_name or claimant_id} (Mobile: {claimant_phone or 'N/A'}) for amount INR {claim_amt:,.2f}", now_ts))
 
-        return self.get_claim_detail(new_claim_id) or {"claim_id": new_claim_id, "status": "Open"}
+        res = self.get_claim_detail(new_claim_id) or {"claim_id": new_claim_id, "status": "Open"}
+        res["id"] = new_claim_id
+        res["claim_number"] = new_claim_id
+        return res
 
     def record_decision(self, claim_id: str, decision: str, reason: str, actor: str = "system") -> Dict[str, Any]:
         """Records a human decision (Approve, Reject, Manual Review, Escalate) with audit trail."""
+        ClaimService._dashboard_cache_time = 0.0
         cid = claim_id.strip()
         status_map = {
             "Approve": "Approved",

@@ -25,9 +25,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<UserRole>('CLAIMS_OFFICER');
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('auth_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [role, setRole] = useState<UserRole>(() => {
+    return (localStorage.getItem('user_role') as UserRole) || 'CLAIMS_OFFICER';
+  });
+
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    const token = localStorage.getItem('auth_token');
+    const savedUser = localStorage.getItem('auth_user');
+    // Only show blocking loading state if token exists but user profile is missing
+    return Boolean(token && !savedUser);
+  });
 
   useEffect(() => {
     const initAuth = async () => {
@@ -43,11 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentUser);
         setRole(currentUser.role);
         localStorage.setItem('user_role', currentUser.role);
+        localStorage.setItem('auth_user', JSON.stringify(currentUser));
       } catch (err) {
         console.warn('Session verification failed, logging out:', err);
         api.setToken(null);
         setUser(null);
         localStorage.removeItem('user_role');
+        localStorage.removeItem('auth_user');
       } finally {
         setIsLoading(false);
       }
@@ -60,10 +78,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(newRole);
     localStorage.setItem('user_role', newRole);
     if (user) {
-      setUser({
-        ...user,
-        role: newRole,
-      });
+      const updated = { ...user, role: newRole };
+      setUser(updated);
+      localStorage.setItem('auth_user', JSON.stringify(updated));
     }
   };
 
@@ -74,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(res.user);
       setRole(res.user.role);
       localStorage.setItem('user_role', res.user.role);
+      localStorage.setItem('auth_user', JSON.stringify(res.user));
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(res.user);
       setRole(res.user.role);
       localStorage.setItem('user_role', res.user.role);
+      localStorage.setItem('auth_user', JSON.stringify(res.user));
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     localStorage.removeItem('user_role');
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
   };
 
   return (

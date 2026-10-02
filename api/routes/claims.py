@@ -37,7 +37,7 @@ def list_claims(
     min_amount: Optional[float] = Query(None, description="Minimum claim amount"),
     max_amount: Optional[float] = Query(None, description="Maximum claim amount"),
     sort_by: str = Query("claim_id", description="Field to sort by"),
-    sort_order: str = Query("asc", description="Sort direction (asc or desc)"),
+    sort_order: str = Query("desc", description="Sort direction (asc or desc)"),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ):

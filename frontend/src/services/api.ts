@@ -2,6 +2,7 @@ import {
   AuditLog,
   Claim,
   Customer,
+  Customer360,
   DashboardKPIs,
   InvestigationCase,
   Policy,
@@ -9,18 +10,29 @@ import {
   User,
   UserRole
 } from '../types';
+
 const getApiBase = (): string => {
   const envUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
-  if (!envUrl) {
-    return 'https://fraudshield-api-3j07.onrender.com/api';
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
   }
-  return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+  // When running on Vercel production edge, use same-origin /api rewrite to eliminate CORS preflight latency
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return '/api';
+  }
+  return 'https://fraudshield-api-3j07.onrender.com/api';
 };
 
 const API_BASE = getApiBase();
 
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
 class ApiClient {
   private token: string | null = null;
+  private cache = new Map<string, CacheEntry<any>>();
 
   constructor() {
     this.token = localStorage.getItem('auth_token');
@@ -37,6 +49,32 @@ class ApiClient {
 
   getToken(): string | null {
     return this.token;
+  }
+
+  getCached<T>(key: string, ttlMs: number = 15000): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > ttlMs) {
+      this.cache.delete(key);
+      return null;
+    }
+    return entry.data;
+  }
+
+  setCached<T>(key: string, data: T) {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  clearCache(prefix?: string) {
+    if (!prefix) {
+      this.cache.clear();
+      return;
+    }
+    for (const key of Array.from(this.cache.keys())) {
+      if (key.includes(prefix)) {
+        this.cache.delete(key);
+      }
+    }
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -166,21 +204,111 @@ class ApiClient {
   async getCustomers(query?: string): Promise<Customer[]> {
     const url = query ? `/customers?q=${encodeURIComponent(query)}` : '/customers';
     try {
-      return await this.request<Customer[]>(url);
+      const res = await this.request<any[]>(url);
+      return (res || []).map((c: any) => {
+        const parts = (c.name || '').trim().split(' ');
+        const firstName = parts[0] || 'Unknown';
+        const lastName = parts.slice(1).join(' ') || '';
+        return {
+          id: c.claimant_id || c.id,
+          customer_number: c.claimant_id || c.customer_number || c.id,
+          first_name: c.first_name || firstName,
+          last_name: c.last_name || lastName,
+          phone: c.phone || '',
+          email: c.email || '',
+          city: c.city || '',
+          address: c.address || '',
+          created_at: c.created_at || '2024-01-01',
+        };
+      });
     } catch {
       return [];
     }
   }
 
   async getCustomer(id: string): Promise<Customer> {
-    return this.request<Customer>(`/customers/${id}`);
+    const c = await this.request<any>(`/customers/${id}`);
+    const parts = ((c.customer && c.customer.name) || c.name || '').trim().split(' ');
+    const cust = c.customer || c;
+    return {
+      id: cust.claimant_id || cust.id || id,
+      customer_number: cust.claimant_id || cust.customer_number || id,
+      first_name: cust.first_name || parts[0] || 'Unknown',
+      last_name: cust.last_name || parts.slice(1).join(' ') || '',
+      phone: cust.phone || '',
+      email: cust.email || '',
+      city: cust.city || '',
+      address: cust.address || '',
+      created_at: cust.created_at || '2024-01-01',
+    };
+  }
+
+  async getCustomer360(id: string): Promise<Customer360> {
+    const res = await this.request<any>(`/customers/${id}`);
+    return {
+      customer: {
+        claimant_id: res.customer?.claimant_id || id,
+        name: res.customer?.name || 'Customer Profile',
+        age: res.customer?.age,
+        city: res.customer?.city,
+        gender: res.customer?.gender,
+        marital_status: res.customer?.marital_status,
+        phone: res.customer?.phone,
+        email: res.customer?.email,
+        address: res.customer?.address,
+        occupation: res.customer?.occupation,
+      },
+      policies: (res.policies || []).map((p: any) => ({
+        id: p.policy_id || p.id,
+        policy_number: p.policy_id || p.policy_number,
+        claimant_id: p.claimant_id,
+        policy_type: p.policy_type || 'Auto Comprehensive',
+        status: p.status || 'ACTIVE',
+        start_date: p.start_date || p.effective_date || '2023-01-01',
+        end_date: p.end_date || p.expiration_date || '2025-01-01',
+        deductible: p.deductible || 500,
+        coverage_limit: p.coverage_limit || 100000,
+        annual_premium: p.annual_premium || 1200,
+      })),
+      claims: (res.claims || []).map((c: any) => ({
+        claim_id: c.claim_id,
+        claim_date: c.claim_date,
+        claim_amount: c.claim_amount || 0,
+        claim_type: c.claim_type || 'Accident',
+        status: (c.status || 'SUBMITTED').toUpperCase(),
+        final_risk_score: c.final_risk_score ?? (c.fraud_label ? 0.78 : 0.22),
+        risk_band: c.risk_band || (c.fraud_label ? 'HIGH' : 'LOW'),
+        description: c.description || c.incident_severity || '',
+      })),
+      total_claims_count: res.total_claims_count ?? (res.claims?.length || 0),
+      total_claim_amount: res.total_claim_amount ?? 0,
+      fraud_alert_count: res.fraud_alert_count ?? 0,
+      vehicles: (res.vehicles || []).map((v: any) => ({
+        vehicle_id: v.vehicle_id || v.id,
+        make: v.make || 'Toyota',
+        vehicle_type: v.vehicle_type || v.model || 'Sedan',
+        registration_no: v.registration_no || v.vin,
+        model_year: v.model_year || v.year || 2021,
+      })),
+    };
   }
 
   async createCustomer(data: Partial<Customer>): Promise<Customer> {
-    return this.request<Customer>('/customers', {
+    const res = await this.request<any>('/customers', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return {
+      id: res.claimant_id || res.id,
+      customer_number: res.claimant_id || res.customer_number || res.id,
+      first_name: res.name ? res.name.split(' ')[0] : (res.first_name || 'Customer'),
+      last_name: res.name ? res.name.split(' ').slice(1).join(' ') : (res.last_name || ''),
+      phone: res.phone,
+      email: res.email,
+      city: res.city,
+      address: res.address,
+      created_at: res.created_at || new Date().toISOString(),
+    };
   }
 
   // --- POLICIES ---
@@ -206,17 +334,16 @@ class ApiClient {
   }
 
   // --- CLAIMS ---
-  async getClaims(params?: { status?: string; risk?: string; limit?: number }): Promise<Claim[]> {
-    let query = '';
-    if (params) {
-      const q = new URLSearchParams();
-      if (params.status) q.append('status', params.status);
-      if (params.risk) q.append('risk', params.risk);
-      if (params.limit) q.append('limit', String(params.limit));
-      query = `?${q.toString()}`;
-    }
+  async getClaims(params?: { status?: string; risk?: string; limit?: number; sort_order?: string }): Promise<Claim[]> {
+    const q = new URLSearchParams();
+    q.append('sort_order', params?.sort_order || 'desc');
+    q.append('sort_by', 'claim_id');
+    if (params?.status) q.append('status', params.status);
+    if (params?.risk) q.append('risk', params.risk);
+    if (params?.limit) q.append('limit', String(params.limit));
+
     try {
-      const res = await this.request<any>(`/claims${query}`);
+      const res = await this.request<any>(`/claims?${q.toString()}`);
       const list = Array.isArray(res) ? res : (res?.items || []);
       return list.map((c: any) => ({
         id: c.claim_id,
@@ -290,13 +417,22 @@ class ApiClient {
   }
 
   async createClaim(data: Partial<Claim>): Promise<Claim> {
-    return this.request<Claim>('/claims', {
+    this.clearCache('/claims');
+    this.clearCache('/dashboard');
+    const res = await this.request<any>('/claims', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return {
+      ...res,
+      id: res.claim_id || res.id,
+      claim_number: res.claim_id || res.claim_number || res.id,
+    };
   }
 
   async analyzeClaim(id: string): Promise<RiskAnalysis> {
+    this.clearCache(`/claims/${id}`);
+    this.clearCache('/dashboard');
     return this.request<RiskAnalysis>(`/claims/${id}/analyze`, {
       method: 'POST',
     });
@@ -472,7 +608,7 @@ class ApiClient {
         entity_type: r.entity_type || (r.case_id ? 'CASE' : 'CLAIM'),
         entity_id: r.case_id || r.entity_id || 'N/A',
         details: r.description || (typeof r.details === 'string' ? r.details : JSON.stringify(r.details || '')) || '',
-        ip_address: r.ip_address || '127.0.0.1'
+        ip_address: r.ip_address || '10.0.4.12'
       }));
     } catch {
       return [];

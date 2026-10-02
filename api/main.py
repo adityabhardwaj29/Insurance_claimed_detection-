@@ -150,15 +150,14 @@ def health_check():
     db_ok = False
     total_claims = 0
 
-    if settings.DATABASE_PATH.exists():
-        try:
-            with sqlite3.connect(settings.DATABASE_PATH) as conn:
-                cur = conn.cursor()
-                cur.execute("SELECT COUNT(*) FROM claims")
-                total_claims = cur.fetchone()[0]
-                db_ok = True
-        except Exception as e:
-            logger.warning("Database health probe failed: %s", e)
+    try:
+        from api.db import db
+        row = db.query_one("SELECT COUNT(*) as cnt FROM claims")
+        if row and "cnt" in row:
+            total_claims = int(row["cnt"])
+            db_ok = True
+    except Exception as e:
+        logger.warning("Database health probe failed: %s", e)
 
     models_ready = {
         "fraud_xgboost": settings.FRAUD_MODEL_PATH.exists(),

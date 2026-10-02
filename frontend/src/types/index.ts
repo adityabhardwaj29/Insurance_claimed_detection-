@@ -27,6 +27,42 @@ export interface Customer {
   created_at: string;
 }
 
+export interface Customer360 {
+  customer: {
+    claimant_id: string;
+    name: string;
+    age?: number;
+    city?: string;
+    gender?: string;
+    marital_status?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    occupation?: string;
+  };
+  policies: Policy[];
+  claims: Array<{
+    claim_id: string;
+    claim_date?: string;
+    claim_amount: number;
+    claim_type: string;
+    status: string;
+    final_risk_score?: number;
+    risk_band?: string;
+    description?: string;
+  }>;
+  total_claims_count: number;
+  total_claim_amount: number;
+  fraud_alert_count: number;
+  vehicles: Array<{
+    vehicle_id: string;
+    make: string;
+    vehicle_type: string;
+    registration_no?: string;
+    model_year?: number;
+  }>;
+}
+
 export interface Policy {
   id: string;
   policy_number: string;

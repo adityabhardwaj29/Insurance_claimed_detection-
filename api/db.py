@@ -41,6 +41,27 @@ class DatabaseManager:
         self.database_url = self._sanitize_db_url(raw_db_url)
         self.sqlite_path = Path(os.getenv("DATABASE_PATH", str(SQLITE_PATH)))
         self._is_postgres = bool(self.database_url and ("postgres" in self.database_url or "supabase" in self.database_url))
+        self._pool = None
+        if self._is_postgres:
+            self._init_pool()
+
+    def _init_pool(self):
+        """Initializes psycopg2 ThreadedConnectionPool for low-latency query reuse."""
+        try:
+            import psycopg2
+            import psycopg2.pool
+            import psycopg2.extras
+            self._pool = psycopg2.pool.ThreadedConnectionPool(
+                minconn=1,
+                maxconn=10,
+                dsn=self.database_url,
+                connect_timeout=5,
+                cursor_factory=psycopg2.extras.RealDictCursor
+            )
+            logger.info("Initialized PostgreSQL ThreadedConnectionPool with 1-10 connections.")
+        except Exception as e:
+            logger.warning("Could not initialize connection pool immediately: %s. Will fallback to direct/local.", e)
+            self._pool = None
 
     @staticmethod
     def _sanitize_db_url(url: str) -> str:
@@ -70,13 +91,22 @@ class DatabaseManager:
     def get_connection(self):
         """Returns a connection object appropriate for the configured engine."""
         if self._is_postgres:
+            if self._pool is not None:
+                try:
+                    return self._pool.getconn()
+                except Exception as pe:
+                    logger.debug("Pool getconn failed, reconnecting: %s", pe)
+                    self._init_pool()
+                    if self._pool is not None:
+                        return self._pool.getconn()
+
             try:
                 import psycopg2
                 import psycopg2.extras
                 conn = psycopg2.connect(self.database_url, connect_timeout=5, cursor_factory=psycopg2.extras.RealDictCursor)
                 return conn
             except Exception as e:
-                # If direct Supabase fails (e.g. Render IPv4 vs Supabase direct IPv6), auto-fallback to Pooler on port 6543
+                # If direct Supabase fails, auto-fallback to Pooler on port 6543
                 if "db." in self.database_url and ".supabase.co" in self.database_url:
                     try:
                         ref = self.database_url.split("db.", 1)[1].split(".supabase.co", 1)[0]
@@ -98,59 +128,46 @@ class DatabaseManager:
         conn = sqlite3.connect(self.sqlite_path)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON;")
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS risk_scores (
-                claim_id TEXT PRIMARY KEY,
-                fraud_probability REAL,
-                anomaly_score REAL,
-                duplicate_score REAL,
-                graph_risk_score REAL,
-                final_risk_score REAL,
-                risk_band TEXT,
-                risk_reasons TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id TEXT PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                full_name TEXT NOT NULL,
-                role_id TEXT NOT NULL,
-                department TEXT,
-                badge_number TEXT,
-                is_active INTEGER DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP
-            );
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS case_events (
-                event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                case_id VARCHAR(30),
-                event_type TEXT,
-                actor TEXT,
-                old_value TEXT,
-                new_value TEXT,
-                details TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
         return conn
 
     @contextmanager
     def connection_scope(self) -> Generator[Any, None, None]:
-        """Context manager providing a safe transaction connection scope."""
-        conn = self.get_connection()
+        """Context manager providing a safe transaction connection scope with pool reuse."""
+        from_pool = False
+        conn = None
+
+        if self._is_postgres and self._pool is not None:
+            try:
+                conn = self._pool.getconn()
+                from_pool = True
+            except Exception:
+                from_pool = False
+                conn = self.get_connection()
+        else:
+            conn = self.get_connection()
+
         try:
             yield conn
             conn.commit()
         except Exception:
-            conn.rollback()
+            if conn:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
             raise
         finally:
-            conn.close()
+            if conn:
+                if from_pool and self._pool is not None:
+                    try:
+                        self._pool.putconn(conn)
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
 
     def convert_sql(self, sql: str) -> str:
         """Translates SQLite query constructs to PostgreSQL when running in production."""
