@@ -43,13 +43,35 @@ render_header(
     badge_variant="primary",
 )
 
-if not DB_PATH.exists():
-    st.warning("Database not found.")
-    st.stop()
+from api.db import db
 
-with sqlite3.connect(DB_PATH) as conn:
-    events_df = pd.read_sql_query("SELECT * FROM case_events ORDER BY timestamp DESC", conn)
-    notes_df = pd.read_sql_query("SELECT * FROM case_notes ORDER BY created_at DESC", conn)
+events_df = pd.DataFrame()
+notes_df = pd.DataFrame()
+
+if db:
+    try:
+        e_rows = db.query_all("SELECT * FROM case_events ORDER BY timestamp DESC")
+        n_rows = db.query_all("SELECT * FROM case_notes ORDER BY created_at DESC")
+        if e_rows:
+            events_df = pd.DataFrame(e_rows)
+        if n_rows:
+            notes_df = pd.DataFrame(n_rows)
+    except Exception:
+        pass
+
+if events_df.empty and notes_df.empty and DB_PATH.exists():
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            events_df = pd.read_sql_query("SELECT * FROM case_events ORDER BY timestamp DESC", conn)
+            notes_df = pd.read_sql_query("SELECT * FROM case_notes ORDER BY created_at DESC", conn)
+    except Exception:
+        pass
+
+if not events_df.empty and "timestamp" in events_df.columns:
+    events_df["timestamp"] = events_df["timestamp"].astype(str).str.slice(0, 19)
+
+if not notes_df.empty and "created_at" in notes_df.columns:
+    notes_df["created_at"] = notes_df["created_at"].astype(str).str.slice(0, 19)
 
 c1, c2, c3 = st.columns(3)
 with c1:

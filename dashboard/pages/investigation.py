@@ -471,8 +471,8 @@ with col_case_info:
                 <div>Status: {status_badge(current_status)}</div>
                 <div>Priority: <strong>{current_priority}</strong></div>
                 <div>Investigator: <strong>{current_assigned}</strong></div>
-                <div>Created: {case.get('created_at', 'N/A')}</div>
-                <div>Last Updated: {case.get('updated_at', 'N/A')}</div>
+                <div>Created: {str(case.get('created_at') or 'N/A')[:19]}</div>
+                <div>Last Updated: {str(case.get('updated_at') or 'N/A')[:19]}</div>
             </div>
         </div>
         """,
@@ -523,8 +523,9 @@ if events or notes:
     with tab_events:
         if events:
             for ev in reversed(events):
+                ts_str = str(ev.get('timestamp') or '')[:19]
                 st.markdown(
-                    f"⏱️ **{ev.get('timestamp', '')[:19]}** | "
+                    f"⏱️ **{ts_str}** | "
                     f"**{ev.get('event_type')}** by `{ev.get('actor')}`: "
                     f"`{ev.get('old_value')}` ➔ `{ev.get('new_value')}` "
                     f"*(Details: {ev.get('details', '')})*"
@@ -535,8 +536,9 @@ if events or notes:
     with tab_notes:
         if notes:
             for n in reversed(notes):
+                ca_str = str(n.get('created_at') or '')[:19]
                 st.markdown(
-                    f"📝 **{n.get('created_at', '')[:19]}** by **{n.get('author')}**:<br>"
+                    f"📝 **{ca_str}** by **{n.get('author')}**:<br>"
                     f"> *{n.get('note_text')}*",
                     unsafe_allow_html=True,
                 )

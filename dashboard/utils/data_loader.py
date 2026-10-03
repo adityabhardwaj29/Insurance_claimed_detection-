@@ -324,14 +324,22 @@ def build_claim_network_graph(claim_id: str) -> Tuple[nx.Graph, Dict[str, Dict[s
     if not claim:
         return G, node_details
 
+    clt_id = str(claim.get("claimant_id") or "CLT-UNKNOWN")
+    pol_id = str(claim.get("policy_id") or "POL-UNKNOWN")
+    veh_id = str(claim.get("vehicle_id") or "VEH-UNKNOWN")
+    prv_id = str(claim.get("provider_id") or "PRV-UNKNOWN")
+    c_amt = float(claim.get("claim_amount") or 0.0)
+    c_fraud = int(claim.get("fraud_label") or 0)
+    c_type = str(claim.get("claim_type") or "N/A")
+
     # 1. Add Central Claim Node
     G.add_node(cid, type="Claim", label=f"Claim: {cid}")
     node_details[cid] = {
         "Entity": "Claim (Subject)",
         "Claim ID": cid,
-        "Amount": f"${claim['claim_amount']:,.2f}",
-        "Type": claim["claim_type"],
-        "Ground Truth Fraud": "YES (Fraud)" if claim["fraud_label"] == 1 else "NO (Legitimate)",
+        "Amount": f"${c_amt:,.2f}",
+        "Type": c_type,
+        "Ground Truth Fraud": "YES (Fraud)" if c_fraud == 1 else "NO (Legitimate)",
         "Description": claim.get("description", "N/A"),
     }
 
@@ -355,7 +363,7 @@ def build_claim_network_graph(claim_id: str) -> Tuple[nx.Graph, Dict[str, Dict[s
         "Entity": "Policy",
         "ID": pol_id,
         "Type": pol.get("policy_type", "N/A"),
-        "Premium": f"${pol.get('premium', 0):,.2f}",
+        "Premium": f"${float(pol.get('premium') or 0):,.2f}",
         "Coverage Start": pol.get("start_date", "N/A"),
         "Coverage End": pol.get("end_date", "N/A"),
     }
@@ -381,7 +389,7 @@ def build_claim_network_graph(claim_id: str) -> Tuple[nx.Graph, Dict[str, Dict[s
         "ID": prv_id,
         "Name": prv.get("provider_name", "N/A"),
         "Type": prv.get("provider_type", "N/A"),
-        "Rating": f"{prv.get('rating', 0):.1f} / 5.0",
+        "Rating": f"{float(prv.get('rating') or 0):.1f} / 5.0",
         "City": prv.get("city", "N/A"),
     }
 
@@ -400,15 +408,17 @@ def build_claim_network_graph(claim_id: str) -> Tuple[nx.Graph, Dict[str, Dict[s
 
     # 7. Connected Claims Nodes
     for conn_claim in connected:
-        s_id = conn_claim["claim_id"]
-        s_fraud = conn_claim["fraud_label"]
+        s_id = str(conn_claim.get("claim_id") or "UNKNOWN")
+        s_fraud = int(conn_claim.get("fraud_label") or 0)
+        s_amt = float(conn_claim.get("claim_amount") or 0.0)
+        s_type = str(conn_claim.get("claim_type") or "N/A")
         G.add_node(s_id, type="ConnectedClaim", label=f"Claim: {s_id}")
         G.add_edge(prv_id, s_id, relation="SERVICED_BY")
         node_details[s_id] = {
             "Entity": "Connected Claim",
             "Claim ID": s_id,
-            "Amount": f"${conn_claim['claim_amount']:,.2f}",
-            "Type": conn_claim["claim_type"],
+            "Amount": f"${s_amt:,.2f}",
+            "Type": s_type,
             "Ground Truth Fraud": "YES (Fraud)" if s_fraud == 1 else "NO (Legitimate)",
         }
 
