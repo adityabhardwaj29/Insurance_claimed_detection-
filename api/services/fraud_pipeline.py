@@ -190,21 +190,21 @@ class FraudAnalysisPipeline:
         ]
 
         # 9. Persist Results in Database
-        # Ensure tables exist
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS risk_scores (
-                claim_id VARCHAR(24) PRIMARY KEY,
-                fraud_probability REAL,
-                anomaly_score REAL,
-                duplicate_score REAL,
-                graph_risk_score REAL,
-                final_risk_score REAL,
-                risk_band TEXT,
-                risk_reasons TEXT,
-                scoring_version TEXT DEFAULT 'v1.0.0',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        if not db.is_postgres:
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS risk_scores (
+                    claim_id VARCHAR(24) PRIMARY KEY,
+                    fraud_probability REAL,
+                    anomaly_score REAL,
+                    duplicate_score REAL,
+                    graph_risk_score REAL,
+                    final_risk_score REAL,
+                    risk_band TEXT,
+                    risk_reasons TEXT,
+                    scoring_version TEXT DEFAULT 'v1.0.0',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
 
         # Upsert risk_scores
         db.execute("""
@@ -244,18 +244,19 @@ class FraudAnalysisPipeline:
         """, (case_id, cid, final_risk_score, risk_band, priority, case_status, reasons_text, now_ts, now_ts))
 
         # 10. Audit Log Entry
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS case_events (
-                event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                case_id VARCHAR(30),
-                event_type TEXT,
-                actor TEXT,
-                old_value TEXT,
-                new_value TEXT,
-                details TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        if not db.is_postgres:
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS case_events (
+                    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    case_id VARCHAR(30),
+                    event_type TEXT,
+                    actor TEXT,
+                    old_value TEXT,
+                    new_value TEXT,
+                    details TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
         now_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         db.execute("""
             INSERT INTO case_events (case_id, event_type, actor, old_value, new_value, details, timestamp)

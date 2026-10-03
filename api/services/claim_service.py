@@ -385,38 +385,73 @@ class ClaimService:
                 WHERE claimant_id = ?
             """, (claimant_name, claimant_phone, claimant_email, claimant_id))
 
-        # Policy
+        # Policy normalization
         policy_id = data.get("policy_id") or data.get("policy_number") or f"POL{next_num:05d}"
+        raw_pol_type = str(data.get("policy_type") or "Comprehensive").lower()
+        if "zero" in raw_pol_type:
+            safe_pol_type = "Zero Dep"
+        elif "third" in raw_pol_type:
+            safe_pol_type = "Third Party"
+        else:
+            safe_pol_type = "Comprehensive"
+
         db.execute("""
             INSERT OR IGNORE INTO policies (policy_id, claimant_id, start_date, end_date, policy_type, premium, date_order_invalid)
-            VALUES (?, ?, '2024-01-01', '2025-01-01', ?, ?, 0)
-        """, (policy_id, claimant_id, data.get("policy_type", "Comprehensive Auto Coverage"), 15000.0))
+            VALUES (?, ?, '2024-01-01', '2025-01-01', ?, ?, FALSE)
+        """, (policy_id, claimant_id, safe_pol_type, 15000.0))
 
-        # Vehicle
+        # Vehicle normalization
         vehicle_id = data.get("vehicle_id") or f"VEH{next_num:05d}"
+        raw_make = str(data.get("vehicle_make") or "Honda").strip().capitalize()
+        allowed_makes = {"Tata", "Maruti", "Hyundai", "Mahindra", "Honda"}
+        safe_make = raw_make if raw_make in allowed_makes else "Honda"
+
+        raw_vtype = str(data.get("vehicle_type") or data.get("vehicle_model") or "Sedan").upper()
+        if "SUV" in raw_vtype:
+            safe_vtype = "SUV"
+        elif "MUV" in raw_vtype:
+            safe_vtype = "MUV"
+        elif "HATCH" in raw_vtype:
+            safe_vtype = "Hatchback"
+        else:
+            safe_vtype = "Sedan"
+
+        safe_year = int(data.get("auto_year") or 2021)
+        if safe_year < 1990 or safe_year > 2026:
+            safe_year = 2021
+
         db.execute("""
             INSERT OR IGNORE INTO vehicles (vehicle_id, claimant_id, make, vehicle_type, registration_no, model_year)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             vehicle_id,
             claimant_id,
-            data.get("vehicle_make") or "Honda",
-            data.get("vehicle_model") or "Sedan",
+            safe_make,
+            safe_vtype,
             data.get("auto_vin") or f"REG-{next_num:05d}",
-            int(data.get("auto_year") or 2021)
+            safe_year
         ))
 
         # Provider
-        provider_id = data.get("provider_id") or "PRV0001"
+        p_row = db.query_one("SELECT provider_id FROM providers ORDER BY provider_id ASC LIMIT 1")
+        default_provider_id = p_row["provider_id"] if p_row else "PRV001"
+        provider_id = data.get("provider_id") or default_provider_id
         if data.get("provider_name"):
             p_match = db.query_one("SELECT provider_id FROM providers WHERE provider_name = ?", (data["provider_name"],))
             if p_match:
                 provider_id = p_match["provider_id"]
             else:
-                prov_id = f"PRV{next_num:04d}"
+                prov_row = db.query_one("SELECT provider_id FROM providers ORDER BY provider_id DESC LIMIT 1")
+                p_num = 1
+                if prov_row and prov_row.get("provider_id") and str(prov_row["provider_id"]).startswith("PRV"):
+                    try:
+                        p_num = int(str(prov_row["provider_id"])[3:]) + 1
+                    except ValueError:
+                        p_num = next_num
+                prov_id = f"PRV{p_num:03d}"
                 db.execute("""
                     INSERT OR IGNORE INTO providers (provider_id, provider_name, city, provider_type, rating)
-                    VALUES (?, ?, ?, 'Body Shop', 4.2)
+                    VALUES (?, ?, ?, 'Garage', 4.2)
                 """, (prov_id, data["provider_name"], data.get("incident_city") or "Mumbai"))
                 provider_id = prov_id
 
@@ -431,6 +466,19 @@ class ClaimService:
                 "INSERT OR IGNORE INTO invoices (invoice_id, provider_id, invoice_amount, invoice_date, description) VALUES (?, ?, ?, ?, ?)",
                 (invoice_id, provider_id, inv_amt, claim_dt, f"Service invoice for {new_claim_id}")
             )
+
+        # Claim type normalization
+        raw_ctype = str(data.get("claim_type") or "Accident").lower()
+        if "theft" in raw_ctype:
+            safe_ctype = "Theft"
+        elif "fire" in raw_ctype:
+            safe_ctype = "Fire"
+        elif "glass" in raw_ctype:
+            safe_ctype = "Glass Damage"
+        elif "disaster" in raw_ctype or "weather" in raw_ctype or "flood" in raw_ctype:
+            safe_ctype = "Natural Disaster"
+        else:
+            safe_ctype = "Accident"
 
         # Insert claim
         db.execute("""
@@ -447,7 +495,7 @@ class ClaimService:
             invoice_id,
             claim_dt,
             claim_amt,
-            data.get("claim_type", "Accident"),
+            safe_ctype,
             data.get("description", f"Submitted claim {new_claim_id}")
         ))
 

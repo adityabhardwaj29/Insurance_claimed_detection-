@@ -238,6 +238,9 @@ export const NewClaimWizard: React.FC = () => {
         bodily_injuries: form.bodily_injuries,
         police_report_available: form.police_report_available,
         total_claim_amount: form.total_claim_amount,
+        claim_amount: form.total_claim_amount,
+        claim_type: form.incident_type,
+        policy_type: form.policy_type,
         injury_claim: form.injury_claim,
         property_claim: form.property_claim,
         vehicle_claim: form.vehicle_claim,
@@ -298,7 +301,8 @@ export const NewClaimWizard: React.FC = () => {
       setStep(7);
     } catch (err: any) {
       console.error('Claim submission failure:', err);
-      setErrorMsg(err.message || 'Failed to submit claim. Please check network and try again.');
+      const isFetchErr = err?.message?.includes('Failed to fetch') || err?.message?.includes('NetworkError');
+      setErrorMsg(isFetchErr ? 'Backend API is connecting. Please click "Submit Claim" again to complete submission.' : (err?.message || 'Failed to submit claim. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }

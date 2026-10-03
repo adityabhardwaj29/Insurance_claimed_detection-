@@ -88,23 +88,51 @@ class ApiClient {
     }
 
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const response = await fetch(`${API_BASE}${cleanEndpoint}`, {
-      ...options,
-      headers,
-    });
+    const directRenderBase = 'https://fraudshield-api-3j07.onrender.com/api';
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorJson;
-      try {
-        errorJson = JSON.parse(errorText);
-      } catch {
-        errorJson = { detail: errorText };
+    try {
+      const response = await fetch(`${API_BASE}${cleanEndpoint}`, {
+        ...options,
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorJson;
+        try {
+          errorJson = JSON.parse(errorText);
+        } catch {
+          errorJson = { detail: errorText };
+        }
+        throw new Error(errorJson.detail || `Request failed with status ${response.status}`);
       }
-      throw new Error(errorJson.detail || `Request failed with status ${response.status}`);
-    }
 
-    return response.json();
+      return response.json();
+    } catch (primaryErr: any) {
+      // If primary relative /api failed due to Vercel edge timeout or proxy error, fallback directly to Render
+      if (API_BASE !== directRenderBase) {
+        try {
+          const directResponse = await fetch(`${directRenderBase}${cleanEndpoint}`, {
+            ...options,
+            headers,
+          });
+          if (directResponse.ok) {
+            return directResponse.json();
+          }
+          const directErrorText = await directResponse.text();
+          let directErrorJson;
+          try {
+            directErrorJson = JSON.parse(directErrorText);
+          } catch {
+            directErrorJson = { detail: directErrorText };
+          }
+          throw new Error(directErrorJson.detail || `Request failed with status ${directResponse.status}`);
+        } catch (fallbackErr: any) {
+          throw fallbackErr.message ? fallbackErr : primaryErr;
+        }
+      }
+      throw primaryErr;
+    }
   }
 
   // --- AUTH ---
