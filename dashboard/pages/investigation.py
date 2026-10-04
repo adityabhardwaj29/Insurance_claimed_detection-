@@ -460,6 +460,9 @@ col_case_info, col_case_action = st.columns([1, 1])
 current_status = case.get("status", "NEW") if case else "UNASSIGNED"
 current_priority = case.get("priority", "MEDIUM") if case else "MEDIUM"
 current_assigned = case.get("assigned_to", "Unassigned") if case else "Unassigned"
+case_id_str = case.get("case_id", f"CASE-{selected_cid} (Unopened)") if case else f"CASE-{selected_cid} (Unopened)"
+created_str = str(case.get("created_at") or "Pending First Action")[:19] if case else "Pending First Action"
+updated_str = str(case.get("updated_at") or "Pending First Action")[:19] if case else "Pending First Action"
 
 with col_case_info:
     st.markdown(
@@ -467,12 +470,12 @@ with col_case_info:
         <div class="saas-card">
             <h4 class="saas-card-title">Case Metadata</h4>
             <div style="margin-top: 12px; line-height: 1.8; font-size: 0.88rem;">
-                <div>Case ID: <strong>{case.get('case_id', 'N/A')}</strong></div>
+                <div>Case ID: <strong>{case_id_str}</strong></div>
                 <div>Status: {status_badge(current_status)}</div>
                 <div>Priority: <strong>{current_priority}</strong></div>
                 <div>Investigator: <strong>{current_assigned}</strong></div>
-                <div>Created: {str(case.get('created_at') or 'N/A')[:19]}</div>
-                <div>Last Updated: {str(case.get('updated_at') or 'N/A')[:19]}</div>
+                <div>Created: {created_str}</div>
+                <div>Last Updated: {updated_str}</div>
             </div>
         </div>
         """,

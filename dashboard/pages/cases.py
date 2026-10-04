@@ -25,7 +25,11 @@ from dashboard.components import (
     render_header,
     render_kpi_card,
 )
-from dashboard.utils.data_loader import load_all_claims_data, load_investigation_cases
+from dashboard.utils.data_loader import (
+    create_or_update_case,
+    load_all_claims_data,
+    load_investigation_cases,
+)
 
 st.set_page_config(
     page_title="Investigation Cases | Triage Board",
@@ -47,8 +51,42 @@ cases_df = load_investigation_cases()
 claims_df = load_all_claims_data()
 
 if cases_df.empty:
-    st.info("No investigation cases recorded. To open a case, navigate to a claim in the Investigation page.")
+    with card_container("⚠️ No Active SIU Cases Recorded"):
+        st.warning("No investigation cases are currently active in the database.")
+        st.markdown(
+            "You can automatically populate the SIU queue with claims flagged as High or Critical Risk by the Multi-Signal ML & Graph Engine."
+        )
+        if st.button("🚀 Auto-Initialize SIU Cases from High-Risk Claims", type="primary"):
+            with st.spinner("Generating SIU cases for high-risk claims..."):
+                high_claims = claims_df[
+                    (claims_df.get("final_risk_score", 0.0) >= 0.50)
+                    | (claims_df.get("fraud_label", 0) == 1)
+                ] if not claims_df.empty else pd.DataFrame()
+
+                created = 0
+                for _, row in high_claims.iterrows():
+                    cid = str(row["claim_id"])
+                    score = float(row.get("final_risk_score", 0.0))
+                    prio = "CRITICAL" if score >= 0.70 else "HIGH"
+                    create_or_update_case(
+                        claim_id=cid,
+                        status="NEW",
+                        priority=prio,
+                        assigned_to="Unassigned",
+                        actor="SYSTEM_AUTO_TRIAGE",
+                        note=f"Auto-generated case from ML risk model (Score: {score:.4f})",
+                    )
+                    created += 1
+                st.success(f"Successfully generated {created} investigation cases!")
+                st.rerun()
     st.stop()
+
+# Ensure types are numeric and dates formatted cleanly
+cases_df["risk_score"] = pd.to_numeric(cases_df["risk_score"], errors="coerce").fillna(0.0)
+if "updated_at" in cases_df.columns:
+    cases_df["updated_at"] = cases_df["updated_at"].astype(str).str.slice(0, 19)
+if "created_at" in cases_df.columns:
+    cases_df["created_at"] = cases_df["created_at"].astype(str).str.slice(0, 19)
 
 # Enrich cases with claim amount and type if missing
 if "claim_amount" not in cases_df.columns and not claims_df.empty:
@@ -204,4 +242,7 @@ with card_container("⚡ Quick Action — Launch 360° Forensic Dossier"):
         if st.button("🔎 Open Dossier", use_container_width=True):
             if selected_jump_claim:
                 st.session_state["investigate_claim_id"] = selected_jump_claim
-                st.success(f"Claim `{selected_jump_claim}` loaded into session! Navigate to **Investigation** tab.")
+                try:
+                    st.switch_page("pages/investigation.py")
+                except Exception:
+                    st.success(f"Claim `{selected_jump_claim}` loaded into session! Navigate to **Investigation** tab.")

@@ -5,6 +5,7 @@ This folder contains complete, end-to-end screen recordings of both application 
 ---
 
 ## 1. Live Web Application Full Walkthrough (`live_webapp_full_walkthrough.webp`)
+
 **Platform:** [https://insurance-claimed-detection.vercel.app/](https://insurance-claimed-detection.vercel.app/)  
 **Duration & Scope:** Comprehensive walkthrough covering 100% of all user pages and workflows:
 
@@ -45,6 +46,7 @@ This folder contains complete, end-to-end screen recordings of both application 
 ---
 
 ## 2. Streamlit Forensic Analytics Console (`streamlit_forensic_console_walkthrough.webp`)
+
 **Platform:** Streamlit Forensic Intelligence Console (`http://localhost:8501`)  
 **Scope:** Deep-dive exploratory data science and research portal:
 
