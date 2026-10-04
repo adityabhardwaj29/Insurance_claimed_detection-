@@ -297,7 +297,7 @@ class CaseManager:
             return InvestigationCase(
                 case_id=row["case_id"],
                 claim_id=row["claim_id"],
-                risk_score=float(row["risk_score"]),
+                risk_score=float(row["risk_score"] or 0.0),
                 risk_band=row["risk_band"],
                 priority=row["priority"],
                 status=row["status"],
@@ -752,7 +752,7 @@ class CaseManager:
                 InvestigationCase(
                     case_id=r["case_id"],
                     claim_id=r["claim_id"],
-                    risk_score=float(r["risk_score"]),
+                    risk_score=float(r["risk_score"] or 0.0),
                     risk_band=r["risk_band"],
                     priority=r["priority"],
                     status=r["status"],

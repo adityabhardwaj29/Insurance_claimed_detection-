@@ -143,6 +143,36 @@ class CaseService:
 
     def get_case(self, case_id: str) -> Optional[Dict[str, Any]]:
         """Retrieves single case by ID."""
+        try:
+            from api.db import db
+            if db and db.is_postgres:
+                row = db.query_one(
+                    """
+                    SELECT c.*, cl.claim_amount as total_claim_amount, cl.claim_type, clt.name as claimant_name
+                    FROM investigation_cases c
+                    LEFT JOIN claims cl ON c.claim_id = cl.claim_id
+                    LEFT JOIN claimants clt ON cl.claimant_id = clt.claimant_id
+                    WHERE c.case_id = %s
+                    """,
+                    (case_id,),
+                )
+                if row:
+                    return {
+                        "case_id": row["case_id"],
+                        "claim_id": row["claim_id"],
+                        "risk_score": float(row["risk_score"] or 0.0),
+                        "risk_band": str(row["risk_band"] or "LOW"),
+                        "priority": str(row["priority"] or "MEDIUM"),
+                        "status": str(row["status"] or "NEW"),
+                        "assigned_to": row["assigned_to"],
+                        "reason": row["reason"],
+                        "notes": row["notes"],
+                        "resolution": row["resolution"],
+                        "created_at": str(row["created_at"])[:19] if row.get("created_at") else None,
+                        "updated_at": str(row["updated_at"])[:19] if row.get("updated_at") else None,
+                    }
+        except Exception:
+            pass
         case = self.manager.get_case(case_id)
         return case.to_dict() if case else None
 
@@ -156,6 +186,61 @@ class CaseService:
         offset: int = 0,
     ) -> List[Dict[str, Any]]:
         """Lists cases matching filter criteria."""
+        try:
+            from api.db import db
+            if db and db.is_postgres:
+                query = """
+                    SELECT c.case_id, c.claim_id, c.risk_score, c.risk_band, c.priority,
+                           c.status, c.assigned_to, c.reason, c.notes, c.resolution,
+                           c.created_at, c.updated_at,
+                           cl.claim_amount as total_claim_amount,
+                           cl.claim_type,
+                           clt.name as claimant_name
+                    FROM investigation_cases c
+                    LEFT JOIN claims cl ON c.claim_id = cl.claim_id
+                    LEFT JOIN claimants clt ON cl.claimant_id = clt.claimant_id
+                    WHERE 1=1
+                """
+                params = []
+                if status:
+                    query += " AND UPPER(c.status) = UPPER(%s)"
+                    params.append(status)
+                if priority:
+                    query += " AND UPPER(c.priority) = UPPER(%s)"
+                    params.append(priority)
+                if assigned_to:
+                    query += " AND c.assigned_to = %s"
+                    params.append(assigned_to)
+                if min_risk is not None:
+                    query += " AND c.risk_score >= %s"
+                    params.append(float(min_risk))
+
+                query += " ORDER BY c.updated_at DESC LIMIT %s OFFSET %s"
+                params.extend([int(limit), int(offset)])
+
+                rows = db.query_all(query, tuple(params))
+                if rows:
+                    results = []
+                    for r in rows:
+                        results.append({
+                            "case_id": r["case_id"],
+                            "claim_id": r["claim_id"],
+                            "risk_score": float(r["risk_score"] or 0.0),
+                            "risk_band": str(r["risk_band"] or "LOW"),
+                            "priority": str(r["priority"] or "MEDIUM"),
+                            "status": str(r["status"] or "NEW"),
+                            "assigned_to": r["assigned_to"],
+                            "reason": r["reason"],
+                            "notes": r["notes"],
+                            "resolution": r["resolution"],
+                            "created_at": str(r["created_at"])[:19] if r.get("created_at") else "",
+                            "updated_at": str(r["updated_at"])[:19] if r.get("updated_at") else "",
+                        })
+                    return results
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning("Error querying PostgreSQL cases: %s", e)
+
         cases = self.manager.list_cases(
             status=status,
             priority=priority,
@@ -168,6 +253,20 @@ class CaseService:
 
     def get_case_statistics(self) -> Dict[str, Any]:
         """Returns aggregate operational statistics."""
+        try:
+            from api.db import db
+            if db and db.is_postgres:
+                tot_r = db.query_one("SELECT COUNT(*) as cnt FROM investigation_cases")
+                total = tot_r["cnt"] if tot_r else 0
+                s_rows = db.query_all("SELECT status, COUNT(*) as cnt FROM investigation_cases GROUP BY status")
+                p_rows = db.query_all("SELECT priority, COUNT(*) as cnt FROM investigation_cases GROUP BY priority")
+                return {
+                    "total_cases": total,
+                    "by_status": {r["status"]: r["cnt"] for r in s_rows},
+                    "by_priority": {r["priority"]: r["cnt"] for r in p_rows},
+                }
+        except Exception:
+            pass
         return self.manager.get_case_statistics()
 
     def get_dossier(self, case_id: str) -> Dict[str, Any]:

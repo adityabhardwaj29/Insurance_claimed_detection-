@@ -173,8 +173,8 @@ export interface InvestigationCase {
   claim_number: string;
   claimant_name?: string;
   total_claim_amount: number;
-  status: 'OPEN' | 'IN_PROGRESS' | 'EVIDENCE_COLLECTION' | 'PENDING_APPROVAL' | 'RESOLVED_FRAUD' | 'RESOLVED_LEGITIMATE' | 'CLOSED';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  status: 'OPEN' | 'IN_PROGRESS' | 'EVIDENCE_COLLECTION' | 'PENDING_APPROVAL' | 'RESOLVED_FRAUD' | 'RESOLVED_LEGITIMATE' | 'CLOSED' | 'NEW' | 'UNDER_REVIEW' | 'ESCALATED' | 'RESOLVED' | 'FALSE_POSITIVE' | string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | string;
   assigned_to?: string;
   investigator_name?: string;
   risk_score: number;
