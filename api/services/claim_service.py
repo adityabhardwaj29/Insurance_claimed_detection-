@@ -253,6 +253,7 @@ class ClaimService:
         top_pos = []
         top_neg = []
         graph_exp = {}
+        summary_text = ""
         if exp_file.exists():
             try:
                 import json
@@ -264,6 +265,7 @@ class ClaimService:
                         top_pos = e.get("top_positive_factors", [])
                         top_neg = e.get("top_negative_factors", [])
                         graph_exp = e.get("graph_explanation", {})
+                        summary_text = e.get("summary_text", "")
             except Exception:
                 pass
 
@@ -275,8 +277,10 @@ class ClaimService:
             "weights": weights,
             "reasons": reasons,
             "summary": summary,
+            "summary_text": summary_text or summary,
             "fraud_probability": signals["fraud_probability"],
             "top_factors": top_factors,
+            "top_contributing_features": top_factors,
             "top_positive_factors": top_pos,
             "top_negative_factors": top_neg,
             "graph_explanation": graph_exp,

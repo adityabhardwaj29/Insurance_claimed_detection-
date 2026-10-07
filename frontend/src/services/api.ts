@@ -483,7 +483,7 @@ class ApiClient {
         hybrid_risk_score: finalScore,
         risk_level: riskBand,
         recommendation: finalScore >= 0.75 ? 'SIU_ESCALATE' : finalScore >= 0.5 ? 'MANUAL_INVESTIGATION' : finalScore >= 0.25 ? 'FAST_TRACK' : 'AUTO_APPROVE',
-        recommendation_reason: exp.human_readable_summary || (risk.risk_reasons ? risk.risk_reasons.join('; ') : 'Multi-signal evaluation completed.'),
+        recommendation_reason: exp.summary_text || exp.summary || exp.human_readable_summary || (risk.risk_reasons ? risk.risk_reasons.join('; ') : 'Multi-signal evaluation completed.'),
         ml_score: risk.fraud_probability !== undefined ? risk.fraud_probability : 0.4,
         anomaly_score: risk.anomaly_score !== undefined ? risk.anomaly_score : 0.3,
         duplicate_score: risk.duplicate_score !== undefined ? risk.duplicate_score : 0.2,
@@ -494,20 +494,55 @@ class ApiClient {
           duplicate_weight: 0.2,
           graph_weight: 0.2,
         },
-        top_risk_factors: (exp.top_contributing_features || []).map((f: any) => ({
-          feature: f.feature,
-          description: `Attributed feature impact ${f.feature}`,
-          impact: Math.abs(f.shap_value || f.impact || 0.1),
-          contribution: (f.shap_value || 0) >= 0 ? 'INCREASES_RISK' : 'REDUCES_RISK',
-          value: f.feature_value,
-        })),
-        duplicate_matches: (dup.matching_claims || dup.matched_claims || []).map((m: any) => ({
-          matched_claim_id: m.matched_claim_id || m.claim_id || 'CLM00002',
-          matched_claim_number: m.matched_claim_id || m.claim_id || 'CLM00002',
-          similarity_score: m.similarity_score !== undefined ? m.similarity_score : 0.85,
-          match_reasons: m.reasons || ['High similarity across incident amount and location'],
-          shared_attributes: m.shared_attributes || {},
-        })),
+        top_risk_factors: (() => {
+          const raw = exp.top_factors || exp.top_contributing_features || exp.factors || [];
+          const pos = exp.top_positive_factors || [];
+          const neg = exp.top_negative_factors || [];
+          const list = raw.length > 0 ? raw : [...pos, ...neg];
+          return list.map((f: any) => {
+            const isPos = f.direction === 'risk_increasing' || (f.impact !== undefined && f.impact > 0) || (f.shap_value !== undefined && f.shap_value > 0);
+            const rawVal = Number(f.impact ?? f.shap_value ?? 0.1);
+            return {
+              feature: f.feature || 'Model Attribution Factor',
+              description: f.description || (isPos ? 'Risk-elevating indicator identified by SHAP tree model' : 'Mitigating legitimacy indicator identified by model'),
+              impact: isPos ? Math.abs(rawVal) : -Math.abs(rawVal),
+              contribution: isPos ? 'POSITIVE' : 'NEGATIVE',
+              value: f.feature_value ?? f.value,
+            };
+          });
+        })(),
+        duplicate_matches: (() => {
+          if (Array.isArray(dup.matching_claims) && dup.matching_claims.length > 0) {
+            return dup.matching_claims.map((m: any) => ({
+              matched_claim_id: m.matched_claim_id || m.claim_id,
+              matched_claim_number: m.matched_claim_id || m.claim_id,
+              similarity_score: m.similarity_score ?? 0.85,
+              match_reasons: m.reasons || ['High similarity across incident amount and location'],
+              shared_attributes: m.shared_attributes || {},
+            }));
+          }
+          if (Array.isArray(dup.matched_claims) && dup.matched_claims.length > 0) {
+            return dup.matched_claims.map((m: any) => ({
+              matched_claim_id: m.matched_claim_id || m.claim_id,
+              matched_claim_number: m.matched_claim_id || m.claim_id,
+              similarity_score: m.similarity_score ?? 0.85,
+              match_reasons: m.reasons || ['High similarity across incident amount and location'],
+              shared_attributes: m.shared_attributes || {},
+            }));
+          }
+          if (dup.matched_claim_id) {
+            return [{
+              matched_claim_id: dup.matched_claim_id,
+              matched_claim_number: dup.matched_claim_id,
+              similarity_score: dup.duplicate_similarity_score ?? 0.65,
+              match_reasons: (dup.matching_attributes && dup.matching_attributes.length > 0)
+                ? dup.matching_attributes.map((a: string) => `Matching ${a.replace('_', ' ')}`)
+                : [`Pairwise cosine similarity: ${((dup.duplicate_similarity_score || 0.65) * 100).toFixed(1)}% (${dup.dup_type || 'CLUSTER'})`],
+              shared_attributes: { type: dup.dup_type || 'PAIRWISE_MATCH' },
+            }];
+          }
+          return [];
+        })(),
         graph_syndicate: {
           suspicious_cluster_found: (graph.suspicious_neighbor_count || 0) > 0,
           cluster_size: (graph.nodes || []).length || 5,
