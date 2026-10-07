@@ -120,20 +120,35 @@ cols_to_show = [
     "case_status",
 ]
 available_cols = [c for c in cols_to_show if c in filtered_df.columns]
-display_df = filtered_df[available_cols].sort_values(sort_field, ascending=ascending)
+display_df = filtered_df[available_cols].copy()
+if sort_field in display_df.columns:
+    display_df = display_df.sort_values(sort_field, ascending=ascending)
 
 # Formatted Data Table
-st.dataframe(
-    display_df.style.format({
-        "claim_amount": "${:,.2f}",
-        "final_risk_score": "{:.4f}",
-        "fraud_probability": "{:.4f}",
-        "anomaly_score": "{:.4f}",
-    }),
-    use_container_width=True,
-    hide_index=True,
-    height=540,
-)
+format_dict = {}
+for col, fmt in [
+    ("claim_amount", "${:,.2f}"),
+    ("final_risk_score", "{:.4f}"),
+    ("fraud_probability", "{:.4f}"),
+    ("anomaly_score", "{:.4f}"),
+]:
+    if col in display_df.columns:
+        format_dict[col] = fmt
+
+try:
+    st.dataframe(
+        display_df.style.format(format_dict),
+        use_container_width=True,
+        hide_index=True,
+        height=540,
+    )
+except Exception:
+    st.dataframe(
+        display_df,
+        use_container_width=True,
+        hide_index=True,
+        height=540,
+    )
 
 # Export Toolbar
 csv_data = display_df.to_csv(index=False).encode("utf-8")

@@ -15,6 +15,8 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+import numpy as np
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 
@@ -221,11 +223,18 @@ with card_container(f"📋 Triage Worklist ({len(filtered_cases)} Matching Cases
     if "claim_amount" in tbl.columns:
         format_dict["claim_amount"] = "${:,.2f}"
 
-    st.dataframe(
-        tbl.style.format(format_dict).background_gradient(subset=["risk_score"], cmap="YlOrRd"),
-        use_container_width=True,
-        height=380,
-    )
+    try:
+        st.dataframe(
+            tbl.style.format(format_dict).background_gradient(subset=["risk_score"], cmap="YlOrRd"),
+            use_container_width=True,
+            height=380,
+        )
+    except Exception:
+        st.dataframe(
+            tbl,
+            use_container_width=True,
+            height=380,
+        )
 
 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
